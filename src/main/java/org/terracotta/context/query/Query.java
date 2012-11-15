@@ -9,5 +9,5 @@ import org.terracotta.context.TreeNode;
 
 public interface Query {
 
-  <I, K, V> Collection<? extends TreeNode<I, K, V>> execute(Collection<? extends TreeNode<I, K, V>> input); 
+  <I, K, V> Collection<TreeNode<I, K, V>> execute(Collection<TreeNode<I, K, V>> input); 
 }

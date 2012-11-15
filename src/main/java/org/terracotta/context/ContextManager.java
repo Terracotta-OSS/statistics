@@ -99,9 +99,12 @@ public class ContextManager {
             //XXX we should log this failure to traverse
             continue;
           }
-          associate(child, origin);
+          if (child != null) {
+            associate(child, origin);
+          }
         }
         if (f.isAnnotationPresent(ContextParent.class)) {
+          f.setAccessible(true);
           Object parent;
           try {
             parent = f.get(origin);
@@ -111,7 +114,9 @@ public class ContextManager {
             //XXX we should log this failure to traverse
             continue;
           }
-          associate(origin, parent);
+          if (parent != null) {
+            associate(origin, parent);
+          }
         }
       }
     }
@@ -125,8 +130,8 @@ public class ContextManager {
     root.removeChild(getTreeNode(object));
   }
   
-  public Collection<? extends TreeNode<Class, String, Object>> query(Query query) {
-    return query.execute(Collections.singleton(root));
+  public Collection<TreeNode<Class, String, Object>> query(Query query) {
+    return query.execute(Collections.<TreeNode<Class, String, Object>>singleton(root));
   }
 
   public TreeNode<Class, String, Object> queryForSingleton(Query query) {
