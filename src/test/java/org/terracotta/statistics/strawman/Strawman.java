@@ -13,8 +13,7 @@ import org.terracotta.statistics.impl.InlineLatencyDistribution;
 import org.terracotta.statistics.observer.EventObserver;
 import org.terracotta.statistics.strawman.Cache.GetResult;
 
-import static org.hamcrest.collection.IsMapContaining.*;
-import static org.hamcrest.core.CombinableMatcher.*;
+import static org.terracotta.context.query.Matchers.*;
 import static org.terracotta.context.query.QueryBuilder.*;
 
 public final class Strawman {
@@ -28,7 +27,7 @@ public final class Strawman {
     StatisticsManager stats = new StatisticsManager();
     stats.root(manager);
 
-    Query query = queryBuilder().descendants().filter(context(both(identifier(subclassOf(OperationStatistic.class))).and(attributes(hasEntry("name", "get"))))).build();
+    Query query = queryBuilder().descendants().filter(context(allOf(identifier(subclassOf(OperationStatistic.class)), attributes(hasAttribute("name", "get"))))).build();
     System.out.println(query);
     TreeNode<Class, String, Object> getStatisticNode = stats.queryForSingleton(query);
     OperationStatistic<GetResult> getStatistic = (OperationStatistic<GetResult>) getStatisticNode.getContext().attributes().get("this");

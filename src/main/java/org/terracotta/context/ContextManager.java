@@ -13,6 +13,8 @@ import org.terracotta.context.extractor.ObjectContextExtractor;
 import org.terracotta.context.query.Query;
 import org.terracotta.context.util.WeakIdentityHashMap;
 
+import static org.terracotta.context.query.QueryBuilder.*;
+
 public class ContextManager {
 
   private static final WeakIdentityHashMap<Object, MutableTreeNode<Class, String, Object>> contextObjects = new WeakIdentityHashMap<Object, MutableTreeNode<Class, String, Object>>();
@@ -128,12 +130,7 @@ public class ContextManager {
   }
 
   public TreeNode<Class, String, Object> queryForSingleton(Query query) {
-    Collection<? extends TreeNode<Class, String, Object>> results = query(query);
-    if (results.size() == 1) {
-      return results.iterator().next();
-    } else {
-      throw new IllegalStateException("Expected singleton result : got " + results.size());
-    }
+    return query(queryBuilder().chain(query).ensureUnique().build()).iterator().next();
   }
   
   public void registerContextListener(ContextListener listener) {

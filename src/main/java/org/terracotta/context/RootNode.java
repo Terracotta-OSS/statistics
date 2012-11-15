@@ -5,6 +5,7 @@ package org.terracotta.context;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -43,5 +44,10 @@ class RootNode<I, K, V> extends AbstractTreeNode<I, K, V> {
   @Override
   public ContextElement<I, K, V> getContext() {
     throw new IllegalStateException();
+  }
+
+  @Override
+  public Collection<List<? extends TreeNode<I, K, V>>> getPaths() {
+    return Collections.<List<? extends TreeNode<I, K, V>>>singleton(Collections.<TreeNode<I, K, V>>emptyList());
   }
 }

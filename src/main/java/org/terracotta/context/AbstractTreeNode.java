@@ -6,6 +6,7 @@ package org.terracotta.context;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -52,6 +53,16 @@ abstract class AbstractTreeNode<I, K, V> implements TreeNode<I, K, V> {
   @Override
   public Set<? extends TreeNode<I, K, V>> getChildren() {
     return Collections.unmodifiableSet(children);
+  }
+
+  @Override
+  public List<? extends TreeNode<I, K, V>> getPath() {
+    Collection<List<? extends TreeNode<I, K, V>>> paths = getPaths();
+    if (paths.size() == 1) {
+      return paths.iterator().next();
+    } else {
+      throw new IllegalStateException("No unique path to root");
+    }
   }
 
   abstract void addedParent(AbstractTreeNode<I, K, V> child);

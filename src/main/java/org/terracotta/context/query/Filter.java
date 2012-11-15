@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.hamcrest.Matcher;
 import org.terracotta.context.TreeNode;
 
 class Filter implements Query {
