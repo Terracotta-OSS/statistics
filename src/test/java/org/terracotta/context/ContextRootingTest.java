@@ -8,7 +8,7 @@ import java.util.Collection;
 
 import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.Test;
-import org.terracotta.context.ContextAssociationTestUtil.NoAnnotations;
+import org.terracotta.context.ContextTestUtils.NoAnnotations;
 
 import static org.hamcrest.collection.IsCollectionWithSize.*;
 import static org.hamcrest.core.IsSame.*;

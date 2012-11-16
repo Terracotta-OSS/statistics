@@ -21,9 +21,9 @@ import static org.terracotta.context.query.QueryBuilder.*;
  *
  * @author cdennis
  */
-public final class ContextAssociationTestUtil {
+public final class ContextTestUtils {
   
-  private ContextAssociationTestUtil() {
+  private ContextTestUtils() {
     //static
   }
   

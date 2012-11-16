@@ -6,7 +6,7 @@ package org.terracotta.context;
 import org.junit.Test;
 import org.terracotta.context.annotations.ContextAttribute;
 
-import static org.terracotta.context.ContextAssociationTestUtil.*;
+import static org.terracotta.context.ContextTestUtils.*;
 import static org.terracotta.context.ContextManager.*;
 
 public class ManualContextAssociationTest {

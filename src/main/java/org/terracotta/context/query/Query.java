@@ -3,11 +3,11 @@
  */
 package org.terracotta.context.query;
 
-import java.util.Collection;
+import java.util.Set;
 
 import org.terracotta.context.TreeNode;
 
 public interface Query {
 
-  <I, K, V> Collection<TreeNode<I, K, V>> execute(Collection<TreeNode<I, K, V>> input); 
+  <I, K, V> Set<TreeNode<I, K, V>> execute(Set<TreeNode<I, K, V>> input); 
 }

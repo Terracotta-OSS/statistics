@@ -9,7 +9,7 @@ import org.terracotta.context.annotations.ContextAttribute;
 import org.terracotta.context.annotations.ContextChild;
 import org.terracotta.context.annotations.ContextParent;
 
-import static org.terracotta.context.ContextAssociationTestUtil.*;
+import static org.terracotta.context.ContextTestUtils.*;
 
 /**
  *

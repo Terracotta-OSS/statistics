@@ -3,7 +3,7 @@
  */
 package org.terracotta.context.query;
 
-import java.util.Collection;
+import java.util.Set;
 
 import org.terracotta.context.TreeNode;
 
@@ -16,7 +16,7 @@ class NullQuery implements Query {
   }
   
   @Override
-  public <I, K, V> Collection<? extends TreeNode<I, K, V>> execute(Collection<? extends TreeNode<I, K, V>> input) {
+  public <I, K, V> Set<TreeNode<I, K, V>> execute(Set<TreeNode<I, K, V>> input) {
     return input;
   }
   
