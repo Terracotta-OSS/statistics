@@ -4,14 +4,17 @@
  * http://creativecommons.org/publicdomain/zero/1.0/
  */
 /*
- * This class has been modified by cdennis@terracottatech.com to
- * use field updaters instead of Unsafe.
+ * This class has been modified by cdennis@terracottatech.com to:
+ *  - use field updaters instead of Unsafe to avoid tripping over security managers
+ *  - use Tom Hawtin's VicariousThreadLocal to avoid memory leaks
  */
 
 package org.terracotta.statistics.jsr166e;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
+
+import org.terracotta.statistics.util.VicariousThreadLocal;
 
 /**
  * A package-local class holding common representation and mechanics
@@ -121,7 +124,7 @@ abstract class Striped64 extends Number {
     /**
      * The corresponding ThreadLocal class
      */
-    static final class ThreadHashCode extends ThreadLocal<HashCode> {
+    static final class ThreadHashCode extends VicariousThreadLocal<HashCode> {
         public HashCode initialValue() { return new HashCode(); }
     }
 

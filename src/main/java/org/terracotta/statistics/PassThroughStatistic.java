@@ -1,13 +1,12 @@
 /*
  * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved.
  */
-package org.terracotta.statistics.impl;
+package org.terracotta.statistics;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 
-import org.terracotta.statistics.ValueStatistic;
-
-public class PassThroughStatistic<T extends Number> implements ValueStatistic<T> {
+public class PassThroughStatistic<T extends Number> {
   
   private final Callable<T> source;
   
@@ -15,12 +14,11 @@ public class PassThroughStatistic<T extends Number> implements ValueStatistic<T>
     this.source = source;
   }
 
-  @Override
-  public T value() {
+  public T value() throws ExecutionException {
     try {
       return source.call();
     } catch (Exception ex) {
-      throw new RuntimeException(ex);
+      throw new ExecutionException(ex);
     }
   }
 }

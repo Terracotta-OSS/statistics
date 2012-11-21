@@ -12,8 +12,6 @@ import org.terracotta.context.ContextManager.Association;
 import org.terracotta.context.ContextManager.Dissociation;
 import org.terracotta.context.TreeNode;
 import org.terracotta.context.query.Query;
-import org.terracotta.statistics.impl.OperationStatisticImpl;
-import org.terracotta.statistics.impl.PassThroughStatistic;
 import org.terracotta.statistics.observer.OperationObserver;
 
 public class StatisticsManager {
@@ -25,7 +23,7 @@ public class StatisticsManager {
   }
   
   public static <T extends Enum<T>> OperationObserver<T> createOperationStatistic(Object context, String name, Class<T> eventTypes) {
-    OperationStatisticImpl stat = new OperationStatisticImpl<T>(name, eventTypes);
+    OperationStatistic stat = new OperationStatistic<T>(name, eventTypes);
     associate(context).withChild(stat);
     return stat;
   }
