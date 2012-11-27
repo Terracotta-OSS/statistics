@@ -73,6 +73,12 @@ public class TargetedQuantiles implements EventObserver {
     private final double epsilon;
 
     private Quantile(double phi, double epsilon) {
+      if (phi < 0.0 || phi > 1.0) {
+        throw new IllegalArgumentException("Quantile must in the range [0, 1]");
+      }
+      if (epsilon < 0.0 || epsilon > 1.0) {
+        throw new IllegalArgumentException("Fractional error must in the range [0, 1]");
+      }
       this.phi = phi;
       this.epsilon = epsilon;
     }
