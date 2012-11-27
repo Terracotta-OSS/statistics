@@ -16,8 +16,11 @@ public class OperationResultFilter<T extends Enum<T>> extends AbstractSourceStat
 
   private final T target;
 
-  public OperationResultFilter(T target) {
+  public OperationResultFilter(T target, EventObserver ... observers) {
     this.target = target;
+    for (EventObserver observer : observers) {
+      addDerivedStatistic(observer);
+    }
   }
   
   @Override

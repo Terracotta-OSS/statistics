@@ -34,10 +34,11 @@ public abstract class CompressedQuantiles {
     for (int i = offset; i < offset + length; i++) {
       long value = values[i];
       
+      Sample previous = null;
       while (it.hasNext()) {
         Sample next = it.next();
         if (value <= next.value) {
-          it.previous();
+          previous = it.previous();
           break;
         } else {
           rank += next.size;
@@ -47,7 +48,7 @@ public abstract class CompressedQuantiles {
       //insert here (either the end or between)
       Sample insert;
       if (it.hasNext() && it.hasPrevious()) {
-        insert = new Sample(value, 1L, ((long) Math.floor(allowableError(rank, totalValues))) - 1L);
+        insert = new Sample(value, 1L, previous.size + previous.delta - 1L);
       } else {
         insert = new Sample(value, 1L, 0L);
       }
@@ -60,12 +61,8 @@ public abstract class CompressedQuantiles {
   }
 
   public synchronized long query(double phi) {
-    if (samples.size() < 2) {
-      throw new IllegalStateException();
-    }
-    
-    double targetRank = phi * totalValues;
-    double threshold = targetRank + (allowableError(targetRank, totalValues) / 2.0);
+    long targetRank = (long) Math.ceil(phi * totalValues);
+    long threshold = targetRank + (long) Math.ceil(allowableError(targetRank, totalValues) / 2.0);
     ListIterator<Sample> it = samples.listIterator();
     Sample previous = it.next();
     long rank = previous.size;
@@ -80,7 +77,7 @@ public abstract class CompressedQuantiles {
     return previous.value;
   }
   
-  protected abstract double allowableError(double r, long n);
+  protected abstract long allowableError(long r, long n);
 
   private synchronized void compress() {
     if (samples.size() < 2) {
@@ -92,7 +89,7 @@ public abstract class CompressedQuantiles {
     long rank = current.size;
     while (it.hasNext()) {
       Sample next = it.next();
-      double allowableError = allowableError(rank, totalValues);
+      long allowableError = allowableError(rank, totalValues);
       if (current.size + next.size + next.delta <= allowableError) {
         Sample merged = new Sample(next.value, current.size + next.size, next.delta);
         it.set(merged);

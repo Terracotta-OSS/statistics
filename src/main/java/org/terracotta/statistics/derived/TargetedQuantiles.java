@@ -53,12 +53,13 @@ public class TargetedQuantiles implements EventObserver {
     }
 
     @Override
-    protected double allowableError(double r, long n) {
-      double allowable = Double.MAX_VALUE;
+    protected long allowableError(long r, long n) {
+      long allowable = Long.MAX_VALUE;
       for (Quantile q : quantiles) {
-        allowable = Math.min(allowable, q.allowableError(r, n));
+        allowable = Math.min(allowable, (long) Math.floor(q.allowableError(r, n)));
       }
-      return allowable;
+      
+      return Math.max(allowable, 1L);
     }
   }
   
@@ -84,7 +85,7 @@ public class TargetedQuantiles implements EventObserver {
       return epsilon;
     }
     
-    private double allowableError(double r, long n) {
+    private double allowableError(long r, long n) {
       if (r <= phi * n) {
         return epsilon * 2.0 * (n - r) / (1 - phi);
       } else {

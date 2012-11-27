@@ -55,6 +55,10 @@ public class ContextManager {
     };
   }
   
+  public static TreeNode<Class, String, Object> nodeFor(Object object) {
+    return getTreeNode(object);
+  }
+  
   private static void associate(Object child, Object parent) {
     getOrCreateTreeNode(parent).addChild(getOrCreateTreeNode(child));
   }
