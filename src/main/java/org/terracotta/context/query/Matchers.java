@@ -18,7 +18,7 @@ public final class Matchers {
     return new Matcher<TreeNode<?, ?, ?>>() {
 
       @Override
-      public boolean matches(TreeNode<?, ?, ?> t) {
+      boolean matchesSafely(TreeNode<?, ?, ?> t) {
         return matcher.matches(t.getContext());
       }
 
@@ -33,7 +33,7 @@ public final class Matchers {
     return new Matcher<ContextElement<?, ?, ?>>() {
 
       @Override
-      public boolean matches(ContextElement<?, ?, ?> t) {
+      boolean matchesSafely(ContextElement<?, ?, ?> t) {
         return matcher.matches(t.attributes());
       }
 
@@ -44,11 +44,11 @@ public final class Matchers {
     };
   }
   
-  public static Matcher<ContextElement<?, ?, ?>> identifier(final Matcher<Object> matcher) {
+  public static Matcher<ContextElement<?, ?, ?>> identifier(final Matcher<?> matcher) {
     return new Matcher<ContextElement<?, ?, ?>>() {
 
       @Override
-      public boolean matches(ContextElement<?, ?, ?> t) {
+      boolean matchesSafely(ContextElement<?, ?, ?> t) {
         return matcher.matches(t.identifier());
       }
 
@@ -60,11 +60,11 @@ public final class Matchers {
     
   }
   
-  public static Matcher<Object> subclassOf(final Class klazz) {
-    return new Matcher<Object>() {
+  public static Matcher<Class<?>> subclassOf(final Class klazz) {
+    return new Matcher<Class<?>>() {
 
       @Override
-      public boolean matches(Object t) {
+      boolean matchesSafely(Class<?> t) {
         return t instanceof Class && klazz.isAssignableFrom((Class) t);
       }
 
@@ -79,8 +79,18 @@ public final class Matchers {
     return new Matcher<Map<?, ?>>() {
 
       @Override
-      public boolean matches(Map<?, ?> object) {
+      boolean matchesSafely(Map<?, ?> object) {
         return object.containsKey(key) && value.equals(object.get(key));
+      }
+    };
+  }
+  
+  public static Matcher<Map<?, ?>> hasAttribute(final Object key, final Matcher<?> value) {
+    return new Matcher<Map<?, ?>>() {
+
+      @Override
+      boolean matchesSafely(Map<?, ?> object) {
+        return object.containsKey(key) && value.matches(object.get(key));
       }
     };
   }
@@ -89,7 +99,7 @@ public final class Matchers {
     return new Matcher<T>() {
 
       @Override
-      public boolean matches(T object) {
+      boolean matchesSafely(T object) {
         for (Matcher<? super T> matcher : matchers) {
           if (matcher.matches(object)) {
             return true;
@@ -104,7 +114,7 @@ public final class Matchers {
     return new Matcher<T>() {
 
       @Override
-      public boolean matches(T object) {
+      boolean matchesSafely(T object) {
         for (Matcher<? super T> matcher : matchers) {
           if (!matcher.matches(object)) {
             return false;

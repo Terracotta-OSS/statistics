@@ -28,7 +28,7 @@ public final class Strawman {
     StatisticsManager stats = new StatisticsManager();
     stats.root(manager);
 
-    Query query = queryBuilder().descendants().filter(context(allOf(identifier(subclassOf(OperationStatistic.class)), attributes(hasAttribute("name", "get"))))).build();
+    Query query = queryBuilder().descendants().filter(context(allOf(identifier(subclassOf(OperationStatistic.class)), attributes(hasAttribute("properties", hasAttribute("name", "get")))))).build();
     System.out.println(query);
     TreeNode<Class, String, Object> getStatisticNode = stats.queryForSingleton(query);
     OperationStatistic<GetResult> getStatistic = (OperationStatistic<GetResult>) getStatisticNode.getContext().attributes().get("this");
