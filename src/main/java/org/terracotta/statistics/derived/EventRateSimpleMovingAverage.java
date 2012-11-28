@@ -37,8 +37,15 @@ public class EventRateSimpleMovingAverage implements EventObserver {
     long startTime = endTime - windowSize;
     
     CounterPartition current = activePartition.get();
-    long count = current.sum();
-    long actualStartTime = current.start();
+    long count;
+    long actualStartTime;
+    if (current.isBefore(startTime)) {
+      count = 0;
+      actualStartTime = startTime;
+    } else {
+      count = current.sum();
+      actualStartTime = current.start();
+    }
     for (Iterator<CounterPartition> it = archive.iterator(); it.hasNext(); ) {
       CounterPartition partition = it.next();
       if (partition == current) {

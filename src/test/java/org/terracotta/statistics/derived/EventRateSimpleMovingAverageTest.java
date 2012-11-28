@@ -59,7 +59,6 @@ public class EventRateSimpleMovingAverageTest {
     
     float finalRate = new EventDriver(stat, 10, 20, 20, TimeUnit.MILLISECONDS).call();
     float rate = stat.rate(TimeUnit.SECONDS);
-    System.out.println("Rate : " + lowRate + " ==> " + rate + " ==> " + finalRate);
     assertThat(rate, both(greaterThan(lowRate)).and(lessThan(finalRate)));
   }
 

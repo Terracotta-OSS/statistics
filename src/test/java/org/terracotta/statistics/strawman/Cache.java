@@ -10,14 +10,16 @@ import org.terracotta.context.annotations.ContextAttribute;
 import org.terracotta.statistics.StatisticsManager;
 import org.terracotta.statistics.observer.OperationObserver;
 
+import static java.util.Collections.singletonMap;
+
 public class Cache<K, V> {
   
   private final Map<K, V> data = new ConcurrentHashMap<K, V>();
   @ContextAttribute("name") private final String name;
 
-  private final OperationObserver<PutResult> putObserver = StatisticsManager.createOperationStatistic(this, "put", PutResult.class);
-  private final OperationObserver<RemoveResult> removeObserver = StatisticsManager.createOperationStatistic(this, "remove", RemoveResult.class);
-  private final OperationObserver<GetResult> getObserver = StatisticsManager.createOperationStatistic(this, "get", GetResult.class);
+  private final OperationObserver<PutResult> putObserver = StatisticsManager.createOperationStatistic(this, singletonMap("name", "put"), PutResult.class);
+  private final OperationObserver<RemoveResult> removeObserver = StatisticsManager.createOperationStatistic(this, singletonMap("name", "remove"), RemoveResult.class);
+  private final OperationObserver<GetResult> getObserver = StatisticsManager.createOperationStatistic(this, singletonMap("name", "get"), GetResult.class);
   
   public Cache(String name) {
     this.name = name;

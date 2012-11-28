@@ -5,6 +5,7 @@ package org.terracotta.statistics;
 
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.terracotta.context.ContextElement;
@@ -23,8 +24,8 @@ public class StatisticsManager {
     HIT, MISS;
   }
   
-  public static <T extends Enum<T>> OperationObserver<T> createOperationStatistic(Object context, String name, Class<T> eventTypes) {
-    OperationStatistic stat = new OperationStatistic<T>(name, eventTypes);
+  public static <T extends Enum<T>> OperationObserver<T> createOperationStatistic(Object context, Map<String, ? extends Object> properties, Class<T> eventTypes) {
+    OperationStatistic<T> stat = new OperationStatistic<T>(properties, eventTypes);
     associate(context).withChild(stat);
     return stat;
   }

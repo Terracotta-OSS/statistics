@@ -3,7 +3,10 @@
  */
 package org.terracotta.statistics;
 
+import java.util.Collections;
 import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.terracotta.context.annotations.ContextAttribute;
 import org.terracotta.statistics.jsr166e.LongAdder;
@@ -12,12 +15,12 @@ import org.terracotta.statistics.observer.OperationObserver;
 @ContextAttribute("this")
 public class OperationStatistic<T extends Enum<T>> extends AbstractSourceStatistic<OperationObserver<? super T>> implements OperationObserver<T> {
 
-  private final String name;
+  private final Map<String, Object> properties;
   private final Class<T> type;
   private final EnumMap<T, LongAdder> counts;
   
-  public OperationStatistic(String name, Class<T> type) {
-    this.name = name;
+  public OperationStatistic(Map<String, ? extends Object> properties, Class<T> type) {
+    this.properties = Collections.unmodifiableMap(new HashMap<String, Object>(properties));
     this.type = type;
     this.counts = new EnumMap<T, LongAdder>(type);
     for (T t : type.getEnumConstants()) {
@@ -25,9 +28,9 @@ public class OperationStatistic<T extends Enum<T>> extends AbstractSourceStatist
     }
   }
   
-  @ContextAttribute("name")
-  public String name() {
-    return name;
+  @ContextAttribute("properties")
+  public Map<String, Object> properties() {
+    return properties;
   }
   
   @ContextAttribute("type")
