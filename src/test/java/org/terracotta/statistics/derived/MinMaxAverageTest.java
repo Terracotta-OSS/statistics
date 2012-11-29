@@ -63,11 +63,11 @@ public class MinMaxAverageTest {
 
     assertThat(stats.mean(), nullValue());
     stats.event(1L);
-    assertThat(stats.mean(), is(1.0f));
+    assertThat(stats.mean(), is(1.0));
     stats.event(3L);
-    assertThat(stats.mean(), is(2.0f));
+    assertThat(stats.mean(), is(2.0));
     stats.event(0L);
     stats.event(0L);
-    assertThat(stats.mean(), is(1.0f));
+    assertThat(stats.mean(), is(1.0));
   }
 }

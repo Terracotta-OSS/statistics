@@ -19,7 +19,7 @@ import static org.terracotta.statistics.Time.time;
  *
  * @author cdennis
  */
-public class EventRateSimpleMovingAverage implements EventObserver, ValueStatistic<Float> {
+public class EventRateSimpleMovingAverage implements EventObserver, ValueStatistic<Double> {
 
   private static final int PARTITION_COUNT = 10;
 
@@ -35,11 +35,11 @@ public class EventRateSimpleMovingAverage implements EventObserver, ValueStatist
   }
 
   @Override
-  public Float value() {
+  public Double value() {
     return rateUsingNanos();
   }
   
-  public Float rateUsingNanos() {
+  public Double rateUsingNanos() {
     long endTime = time();
     long startTime = endTime - windowSize;
     
@@ -65,10 +65,10 @@ public class EventRateSimpleMovingAverage implements EventObserver, ValueStatist
       }
     }
     
-    return ((float) count) / (endTime - actualStartTime);
+    return ((double) count) / (endTime - actualStartTime);
   }
   
-  public Float rate(TimeUnit base) {
+  public Double rate(TimeUnit base) {
     return rateUsingNanos() * base.toNanos(1);
   }
   

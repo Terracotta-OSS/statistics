@@ -6,9 +6,8 @@ package org.terracotta.statistics.derived;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.Executor;
-import java.util.concurrent.LinkedBlockingQueue;
 
-import org.terracotta.statistics.AbstractSourceStatistic;
+import org.terracotta.statistics.ValueStatistic;
 import org.terracotta.statistics.observer.EventObserver;
 import org.terracotta.statistics.util.InThreadExecutor;
 
@@ -37,6 +36,16 @@ public class TargetedQuantiles implements EventObserver {
 
   public long quantile(double quantile) {
     return quantiles.query(quantile);
+  }
+  
+  public ValueStatistic<Long> quantileStatistic(final double quantile) {
+    return new ValueStatistic<Long>() {
+
+      @Override
+      public Long value() {
+        return quantile(quantile);
+      }
+    };
   }
   
   @Override

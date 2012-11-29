@@ -20,8 +20,8 @@ public class LatencySampling<T extends Enum<T>> extends AbstractSourceStatistic<
   private final T targetOperation;
   private final int ceiling;
   
-  public LatencySampling(T target, float sampling) {
-    if (sampling > 1.0f || sampling < 0.0f) {
+  public LatencySampling(T target, double sampling) {
+    if (sampling > 1.0 || sampling < 0.0) {
       throw new IllegalArgumentException();
     }
     this.ceiling = (int) (Integer.MAX_VALUE * sampling);

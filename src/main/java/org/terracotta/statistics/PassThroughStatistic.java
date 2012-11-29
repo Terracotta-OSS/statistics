@@ -4,9 +4,8 @@
 package org.terracotta.statistics;
 
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 
-public class PassThroughStatistic<T extends Number> {
+public class PassThroughStatistic<T extends Number> implements ValueStatistic<T> {
   
   private final Callable<T> source;
   
@@ -14,11 +13,12 @@ public class PassThroughStatistic<T extends Number> {
     this.source = source;
   }
 
-  public T value() throws ExecutionException {
+  @Override
+  public T value() {
     try {
       return source.call();
     } catch (Exception ex) {
-      throw new ExecutionException(ex);
+      throw new RuntimeException(ex);
     }
   }
 }

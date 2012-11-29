@@ -30,7 +30,7 @@ import static org.terracotta.util.RetryAssert.assertBy;
 public class StatisticSamplerTest {
   
   @Test
-  public void testUnstartedSampler() {
+  public void testUnstartedSampler() throws InterruptedException {
     StatisticSampler<String> sampler = new StatisticSampler<String>(1L, TimeUnit.NANOSECONDS, new ValueStatistic<String>() {
 
       @Override
@@ -43,7 +43,7 @@ public class StatisticSamplerTest {
   }
   
   @Test(expected = IllegalStateException.class)
-  public void testShutdownOfSharedExecutor() {
+  public void testShutdownOfSharedExecutor() throws InterruptedException {
     ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     try {
       StatisticSampler<String> sampler = new StatisticSampler<String>(executor, 1L, TimeUnit.NANOSECONDS, constantStatistic("foo"), DevNull.DEV_NULL);
@@ -54,7 +54,7 @@ public class StatisticSamplerTest {
   }
   
   @Test
-  public void testLongPeriodSampler() {
+  public void testLongPeriodSampler() throws InterruptedException {
     StatisticArchive<String> archive = new StatisticArchive<String>(1);
     StatisticSampler<String> sampler = new StatisticSampler<String>(1L, TimeUnit.HOURS, new ValueStatistic<String>() {
 

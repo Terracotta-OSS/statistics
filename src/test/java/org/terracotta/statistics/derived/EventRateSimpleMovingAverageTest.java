@@ -26,14 +26,14 @@ import static org.junit.Assert.assertThat;
  */
 public class EventRateSimpleMovingAverageTest {
   
-  private static final float EXPECTED_ACCURACY = 0.1f;
+  private static final double EXPECTED_ACCURACY = 0.1;
   
   @Test
   public void testConsistentRate() throws InterruptedException {
     for (int rate = 1; rate < 10; rate++) {
       EventRateSimpleMovingAverage stat = new EventRateSimpleMovingAverage(1, TimeUnit.SECONDS);
-      float actualRate = new EventDriver(stat, 10, rate, 20, TimeUnit.MILLISECONDS).call();
-      assertThat(stat.rate(TimeUnit.SECONDS).doubleValue(), closeTo(actualRate, EXPECTED_ACCURACY * actualRate));
+      double actualRate = new EventDriver(stat, 10, rate, 20, TimeUnit.MILLISECONDS).call();
+      assertThat(stat.rate(TimeUnit.SECONDS), closeTo(actualRate, EXPECTED_ACCURACY * actualRate));
     }
   }
   
@@ -41,51 +41,51 @@ public class EventRateSimpleMovingAverageTest {
   public void testChangingRateWithShortPeriodReaches() throws InterruptedException {
     EventRateSimpleMovingAverage stat = new EventRateSimpleMovingAverage(200, TimeUnit.MILLISECONDS);    
     
-    float firstRate = new EventDriver(stat, 10, 10, 20, TimeUnit.MILLISECONDS).call();
-    assertThat(stat.rate(TimeUnit.SECONDS).doubleValue(), closeTo(firstRate, EXPECTED_ACCURACY * firstRate));
+    double firstRate = new EventDriver(stat, 10, 10, 20, TimeUnit.MILLISECONDS).call();
+    assertThat(stat.rate(TimeUnit.SECONDS), closeTo(firstRate, EXPECTED_ACCURACY * firstRate));
     
-    float finalRate = new EventDriver(stat, 10, 20, 20, TimeUnit.MILLISECONDS).call();
-    assertThat(stat.rate(TimeUnit.SECONDS).doubleValue(), closeTo(finalRate, EXPECTED_ACCURACY * finalRate));
+    double finalRate = new EventDriver(stat, 10, 20, 20, TimeUnit.MILLISECONDS).call();
+    assertThat(stat.rate(TimeUnit.SECONDS), closeTo(finalRate, EXPECTED_ACCURACY * finalRate));
   }
   
   @Test
   public void testChangingRateWithLongPeriodDoesntReach() throws InterruptedException {
     EventRateSimpleMovingAverage stat = new EventRateSimpleMovingAverage(60, TimeUnit.SECONDS);    
     
-    float firstRate = new EventDriver(stat, 10, 10, 20, TimeUnit.MILLISECONDS).call();
-    float lowRate = stat.rate(TimeUnit.SECONDS);
-    assertThat((double) firstRate, closeTo(500.0, 50.0));
+    double firstRate = new EventDriver(stat, 10, 10, 20, TimeUnit.MILLISECONDS).call();
+    double lowRate = stat.rate(TimeUnit.SECONDS);
+    assertThat(firstRate, closeTo(500.0, 50.0));
     
-    float finalRate = new EventDriver(stat, 10, 20, 20, TimeUnit.MILLISECONDS).call();
-    float rate = stat.rate(TimeUnit.SECONDS);
+    double finalRate = new EventDriver(stat, 10, 20, 20, TimeUnit.MILLISECONDS).call();
+    double rate = stat.rate(TimeUnit.SECONDS);
     assertThat(rate, both(greaterThan(lowRate)).and(lessThan(finalRate)));
   }
 
   @Test
   public void testContinuousRateSplitAcrossTwoThreads() throws InterruptedException {
     EventRateSimpleMovingAverage stat = new EventRateSimpleMovingAverage(1, TimeUnit.SECONDS);
-    Callable<Float> c1 = new EventDriver(stat, 10, 20, 20, TimeUnit.MILLISECONDS);
-    Callable<Float> c2 = new EventDriver(stat, 10, 20, 20, TimeUnit.MILLISECONDS);
+    Callable<Double> c1 = new EventDriver(stat, 10, 20, 20, TimeUnit.MILLISECONDS);
+    Callable<Double> c2 = new EventDriver(stat, 10, 20, 20, TimeUnit.MILLISECONDS);
 
     ExecutorService executor = Executors.newFixedThreadPool(2);
     try {
       @SuppressWarnings("unchecked")
-      List<Future<Float>> futures = executor.invokeAll(Arrays.<Callable<Float>>asList(c1, c2));
-      float totalRate = 0f;
-      for (Future<Float> rate : futures) {
+      List<Future<Double>> futures = executor.invokeAll(Arrays.<Callable<Double>>asList(c1, c2));
+      double totalRate = 0f;
+      for (Future<Double> rate : futures) {
         try {
-          totalRate += rate.get().floatValue();
+          totalRate += rate.get();
         } catch (ExecutionException e) {
           throw new AssertionError(e);
         }
       }
-      assertThat(stat.rate(TimeUnit.SECONDS).doubleValue(), closeTo(totalRate, EXPECTED_ACCURACY * totalRate));
+      assertThat(stat.rate(TimeUnit.SECONDS), closeTo(totalRate, EXPECTED_ACCURACY * totalRate));
     } finally {
       executor.shutdown();
     }
   }
 
-  static class EventDriver implements Callable<Float> {
+  static class EventDriver implements Callable<Double> {
 
     private final EventObserver stat;
     private final int batches;
@@ -105,7 +105,7 @@ public class EventRateSimpleMovingAverageTest {
     }
     
     @Override
-    public Float call() {
+    public Double call() {
       long start = System.nanoTime();
       for (int i = 0; i < batches; i++) {
         try {
@@ -118,7 +118,7 @@ public class EventRateSimpleMovingAverageTest {
         }
       }
       long end = System.nanoTime();
-      return ((float) TimeUnit.SECONDS.toNanos(1) * batches * batchSize) / (end - start);
+      return ((double) TimeUnit.SECONDS.toNanos(1) * batches * batchSize) / (end - start);
     }
   }
 }

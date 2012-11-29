@@ -58,24 +58,11 @@ public class StatisticSampler<T> {
     }
   }
   
-  public synchronized void shutdown() {
+  public synchronized void shutdown() throws InterruptedException {
     if (exclusiveExecutor) {
         executor.shutdown();
-        boolean interrupted = false;
-        try {
-          while (true) {
-            try {
-              if (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
-                throw new IllegalStateException("Exclusive ScheduledExecutorService failed to terminate promptly");
-              }
-            } catch (InterruptedException ex) {
-              interrupted = true;
-            }
-          }
-        } finally {
-          if (interrupted) {
-            Thread.currentThread().interrupt();
-          }
+        if (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
+          throw new IllegalStateException("Exclusive ScheduledExecutorService failed to terminate promptly");
         }
     } else {
       throw new IllegalStateException("ScheduledExecutorService was supplied externally - it must be shutdown directly");

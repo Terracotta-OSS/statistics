@@ -28,6 +28,17 @@ public class OperationStatistic<T extends Enum<T>> extends AbstractSourceStatist
     }
   }
   
+  public ValueStatistic<Long> statistic(T result) {
+    final LongAdder adder = counts.get(result);
+    return new ValueStatistic<Long>() {
+
+      @Override
+      public Long value() {
+        return adder.sum();
+      }
+    };
+  }
+  
   @ContextAttribute("properties")
   public Map<String, Object> properties() {
     return properties;

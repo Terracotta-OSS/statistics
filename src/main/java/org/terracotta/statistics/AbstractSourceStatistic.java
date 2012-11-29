@@ -6,7 +6,6 @@ package org.terracotta.statistics;
 import java.util.Collection;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.terracotta.statistics.SourceStatistic;
 import org.terracotta.statistics.observer.Observer;
 
 public class AbstractSourceStatistic<T extends Observer> implements SourceStatistic<T> {
