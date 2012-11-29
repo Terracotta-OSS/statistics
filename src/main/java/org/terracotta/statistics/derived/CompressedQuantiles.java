@@ -30,18 +30,14 @@ public abstract class CompressedQuantiles {
     Arrays.sort(values, offset, length);
     
     ListIterator<Sample> it = samples.listIterator();
-    long rank = 0;
     for (int i = offset; i < offset + length; i++) {
       long value = values[i];
       
       Sample previous = null;
       while (it.hasNext()) {
-        Sample next = it.next();
-        if (value <= next.value) {
+        if (value <= it.next().value) {
           previous = it.previous();
           break;
-        } else {
-          rank += next.size;
         }
       }
       
@@ -54,7 +50,6 @@ public abstract class CompressedQuantiles {
       }
       it.add(insert);
       totalValues++;
-      rank += insert.size;
     }
 
     compress();

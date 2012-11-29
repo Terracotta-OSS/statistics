@@ -9,6 +9,8 @@ import org.terracotta.statistics.jsr166e.ThreadLocalRandom;
 import org.terracotta.statistics.observer.EventObserver;
 import org.terracotta.statistics.observer.OperationObserver;
 
+import static org.terracotta.statistics.Time.time;
+
 /**
  *
  * @author cdennis
@@ -55,9 +57,5 @@ public class LatencySampling<T extends Enum<T>> extends AbstractSourceStatistic<
   
   private boolean sample() {
     return ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE) < ceiling;
-  }
-  
-  private static long time() {
-    return System.nanoTime();
   }
 }

@@ -10,14 +10,17 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.terracotta.statistics.ValueStatistic;
 import org.terracotta.statistics.jsr166e.LongAdder;
 import org.terracotta.statistics.observer.EventObserver;
+
+import static org.terracotta.statistics.Time.time;
 
 /**
  *
  * @author cdennis
  */
-public class EventRateSimpleMovingAverage implements EventObserver {
+public class EventRateSimpleMovingAverage implements EventObserver, ValueStatistic<Float> {
 
   private static final int PARTITION_COUNT = 10;
 
@@ -32,6 +35,11 @@ public class EventRateSimpleMovingAverage implements EventObserver {
     this.activePartition = new AtomicReference<CounterPartition>(new CounterPartition(time(), partitionSize));
   }
 
+  @Override
+  public Float value() {
+    return rateUsingNanos();
+  }
+  
   public Float rateUsingNanos() {
     long endTime = time();
     long startTime = endTime - windowSize;
@@ -95,10 +103,6 @@ public class EventRateSimpleMovingAverage implements EventObserver {
     }
   }
   
-  private static long time() {
-    return System.nanoTime();
-  }
-
   static class CounterPartition extends LongAdder {
 
     private final long start;
