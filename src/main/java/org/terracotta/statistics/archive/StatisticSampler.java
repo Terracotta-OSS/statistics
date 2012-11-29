@@ -19,6 +19,7 @@ import static org.terracotta.statistics.Time.absoluteTime;
  */
 public class StatisticSampler<T> {
 
+  private final boolean exclusiveExecutor;
   private final ScheduledExecutorService executor;
   private final long period;
   private final Runnable task;
@@ -26,19 +27,17 @@ public class StatisticSampler<T> {
   private ScheduledFuture<?> currentExecution;
   
   public StatisticSampler(long time, TimeUnit unit, ValueStatistic<T> statistic, SampleSink<? super Timestamped<T>> sink) {
-    this(Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
-
-      @Override
-      public Thread newThread(Runnable r) {
-        Thread t = new Thread(r);
-        t.setDaemon(true);
-        return t;
-      }
-    }), time, unit, statistic, sink);
+    this(null, time, unit, statistic, sink);
   }
   
   public StatisticSampler(ScheduledExecutorService executor, long time, TimeUnit unit, ValueStatistic<T> statistic, SampleSink<? super Timestamped<T>> sink) {
-    this.executor = executor;
+    if (executor == null) {
+      this.exclusiveExecutor = true;
+      this.executor = Executors.newSingleThreadScheduledExecutor(new SamplerThreadFactory());
+    } else {
+      this.exclusiveExecutor = false;
+      this.executor = executor;
+    }
     this.period = unit.toNanos(time);
     this.task = new SamplingTask(statistic, sink);
   }
@@ -60,7 +59,27 @@ public class StatisticSampler<T> {
   }
   
   public synchronized void shutdown() {
-    executor.shutdown();
+    if (exclusiveExecutor) {
+        executor.shutdown();
+        boolean interrupted = false;
+        try {
+          while (true) {
+            try {
+              if (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
+                throw new IllegalStateException("Exclusive ScheduledExecutorService failed to terminate promptly");
+              }
+            } catch (InterruptedException ex) {
+              interrupted = true;
+            }
+          }
+        } finally {
+          if (interrupted) {
+            Thread.currentThread().interrupt();
+          }
+        }
+    } else {
+      throw new IllegalStateException("ScheduledExecutorService was supplied externally - it must be shutdown directly");
+    }
   }
   
   static class SamplingTask<T> implements Runnable {
@@ -97,6 +116,16 @@ public class StatisticSampler<T> {
     @Override
     public long getTimestamp() {
       return timestamp;
+    }
+  }
+  
+  static class SamplerThreadFactory implements ThreadFactory {
+
+    @Override
+    public Thread newThread(Runnable r) {
+      Thread t = new Thread(r, "Statistic Sampler");
+      t.setDaemon(true);
+      return t;
     }
   }
 }
