@@ -27,13 +27,13 @@ public final class ContextTestUtils {
   }
   
   public static void validateAssociation(ContextManager manager, Object parent, Object child) {
-    TreeNode<?, ?, ?> parentNode = manager.queryForSingleton(queryBuilder().descendants().filter(context(attributes(hasAttribute("this", parent)))).build());
-    TreeNode<?, ?, ?> childNode = manager.queryForSingleton(queryBuilder().descendants().filter(context(attributes(hasAttribute("this", child)))).build());
-    Assert.assertThat((Collection<TreeNode<?, ?, ?>>) parentNode.getChildren(), hasItem(sameInstance(childNode)));
+    TreeNode parentNode = manager.queryForSingleton(queryBuilder().descendants().filter(context(attributes(hasAttribute("this", parent)))).build());
+    TreeNode childNode = manager.queryForSingleton(queryBuilder().descendants().filter(context(attributes(hasAttribute("this", child)))).build());
+    Assert.assertThat((Collection<TreeNode>) parentNode.getChildren(), hasItem(sameInstance(childNode)));
   }
   
   public static void validateNoAssociation(ContextManager manager, Object parent, Object child) {
-    TreeNode<?, ?, ?> parentNode = manager.queryForSingleton(queryBuilder().descendants().filter(context(attributes(hasAttribute("this", parent)))).build());
+    TreeNode parentNode = manager.queryForSingleton(queryBuilder().descendants().filter(context(attributes(hasAttribute("this", parent)))).build());
     Assert.assertTrue(queryBuilder().children().filter(context(attributes(hasAttribute("this", child)))).build().execute(Collections.singleton(parentNode)).isEmpty());
   }
 

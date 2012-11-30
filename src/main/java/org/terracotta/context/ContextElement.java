@@ -5,9 +5,9 @@ package org.terracotta.context;
 
 import java.util.Map;
 
-public interface ContextElement<T, K, V> {
+public interface ContextElement {
   
-  T identifier();
+  Class identifier();
   
-  Map<K, V> attributes();
+  Map<String, Object> attributes();
 }

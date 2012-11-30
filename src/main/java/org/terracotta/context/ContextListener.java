@@ -3,9 +3,9 @@
  */
 package org.terracotta.context;
 
-public interface ContextListener<I, K, V> {
+public interface ContextListener {
   
-  void graphAdded(TreeNode<I, K, V> parent, TreeNode<I, K, V> added);
+  void graphAdded(TreeNode parent, TreeNode added);
   
-  void graphRemoved(TreeNode<I, K, V> parent, TreeNode<I, K, V> removed);
+  void graphRemoved(TreeNode parent, TreeNode removed);
 }

@@ -36,22 +36,22 @@ public class EnsureUniqueTest {
 
   @Test
   public void testUniqueInput() {
-    TreeNode<String, Object, Object> node = createTreeNode("foo");
-    Set<TreeNode<String, Object, Object>> results = query.execute(Collections.singleton(node));
+    TreeNode node = createTreeNode(A.class);
+    Set<TreeNode> results = query.execute(Collections.singleton(node));
     assertThat(results, hasSize(1));
     assertThat(results, hasItem(node));
   }
   
   @Test(expected = IllegalStateException.class)
   public void testNonUniqueInput() {
-    Set<TreeNode<String, Object, Object>> nodes = new HashSet<TreeNode<String, Object, Object>>();
-    nodes.add(createTreeNode("foo"));
-    nodes.add(createTreeNode("bar"));
+    Set<TreeNode> nodes = new HashSet<TreeNode>();
+    nodes.add(createTreeNode(A.class));
+    nodes.add(createTreeNode(B.class));
     query.execute(nodes);
   }
   
   @Test(expected = IllegalStateException.class)
   public void testEmptyInput() {
-    query.execute(Collections.<TreeNode<Object, Object, Object>>emptySet());
+    query.execute(Collections.<TreeNode>emptySet());
   }
 }

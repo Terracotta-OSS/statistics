@@ -31,11 +31,11 @@ public class StatisticsManager {
   }
   
   public static <T extends Enum<T>> OperationStatistic<T> getOperationStatisticFor(OperationObserver<T> observer) {
-    TreeNode<Class, String, Object> node = ContextManager.nodeFor(observer);
+    TreeNode node = ContextManager.nodeFor(observer);
     if (node == null) {
       return null;
     } else {
-      ContextElement<Class, String, Object> context = node.getContext();
+      ContextElement context = node.getContext();
       if (OperationStatistic.class.equals(context.identifier())) {
         return (OperationStatistic<T>) context.attributes().get("this");
       } else {
@@ -49,11 +49,11 @@ public class StatisticsManager {
     associate(context).withChild(stat);
   }
   
-  public Collection<? extends TreeNode<Class, String, Object>> query(Query query) {
+  public Collection<? extends TreeNode> query(Query query) {
     return contextManager.query(query);
   }
   
-  public TreeNode<Class, String, Object> queryForSingleton(Query query) {
+  public TreeNode queryForSingleton(Query query) {
     return contextManager.queryForSingleton(query);
   }
         

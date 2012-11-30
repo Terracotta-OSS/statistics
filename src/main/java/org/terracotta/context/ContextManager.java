@@ -17,9 +17,9 @@ import static org.terracotta.context.query.QueryBuilder.*;
 
 public class ContextManager {
 
-  private static final WeakIdentityHashMap<Object, MutableTreeNode<Class, String, Object>> contextObjects = new WeakIdentityHashMap<Object, MutableTreeNode<Class, String, Object>>();
+  private static final WeakIdentityHashMap<Object, MutableTreeNode> contextObjects = new WeakIdentityHashMap<Object, MutableTreeNode>();
 
-  private final RootNode<Class, String, Object> root = new RootNode<Class, String, Object>();
+  private final RootNode root = new RootNode();
   
   public static Association associate(final Object object) {
     return new Association() {
@@ -55,7 +55,7 @@ public class ContextManager {
     };
   }
   
-  public static TreeNode<Class, String, Object> nodeFor(Object object) {
+  public static TreeNode nodeFor(Object object) {
     return getTreeNode(object);
   }
   
@@ -67,17 +67,17 @@ public class ContextManager {
     getTreeNode(parent).removeChild(getTreeNode(child));
   }
   
-  private static MutableTreeNode<Class, String, Object> getTreeNode(Object object) {
+  private static MutableTreeNode getTreeNode(Object object) {
     return contextObjects.get(object);
   }
   
-  private static MutableTreeNode<Class, String, Object> getOrCreateTreeNode(Object object) {
-    MutableTreeNode<Class, String, Object> node = contextObjects.get(object);
+  private static MutableTreeNode getOrCreateTreeNode(Object object) {
+    MutableTreeNode node = contextObjects.get(object);
     
     if (node == null) {
-      ContextElement<Class, String, Object> context = ObjectContextExtractor.extract(object);
-      node = new MutableTreeNode<Class, String, Object>(context);
-      MutableTreeNode<Class, String, Object> racer = contextObjects.putIfAbsent(object, node);
+      ContextElement context = ObjectContextExtractor.extract(object);
+      node = new MutableTreeNode(context);
+      MutableTreeNode racer = contextObjects.putIfAbsent(object, node);
       if (racer != null) {
         return racer;
       } else {
@@ -134,11 +134,11 @@ public class ContextManager {
     root.removeChild(getTreeNode(object));
   }
   
-  public Collection<TreeNode<Class, String, Object>> query(Query query) {
-    return query.execute(Collections.<TreeNode<Class, String, Object>>singleton(root));
+  public Collection<TreeNode> query(Query query) {
+    return query.execute(Collections.<TreeNode>singleton(root));
   }
 
-  public TreeNode<Class, String, Object> queryForSingleton(Query query) {
+  public TreeNode queryForSingleton(Query query) {
     return query(queryBuilder().chain(query).ensureUnique().build()).iterator().next();
   }
   

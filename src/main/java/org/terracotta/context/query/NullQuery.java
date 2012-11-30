@@ -16,7 +16,7 @@ class NullQuery implements Query {
   }
   
   @Override
-  public <I, K, V> Set<TreeNode<I, K, V>> execute(Set<TreeNode<I, K, V>> input) {
+  public Set<TreeNode> execute(Set<TreeNode> input) {
     return input;
   }
   

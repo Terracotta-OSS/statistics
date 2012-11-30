@@ -17,7 +17,7 @@ public class QueryBuilder {
     return new QueryBuilder();
   }
   
-  public QueryBuilder filter(Matcher<? super TreeNode<?, ?, ?>> filter) {
+  public QueryBuilder filter(Matcher<? super TreeNode> filter) {
     return chain(new Filter(filter));
   }
   

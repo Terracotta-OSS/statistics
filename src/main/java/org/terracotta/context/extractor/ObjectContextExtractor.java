@@ -18,14 +18,14 @@ public final class ObjectContextExtractor {
     //singleton
   }
   
-  public static ContextElement<Class, String, Object> extract(Object from) {
+  public static ContextElement extract(Object from) {
     Map<String, AttributeGetter<? extends Object>> attributes = new HashMap<String, AttributeGetter<? extends Object>>();
     if (from.getClass().isAnnotationPresent(ContextAttribute.class)) {
       attributes.put(from.getClass().getAnnotation(ContextAttribute.class).value(), new WeakAttributeGetter<Object>(from));
     }
     attributes.putAll(extractMethodAttributes(from));
     attributes.putAll(extractFieldAttributes(from));
-    return new LazyContextElement<Class, String, Object> (from.getClass(), attributes);
+    return new LazyContextElement(from.getClass(), attributes);
   }
 
   private static Map<String, AttributeGetter<? extends Object>> extractMethodAttributes(Object from) {

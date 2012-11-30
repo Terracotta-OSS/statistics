@@ -9,5 +9,5 @@ import org.terracotta.context.TreeNode;
 
 public interface Query {
 
-  <I, K, V> Set<TreeNode<I, K, V>> execute(Set<TreeNode<I, K, V>> input); 
+  Set<TreeNode> execute(Set<TreeNode> input); 
 }

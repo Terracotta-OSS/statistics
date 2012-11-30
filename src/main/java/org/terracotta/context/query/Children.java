@@ -8,14 +8,14 @@ import java.util.Set;
 
 import org.terracotta.context.TreeNode;
 
-class Children<I, K, V> implements Query {
+class Children implements Query {
 
   static final Query INSTANCE = new Children();
   
   @Override
-  public <I, K, V> Set<TreeNode<I, K, V>> execute(Set<TreeNode<I, K, V>> input) {
-    Set<TreeNode<I, K, V>> output = new HashSet<TreeNode<I, K, V>>();
-    for (TreeNode<I, K, V> node : input) {
+  public Set<TreeNode> execute(Set<TreeNode> input) {
+    Set<TreeNode> output = new HashSet<TreeNode>();
+    for (TreeNode node : input) {
       output.addAll(node.getChildren());
     }
     return output;

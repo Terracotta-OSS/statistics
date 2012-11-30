@@ -4,6 +4,7 @@
 package org.terracotta.statistics.derived;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
@@ -50,14 +51,13 @@ public abstract class CompressedQuantiles {
       it.add(insert);
       totalValues++;
     }
-
     compress();
   }
 
   public synchronized long query(double phi) {
     long targetRank = (long) Math.ceil(phi * totalValues);
     long threshold = targetRank + (long) Math.ceil(allowableError(targetRank, totalValues) / 2.0);
-    ListIterator<Sample> it = samples.listIterator();
+    Iterator<Sample> it = samples.iterator();
     Sample previous = it.next();
     long rank = previous.size;
     while (it.hasNext()) {
@@ -78,27 +78,22 @@ public abstract class CompressedQuantiles {
       return;
     }
     
-    ListIterator<Sample> it = samples.listIterator(1);
+    ListIterator<Sample> it = samples.listIterator();
+    long rank = it.next().size;
     Sample current = it.next();
-    long rank = current.size;
     while (it.hasNext()) {
       Sample next = it.next();
       long allowableError = allowableError(rank, totalValues);
       if (current.size + next.size + next.delta <= allowableError) {
         Sample merged = new Sample(next.value, current.size + next.size, next.delta);
         it.set(merged);
-        if (it.previous() != merged) {
-          throw new AssertionError();
-        }
-        if (it.previous() != current) {
-          throw new AssertionError();
-        }
+        it.previous();
+        it.previous();
         it.remove();
         current = it.next();
-        rank += next.size;
       } else {
-        current = next;
         rank += current.size;
+        current = next;
       }
     }
   }

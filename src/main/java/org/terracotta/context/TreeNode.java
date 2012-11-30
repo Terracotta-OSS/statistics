@@ -7,13 +7,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-public interface TreeNode<I, K, V> {
+public interface TreeNode {
   
-  Set<? extends TreeNode<I, K, V>> getChildren();
+  Set<? extends TreeNode> getChildren();
   
-  List<? extends TreeNode<I, K, V>> getPath();
+  List<? extends TreeNode> getPath();
   
-  Collection<List<? extends TreeNode<I, K, V>>> getPaths();
+  Collection<List<? extends TreeNode>> getPaths();
   
-  ContextElement<I, K, V> getContext();
+  ContextElement getContext();
 }

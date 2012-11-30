@@ -9,22 +9,22 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-class RootNode<I, K, V> extends AbstractTreeNode<I, K, V> {
+class RootNode extends AbstractTreeNode {
 
   private final Collection<ContextListener> listeners = new CopyOnWriteArrayList<ContextListener>();
   
   @Override
-  void addedParent(AbstractTreeNode<I, K, V> child) {
+  void addedParent(AbstractTreeNode child) {
     throw new IllegalStateException();
   }
 
   @Override
-  void removedParent(AbstractTreeNode<I, K, V> child) {
+  void removedParent(AbstractTreeNode child) {
     throw new IllegalStateException();
   }
 
   @Override
-  Set<AbstractTreeNode<I, K, V>> getAncestors() {
+  Set<AbstractTreeNode> getAncestors() {
     return Collections.emptySet();
   }
 
@@ -42,12 +42,12 @@ class RootNode<I, K, V> extends AbstractTreeNode<I, K, V> {
   }
 
   @Override
-  public ContextElement<I, K, V> getContext() {
+  public ContextElement getContext() {
     throw new IllegalStateException();
   }
 
   @Override
-  public Collection<List<? extends TreeNode<I, K, V>>> getPaths() {
-    return Collections.<List<? extends TreeNode<I, K, V>>>singleton(Collections.<TreeNode<I, K, V>>emptyList());
+  public Collection<List<? extends TreeNode>> getPaths() {
+    return Collections.<List<? extends TreeNode>>singleton(Collections.<TreeNode>emptyList());
   }
 }

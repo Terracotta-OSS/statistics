@@ -18,7 +18,7 @@ class ChainedQuery implements Query {
   }
 
   @Override
-  public final <I, K, V> Set<TreeNode<I, K, V>> execute(Set<TreeNode<I, K, V>> input) {
+  public final Set<TreeNode> execute(Set<TreeNode> input) {
     return current.execute(previous.execute(input));
   }
 

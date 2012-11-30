@@ -11,18 +11,18 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-class MutableTreeNode<I, K, V> extends AbstractTreeNode<I, K, V> {
+class MutableTreeNode extends AbstractTreeNode {
 
-  private final CopyOnWriteArraySet<AbstractTreeNode<I, K, V>> parents = new CopyOnWriteArraySet<AbstractTreeNode<I, K, V>>();
+  private final CopyOnWriteArraySet<AbstractTreeNode> parents = new CopyOnWriteArraySet<AbstractTreeNode>();
 
-  private final ContextElement<I, K, V> context;
+  private final ContextElement context;
 
-  public MutableTreeNode(ContextElement<I, K, V> context) {
+  public MutableTreeNode(ContextElement context) {
     this.context = context;
   }
 
   @Override
-  public ContextElement<I, K, V> getContext() {
+  public ContextElement getContext() {
     return context;
   }
   
@@ -32,10 +32,10 @@ class MutableTreeNode<I, K, V> extends AbstractTreeNode<I, K, V> {
   }
 
   @Override
-  Set<AbstractTreeNode<I, K, V>> getAncestors() {
-    Set<AbstractTreeNode<I, K, V>> ancestors = Collections.newSetFromMap(new IdentityHashMap<AbstractTreeNode<I, K, V>, Boolean>());
+  Set<AbstractTreeNode> getAncestors() {
+    Set<AbstractTreeNode> ancestors = Collections.newSetFromMap(new IdentityHashMap<AbstractTreeNode, Boolean>());
     ancestors.addAll(parents);
-    for (AbstractTreeNode<I, K, V> parent : parents) {
+    for (AbstractTreeNode parent : parents) {
       ancestors.addAll(parent.getAncestors());
     }
     return Collections.unmodifiableSet(ancestors);
@@ -47,22 +47,22 @@ class MutableTreeNode<I, K, V> extends AbstractTreeNode<I, K, V> {
   }
 
   @Override
-  void addedParent(AbstractTreeNode<I, K, V> parent) {
+  void addedParent(AbstractTreeNode parent) {
     parents.add(parent);
   }
 
   @Override
-  void removedParent(AbstractTreeNode<I, K, V> parent) {
+  void removedParent(AbstractTreeNode parent) {
     parents.remove(parent);
   }
 
   @Override
-  public Collection<List<? extends TreeNode<I, K, V>>> getPaths() {
-    Collection<List<? extends TreeNode<I, K, V>>> paths = new ArrayList<List<? extends TreeNode<I, K, V>>>();
+  public Collection<List<? extends TreeNode>> getPaths() {
+    Collection<List<? extends TreeNode>> paths = new ArrayList<List<? extends TreeNode>>();
     
-    for (TreeNode<I, K, V> node : parents) {
-      for (List<? extends TreeNode<I, K, V>> path : node.getPaths()) {
-        List<TreeNode<I, K, V>> newPath = new ArrayList<TreeNode<I, K, V>>(path);
+    for (TreeNode node : parents) {
+      for (List<? extends TreeNode> path : node.getPaths()) {
+        List<TreeNode> newPath = new ArrayList<TreeNode>(path);
         newPath.add(this);
         paths.add(newPath);
       }

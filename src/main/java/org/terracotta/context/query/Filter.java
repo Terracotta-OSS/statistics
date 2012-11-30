@@ -11,9 +11,9 @@ import org.terracotta.context.TreeNode;
 
 class Filter implements Query {
 
-  private final Matcher<? super TreeNode<?, ?, ?>> filter;
+  private final Matcher<? super TreeNode> filter;
   
-  public Filter(Matcher<? super TreeNode<?, ?, ?>> filter) {
+  public Filter(Matcher<? super TreeNode> filter) {
     if (filter == null) {
       throw new NullPointerException("Cannot filter using a null matcher");
     } else {
@@ -22,9 +22,9 @@ class Filter implements Query {
   }
   
   @Override
-  public <I, K, V> Set<TreeNode<I, K, V>> execute(Set<TreeNode<I, K, V>> input) {
-    Set<TreeNode<I, K, V>> output = new HashSet<TreeNode<I, K, V>>(input);
-    for (Iterator<TreeNode<I, K, V>> it = output.iterator(); it.hasNext(); ) {
+  public Set<TreeNode> execute(Set<TreeNode> input) {
+    Set<TreeNode> output = new HashSet<TreeNode>(input);
+    for (Iterator<TreeNode> it = output.iterator(); it.hasNext(); ) {
       if (!filter.matches(it.next())) {
         it.remove();
       }

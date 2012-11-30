@@ -18,49 +18,49 @@ import org.terracotta.context.TreeNode;
  */
 public class QueryTestUtils {
   
-  public static <I, K, V> TreeNode<I, K, V> createTreeNode(I identifier) {
-    return createTreeNode(identifier, Collections.<K, V>emptyMap());
+  public static  TreeNode createTreeNode(Class identifier) {
+    return createTreeNode(identifier, Collections.<String, Object>emptyMap());
   }
   
-  public static <I, K, V> TreeNode<I, K, V> createTreeNode(I identifier, Map<K, V> attributes) {
-    return createTreeNode(identifier, attributes, Collections.<TreeNode<I, K, V>>emptySet());
+  public static  TreeNode createTreeNode(Class identifier, Map<String, Object> attributes) {
+    return createTreeNode(identifier, attributes, Collections.<TreeNode>emptySet());
   }
   
-  public static <I, K, V> TreeNode<I, K, V> createTreeNode(I identifier, Set<TreeNode<I, K, V>> children) {
-    return createTreeNode(identifier, Collections.<K, V>emptyMap(), children);
+  public static  TreeNode createTreeNode(Class identifier, Set<TreeNode> children) {
+    return createTreeNode(identifier, Collections.<String, Object>emptyMap(), children);
   }
   
-  public static <I, K, V> TreeNode<I, K, V> createTreeNode(I identifier, Map<K, V> attributes, Set<TreeNode<I, K, V>> children) {
-    return new ImmutableTreeNode<I, K, V>(children, new ImmutableContextElement<I, K, V>(identifier, attributes));
+  public static  TreeNode createTreeNode(Class identifier, Map<String, Object> attributes, Set<TreeNode> children) {
+    return new ImmutableTreeNode(children, new ImmutableContextElement(identifier, attributes));
   }
   
-  static class ImmutableTreeNode<I, K, V> implements TreeNode<I, K, V> {
+  static class ImmutableTreeNode implements TreeNode {
     
-    private final Set<? extends TreeNode<I, K, V>> children;
-    private final ContextElement<I, K, V> context;
+    private final Set<? extends TreeNode> children;
+    private final ContextElement context;
 
-    public ImmutableTreeNode(Set<? extends TreeNode<I, K, V>> children, ContextElement<I, K, V> context) {
+    public ImmutableTreeNode(Set<? extends TreeNode> children, ContextElement context) {
       this.children = Collections.unmodifiableSet(children);
       this.context = context;
     }
 
     @Override
-    public Set<? extends TreeNode<I, K, V>> getChildren() {
+    public Set<? extends TreeNode> getChildren() {
       return children;
     }
 
     @Override
-    public List<? extends TreeNode<I, K, V>> getPath() {
+    public List<? extends TreeNode> getPath() {
       throw new IllegalStateException();
     }
 
     @Override
-    public Collection<List<? extends TreeNode<I, K, V>>> getPaths() {
+    public Collection<List<? extends TreeNode>> getPaths() {
       return Collections.emptyList();
     }
 
     @Override
-    public ContextElement<I, K, V> getContext() {
+    public ContextElement getContext() {
       return context;
     }
     
@@ -70,23 +70,23 @@ public class QueryTestUtils {
     }
   }
   
-  static class ImmutableContextElement<I, K, V> implements ContextElement<I, K, V> {
+  static class ImmutableContextElement implements ContextElement {
 
-    private final I identifier;
-    private final Map<K, V> attributes;
+    private final Class identifier;
+    private final Map<String, Object> attributes;
 
-    public ImmutableContextElement(I identifier, Map<K, V> attributes) {
+    public ImmutableContextElement(Class identifier, Map<String, Object> attributes) {
       this.identifier = identifier;
       this.attributes = Collections.unmodifiableMap(attributes);
     }
 
     @Override
-    public I identifier() {
+    public Class identifier() {
       return identifier;
     }
 
     @Override
-    public Map<K, V> attributes() {
+    public Map<String, Object> attributes() {
       return attributes;
     }
     
@@ -99,4 +99,15 @@ public class QueryTestUtils {
       }
     }
   }
+  
+  public static class A {}
+  public static class B {}
+  public static class C {}
+  public static class D {}
+  public static class E {}
+  public static class F {}
+  public static class G {}
+  public static class H {}
+  public static class I {}
+  public static class J {}
 }

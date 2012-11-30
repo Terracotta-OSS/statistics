@@ -37,41 +37,41 @@ public class DescendantsTest {
   
   @Test
   public void testSingleNodeWithNoDescendants() {
-    assertThat(query.execute(Collections.singleton(createTreeNode("foo"))), IsEmptyCollection.<TreeNode<String, Object, Object>>empty());
+    assertThat(query.execute(Collections.singleton(createTreeNode(A.class))), IsEmptyCollection.<TreeNode>empty());
   }
 
   @Test
   public void testMultipleNodesWithNoDescendants() {
-    Set<TreeNode<String, Object, Object>> nodes = new HashSet<TreeNode<String, Object, Object>>();
-    nodes.add(createTreeNode("foo"));
-    nodes.add(createTreeNode("bar"));
-    assertThat(query.execute(nodes), IsEmptyCollection.<TreeNode<String, Object, Object>>empty());
+    Set<TreeNode> nodes = new HashSet<TreeNode>();
+    nodes.add(createTreeNode(A.class));
+    nodes.add(createTreeNode(B.class));
+    assertThat(query.execute(nodes), IsEmptyCollection.<TreeNode>empty());
   }
 
   @Test
   public void testSingleNodeWithChildren() {
-    Set<TreeNode<String, Object, Object>> children = new HashSet<TreeNode<String, Object, Object>>();
-    children.add(createTreeNode("foo"));
-    children.add(createTreeNode("bar"));
+    Set<TreeNode> children = new HashSet<TreeNode>();
+    children.add(createTreeNode(A.class));
+    children.add(createTreeNode(B.class));
     
-    TreeNode<String, Object, Object> node = createTreeNode("baz", children);
+    TreeNode node = createTreeNode(C.class, children);
     
     assertThat(query.execute(Collections.singleton(node)), equalTo(children));
   }  
 
   @Test
   public void testSingleNodeWithChildrenAndGrandChildren() {
-    Set<TreeNode<String, Object, Object>> grandChildren = new HashSet<TreeNode<String, Object, Object>>();
-    grandChildren.add(createTreeNode("foo"));
-    grandChildren.add(createTreeNode("bar"));
+    Set<TreeNode> grandChildren = new HashSet<TreeNode>();
+    grandChildren.add(createTreeNode(A.class));
+    grandChildren.add(createTreeNode(B.class));
 
-    Set<TreeNode<String, Object, Object>> children = new HashSet<TreeNode<String, Object, Object>>();
-    children.add(createTreeNode("baz", grandChildren));
-    children.add(createTreeNode("bat"));
+    Set<TreeNode> children = new HashSet<TreeNode>();
+    children.add(createTreeNode(C.class, grandChildren));
+    children.add(createTreeNode(D.class));
     
-    TreeNode<String, Object, Object> node = createTreeNode("fum", children);
+    TreeNode node = createTreeNode(E.class, children);
     
-    Set<TreeNode<String, Object, Object>> descendants = new HashSet<TreeNode<String, Object, Object>>();
+    Set<TreeNode> descendants = new HashSet<TreeNode>();
     descendants.addAll(grandChildren);
     descendants.addAll(children);
     
@@ -80,87 +80,87 @@ public class DescendantsTest {
   
   @Test
   public void testMultipleNodesWithChildren() {
-    Set<TreeNode<String, Object, Object>> bazChildren = new HashSet<TreeNode<String, Object, Object>>();
-    bazChildren.add(createTreeNode("foo"));
-    bazChildren.add(createTreeNode("bar"));
+    Set<TreeNode> cChildren = new HashSet<TreeNode>();
+    cChildren.add(createTreeNode(A.class));
+    cChildren.add(createTreeNode(B.class));
     
-    TreeNode<String, Object, Object> baz = createTreeNode("baz", bazChildren);
+    TreeNode c = createTreeNode(C.class, cChildren);
     
-    Set<TreeNode<String, Object, Object>> eveChildren = new HashSet<TreeNode<String, Object, Object>>();
-    eveChildren.add(createTreeNode("alice"));
-    eveChildren.add(createTreeNode("bob"));
+    Set<TreeNode> fChildren = new HashSet<TreeNode>();
+    fChildren.add(createTreeNode(D.class));
+    fChildren.add(createTreeNode(E.class));
     
-    TreeNode<String, Object, Object> eve = createTreeNode("eve", eveChildren);
+    TreeNode f = createTreeNode(F.class, fChildren);
     
-    Set<TreeNode<String, Object, Object>> input = new HashSet<TreeNode<String, Object, Object>>();
-    input.add(baz);
-    input.add(eve);
+    Set<TreeNode> input = new HashSet<TreeNode>();
+    input.add(c);
+    input.add(f);
     
-    Set<TreeNode<String, Object, Object>> children = new HashSet<TreeNode<String, Object, Object>>();
-    children.addAll(eveChildren);
-    children.addAll(bazChildren);
+    Set<TreeNode> children = new HashSet<TreeNode>();
+    children.addAll(fChildren);
+    children.addAll(cChildren);
     
     assertThat(query.execute(input), equalTo(children));
   }
 
   @Test
   public void testMultipleNodesWithChildrenAndGrandchildren() {
-    Set<TreeNode<String, Object, Object>> bazGrandchildren = new HashSet<TreeNode<String, Object, Object>>();
-    bazGrandchildren.add(createTreeNode("frank"));
-    bazGrandchildren.add(createTreeNode("joe"));
+    Set<TreeNode> eGrandchildren = new HashSet<TreeNode>();
+    eGrandchildren.add(createTreeNode(A.class));
+    eGrandchildren.add(createTreeNode(B.class));
     
-    Set<TreeNode<String, Object, Object>> bazChildren = new HashSet<TreeNode<String, Object, Object>>();
-    bazChildren.add(createTreeNode("foo", bazGrandchildren));
-    bazChildren.add(createTreeNode("bar"));
+    Set<TreeNode> eChildren = new HashSet<TreeNode>();
+    eChildren.add(createTreeNode(C.class, eGrandchildren));
+    eChildren.add(createTreeNode(D.class));
     
-    TreeNode<String, Object, Object> baz = createTreeNode("baz", bazChildren);
+    TreeNode e = createTreeNode(E.class, eChildren);
     
-    Set<TreeNode<String, Object, Object>> eveGrandchildren = new HashSet<TreeNode<String, Object, Object>>();
-    eveGrandchildren.add(createTreeNode("brian"));
-    eveGrandchildren.add(createTreeNode("stewie"));
+    Set<TreeNode> jGrandchildren = new HashSet<TreeNode>();
+    jGrandchildren.add(createTreeNode(F.class));
+    jGrandchildren.add(createTreeNode(G.class));
     
-    Set<TreeNode<String, Object, Object>> eveChildren = new HashSet<TreeNode<String, Object, Object>>();
-    eveChildren.add(createTreeNode("alice", eveGrandchildren));
-    eveChildren.add(createTreeNode("bob"));
+    Set<TreeNode> jChildren = new HashSet<TreeNode>();
+    jChildren.add(createTreeNode(H.class, jGrandchildren));
+    jChildren.add(createTreeNode(I.class));
     
-    TreeNode<String, Object, Object> eve = createTreeNode("eve", eveChildren);
+    TreeNode j = createTreeNode(J.class, jChildren);
     
-    Set<TreeNode<String, Object, Object>> input = new HashSet<TreeNode<String, Object, Object>>();
-    input.add(baz);
-    input.add(eve);
+    Set<TreeNode> input = new HashSet<TreeNode>();
+    input.add(e);
+    input.add(j);
     
-    Set<TreeNode<String, Object, Object>> descendants = new HashSet<TreeNode<String, Object, Object>>();
-    descendants.addAll(eveChildren);
-    descendants.addAll(eveGrandchildren);
-    descendants.addAll(bazChildren);
-    descendants.addAll(bazGrandchildren);
+    Set<TreeNode> descendants = new HashSet<TreeNode>();
+    descendants.addAll(jChildren);
+    descendants.addAll(jGrandchildren);
+    descendants.addAll(eChildren);
+    descendants.addAll(eGrandchildren);
     
     assertThat(query.execute(input), equalTo(descendants));
   }
   
   @Test
   public void testMultipleNodesWithCommonChildren() {
-    TreeNode<String, Object, Object> alice = createTreeNode("alice");
+    TreeNode a = createTreeNode(A.class);
     
-    Set<TreeNode<String, Object, Object>> bazChildren = new HashSet<TreeNode<String, Object, Object>>();
-    bazChildren.add(createTreeNode("foo"));
-    bazChildren.add(alice);
+    Set<TreeNode> cChildren = new HashSet<TreeNode>();
+    cChildren.add(createTreeNode(B.class));
+    cChildren.add(a);
     
-    TreeNode<String, Object, Object> baz = createTreeNode("baz", bazChildren);
+    TreeNode c = createTreeNode(C.class, cChildren);
     
-    Set<TreeNode<String, Object, Object>> eveChildren = new HashSet<TreeNode<String, Object, Object>>();
-    eveChildren.add(createTreeNode("bob"));
-    eveChildren.add(alice);
+    Set<TreeNode> eChildren = new HashSet<TreeNode>();
+    eChildren.add(createTreeNode(D.class));
+    eChildren.add(a);
     
-    TreeNode<String, Object, Object> eve = createTreeNode("eve", eveChildren);
+    TreeNode e = createTreeNode(E.class, eChildren);
     
-    Set<TreeNode<String, Object, Object>> input = new HashSet<TreeNode<String, Object, Object>>();
-    input.add(baz);
-    input.add(eve);
+    Set<TreeNode> input = new HashSet<TreeNode>();
+    input.add(c);
+    input.add(e);
     
-    Set<TreeNode<String, Object, Object>> children = new HashSet<TreeNode<String, Object, Object>>();
-    children.addAll(eveChildren);
-    children.addAll(bazChildren);
+    Set<TreeNode> children = new HashSet<TreeNode>();
+    children.addAll(eChildren);
+    children.addAll(cChildren);
     assertThat(children, hasSize(3));
     
     assertThat(query.execute(input), equalTo(children));
@@ -168,35 +168,35 @@ public class DescendantsTest {
 
   @Test
   public void testMultipleNodesWithCommonGrandchildren() {
-    Set<TreeNode<String, Object, Object>> bazGrandchildren = new HashSet<TreeNode<String, Object, Object>>();
-    bazGrandchildren.add(createTreeNode("frank"));
-    bazGrandchildren.add(createTreeNode("joe"));
+    Set<TreeNode> eGrandchildren = new HashSet<TreeNode>();
+    eGrandchildren.add(createTreeNode(A.class));
+    eGrandchildren.add(createTreeNode(B.class));
     
-    Set<TreeNode<String, Object, Object>> bazChildren = new HashSet<TreeNode<String, Object, Object>>();
-    bazChildren.add(createTreeNode("foo", bazGrandchildren));
-    bazChildren.add(createTreeNode("bar"));
+    Set<TreeNode> eChildren = new HashSet<TreeNode>();
+    eChildren.add(createTreeNode(C.class, eGrandchildren));
+    eChildren.add(createTreeNode(D.class));
     
-    TreeNode<String, Object, Object> baz = createTreeNode("baz", bazChildren);
+    TreeNode e = createTreeNode(E.class, eChildren);
     
-    Set<TreeNode<String, Object, Object>> eveGrandchildren = new HashSet<TreeNode<String, Object, Object>>();
-    eveGrandchildren.add(createTreeNode("brian"));
-    eveGrandchildren.add(createTreeNode("stewie"));
+    Set<TreeNode> jGrandchildren = new HashSet<TreeNode>();
+    jGrandchildren.add(createTreeNode(F.class));
+    jGrandchildren.add(createTreeNode(G.class));
     
-    Set<TreeNode<String, Object, Object>> eveChildren = new HashSet<TreeNode<String, Object, Object>>();
-    eveChildren.add(createTreeNode("alice", eveGrandchildren));
-    eveChildren.add(createTreeNode("bob"));
+    Set<TreeNode> jChildren = new HashSet<TreeNode>();
+    jChildren.add(createTreeNode(H.class, jGrandchildren));
+    jChildren.add(createTreeNode(I.class));
     
-    TreeNode<String, Object, Object> eve = createTreeNode("eve", eveChildren);
+    TreeNode j = createTreeNode(J.class, jChildren);
     
-    Set<TreeNode<String, Object, Object>> input = new HashSet<TreeNode<String, Object, Object>>();
-    input.add(baz);
-    input.add(eve);
+    Set<TreeNode> input = new HashSet<TreeNode>();
+    input.add(e);
+    input.add(j);
     
-    Set<TreeNode<String, Object, Object>> descendants = new HashSet<TreeNode<String, Object, Object>>();
-    descendants.addAll(eveChildren);
-    descendants.addAll(eveGrandchildren);
-    descendants.addAll(bazChildren);
-    descendants.addAll(bazGrandchildren);
+    Set<TreeNode> descendants = new HashSet<TreeNode>();
+    descendants.addAll(jChildren);
+    descendants.addAll(jGrandchildren);
+    descendants.addAll(eChildren);
+    descendants.addAll(eGrandchildren);
     
     assertThat(query.execute(input), equalTo(descendants));
   }

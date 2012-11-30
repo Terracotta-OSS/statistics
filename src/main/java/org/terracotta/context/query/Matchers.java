@@ -14,11 +14,11 @@ public final class Matchers {
     //static class
   }
 
-  public static Matcher<? super TreeNode<?, ?, ?>> context(final Matcher<ContextElement<?, ?, ?>> matcher) {
-    return new Matcher<TreeNode<?, ?, ?>>() {
+  public static Matcher<TreeNode> context(final Matcher<ContextElement> matcher) {
+    return new Matcher<TreeNode>() {
 
       @Override
-      boolean matchesSafely(TreeNode<?, ?, ?> t) {
+      boolean matchesSafely(TreeNode t) {
         return matcher.matches(t.getContext());
       }
 
@@ -29,11 +29,11 @@ public final class Matchers {
     };
   }
   
-  public static Matcher<ContextElement<?, ?, ?>> attributes(final Matcher<Map<?, ?>> matcher) {
-    return new Matcher<ContextElement<?, ?, ?>>() {
+  public static Matcher<ContextElement> attributes(final Matcher<? extends Map<? extends String, ? extends Object>> matcher) {
+    return new Matcher<ContextElement>() {
 
       @Override
-      boolean matchesSafely(ContextElement<?, ?, ?> t) {
+      boolean matchesSafely(ContextElement t) {
         return matcher.matches(t.attributes());
       }
 
@@ -44,11 +44,11 @@ public final class Matchers {
     };
   }
   
-  public static Matcher<ContextElement<?, ?, ?>> identifier(final Matcher<?> matcher) {
-    return new Matcher<ContextElement<?, ?, ?>>() {
+  public static Matcher<ContextElement> identifier(final Matcher<Class<?>> matcher) {
+    return new Matcher<ContextElement>() {
 
       @Override
-      boolean matchesSafely(ContextElement<?, ?, ?> t) {
+      boolean matchesSafely(ContextElement t) {
         return matcher.matches(t.identifier());
       }
 
@@ -75,21 +75,21 @@ public final class Matchers {
     };
   }
   
-  public static Matcher<Map<?, ?>> hasAttribute(final Object key, final Object value) {
-    return new Matcher<Map<?, ?>>() {
+  public static <K, V> Matcher<Map<K, V>> hasAttribute(final K key, final V value) {
+    return new Matcher<Map<K, V>>() {
 
       @Override
-      boolean matchesSafely(Map<?, ?> object) {
+      boolean matchesSafely(Map<K, V> object) {
         return object.containsKey(key) && value.equals(object.get(key));
       }
     };
   }
   
-  public static Matcher<Map<?, ?>> hasAttribute(final Object key, final Matcher<?> value) {
-    return new Matcher<Map<?, ?>>() {
+  public static <K, V> Matcher<Map<K, V>> hasAttribute(final K key, final Matcher<V> value) {
+    return new Matcher<Map<K, V>>() {
 
       @Override
-      boolean matchesSafely(Map<?, ?> object) {
+      boolean matchesSafely(Map<K, V> object) {
         return object.containsKey(key) && value.matches(object.get(key));
       }
     };

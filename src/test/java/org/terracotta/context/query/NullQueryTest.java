@@ -37,16 +37,16 @@ public class NullQueryTest {
   
   @Test
   public void testEmptySetUnmodified() {
-    assertThat(query.execute(Collections.<TreeNode<Object, Object, Object>>emptySet()), IsEmptyCollection.<TreeNode<Object, Object, Object>>empty());
+    assertThat(query.execute(Collections.<TreeNode>emptySet()), IsEmptyCollection.<TreeNode>empty());
   }
   
   @Test
   public void testPopulatedSetUnmodified() {
-    Set<TreeNode<String, Object, Object>> nodes = new HashSet<TreeNode<String, Object, Object>>();
-    nodes.add(createTreeNode("foo", Collections.emptyMap()));
-    nodes.add(createTreeNode("bar", Collections.emptyMap()));
+    Set<TreeNode> nodes = new HashSet<TreeNode>();
+    nodes.add(createTreeNode(A.class));
+    nodes.add(createTreeNode(B.class));
     
-    Set<TreeNode<String, Object, Object>> result = query.execute(nodes);
+    Set<TreeNode> result = query.execute(nodes);
     
     assertThat(result, equalTo(nodes));
   }

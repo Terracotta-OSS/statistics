@@ -52,14 +52,14 @@ public class FilterTest {
       public boolean matchesSafely(Object object) {
         throw new UnsupportedOperationException();
       }
-    }).execute(Collections.singleton(createTreeNode("foo")));
+    }).execute(Collections.singleton(createTreeNode(A.class)));
   }
   
   @Test
   public void testAlwaysFailMatcher() {
-    Set<TreeNode<String, Object, Object>> input = new HashSet<TreeNode<String, Object, Object>>();
-    input.add(createTreeNode("foo"));
-    input.add(createTreeNode("bar"));
+    Set<TreeNode> input = new HashSet<TreeNode>();
+    input.add(createTreeNode(A.class));
+    input.add(createTreeNode(B.class));
     
     assertThat(buildQuery(new Matcher() {
 
@@ -67,14 +67,14 @@ public class FilterTest {
       boolean matchesSafely(Object object) {
         return false;
       }
-    }).execute(input), IsEmptyCollection.<TreeNode<String, Object, Object>>empty());
+    }).execute(input), IsEmptyCollection.<TreeNode>empty());
   }
   
   @Test
   public void testAlwaysPassMatcher() {
-    Set<TreeNode<String, Object, Object>> input = new HashSet<TreeNode<String, Object, Object>>();
-    input.add(createTreeNode("foo"));
-    input.add(createTreeNode("bar"));
+    Set<TreeNode> input = new HashSet<TreeNode>();
+    input.add(createTreeNode(A.class));
+    input.add(createTreeNode(B.class));
     
     assertThat(buildQuery(new Matcher() {
 
@@ -87,9 +87,9 @@ public class FilterTest {
   
   @Test
   public void testHalfPassMatcher() {
-    Set<TreeNode<String, Object, Object>> input = new HashSet<TreeNode<String, Object, Object>>();
-    input.add(createTreeNode("foo"));
-    input.add(createTreeNode("bar"));
+    Set<TreeNode> input = new HashSet<TreeNode>();
+    input.add(createTreeNode(A.class));
+    input.add(createTreeNode(B.class));
     
     assertThat(buildQuery(new Matcher() {
 

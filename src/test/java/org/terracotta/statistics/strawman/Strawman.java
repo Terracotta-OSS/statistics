@@ -30,7 +30,7 @@ public final class Strawman {
 
     Query query = queryBuilder().descendants().filter(context(allOf(identifier(subclassOf(OperationStatistic.class)), attributes(hasAttribute("properties", hasAttribute("name", "get")))))).build();
     System.out.println(query);
-    TreeNode<Class, String, Object> getStatisticNode = stats.queryForSingleton(query);
+    TreeNode getStatisticNode = stats.queryForSingleton(query);
     OperationStatistic<GetResult> getStatistic = (OperationStatistic<GetResult>) getStatisticNode.getContext().attributes().get("this");
     LatencySampling<Cache.GetResult> hitLatency = new LatencySampling(Cache.GetResult.HIT, 1.0f);
     MinMaxAverage hitLatencyStats = new MinMaxAverage();
@@ -69,17 +69,17 @@ public final class Strawman {
     System.err.println("HIT LATENCY : " + hitLatencyStats.mean());
   }
   
-  public static String dumpTree(TreeNode<?, ?, ?> node) {
+  public static String dumpTree(TreeNode node) {
     return dumpSubtree(0, node);
   }
   
-  public static String dumpSubtree(int indent, TreeNode<?, ?, ?> node) {
+  public static String dumpSubtree(int indent, TreeNode node) {
     char[] indentChars = new char[indent];
     Arrays.fill(indentChars, ' ');
     StringBuilder sb = new StringBuilder();
     String nodeString = node.toString();
     sb.append(indentChars).append(nodeString).append("\n");
-    for (TreeNode<?, ?, ?> child : node.getChildren()) {
+    for (TreeNode child : node.getChildren()) {
       sb.append(dumpSubtree(indent + nodeString.length(), child));
     }
     return sb.toString();

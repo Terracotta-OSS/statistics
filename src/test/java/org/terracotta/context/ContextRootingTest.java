@@ -27,7 +27,7 @@ public class ContextRootingTest {
     Object root = new NoAnnotations();
     manager.root(root);
     
-    Collection<TreeNode<Class, String, Object>> roots = manager.query(queryBuilder().children().build());
+    Collection<TreeNode> roots = manager.query(queryBuilder().children().build());
 
     assertThat(roots, hasSize(1));
     assertThat(roots.iterator().next().getContext().attributes().get("this"), sameInstance(root));
@@ -41,9 +41,9 @@ public class ContextRootingTest {
     manager.root(root);
     manager.uproot(root);
     
-    Collection<TreeNode<Class, String, Object>> roots = manager.query(queryBuilder().children().build());
+    Collection<TreeNode> roots = manager.query(queryBuilder().children().build());
 
-    assertThat(roots, IsEmptyCollection.<TreeNode<Class, String, Object>>empty());
+    assertThat(roots, IsEmptyCollection.<TreeNode>empty());
   }
   
   @Test
@@ -54,7 +54,7 @@ public class ContextRootingTest {
     manager.root(root);
     manager.root(root);
     
-    Collection<TreeNode<Class, String, Object>> roots = manager.query(queryBuilder().children().build());
+    Collection<TreeNode> roots = manager.query(queryBuilder().children().build());
 
     assertThat(roots, hasSize(1));
     assertThat(roots.iterator().next().getContext().attributes().get("this"), sameInstance(root));
@@ -69,8 +69,8 @@ public class ContextRootingTest {
     manager.root(root);
     manager.uproot(root);
     
-    Collection<TreeNode<Class, String, Object>> roots = manager.query(queryBuilder().children().build());
+    Collection<TreeNode> roots = manager.query(queryBuilder().children().build());
 
-    assertThat(roots, IsEmptyCollection.<TreeNode<Class, String, Object>>empty());
+    assertThat(roots, IsEmptyCollection.<TreeNode>empty());
   }
 }

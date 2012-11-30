@@ -10,17 +10,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-abstract class AbstractTreeNode<I, K, V> implements TreeNode<I, K, V> {
+abstract class AbstractTreeNode implements TreeNode {
 
-  private final CopyOnWriteArraySet<TreeNode<I, K, V>> children = new CopyOnWriteArraySet<TreeNode<I, K, V>>();
+  private final CopyOnWriteArraySet<TreeNode> children = new CopyOnWriteArraySet<TreeNode>();
   
-  public boolean addChild(AbstractTreeNode<I, K, V> child) {
+  public boolean addChild(AbstractTreeNode child) {
     synchronized (this) {
-      Collection<AbstractTreeNode<I, K, V>> ancestors = new HashSet<AbstractTreeNode<I, K, V>>(getAncestors());
+      Collection<AbstractTreeNode> ancestors = new HashSet<AbstractTreeNode>(getAncestors());
       ancestors.removeAll(child.getAncestors());
       if (children.add(child)) {
         child.addedParent(this);
-        for (AbstractTreeNode<I, K, V> ancestor : ancestors) {
+        for (AbstractTreeNode ancestor : ancestors) {
           for (ContextListener listener : ancestor.getListeners()) {
             listener.graphAdded(this, child);
           }
@@ -32,13 +32,13 @@ abstract class AbstractTreeNode<I, K, V> implements TreeNode<I, K, V> {
     }
   }
 
-  public boolean removeChild(AbstractTreeNode<I, K, V> child) {
+  public boolean removeChild(AbstractTreeNode child) {
     synchronized (this) {
       if (children.remove(child)) {
         child.removedParent(this);
-        Collection<AbstractTreeNode<I, K, V>> ancestors = new HashSet<AbstractTreeNode<I, K, V>>(getAncestors());
+        Collection<AbstractTreeNode> ancestors = new HashSet<AbstractTreeNode>(getAncestors());
         ancestors.removeAll(child.getAncestors());
-        for (AbstractTreeNode<I, K, V> ancestor : ancestors) {
+        for (AbstractTreeNode ancestor : ancestors) {
           for (ContextListener listener : ancestor.getListeners()) {
             listener.graphRemoved(this, child);
           }
@@ -51,13 +51,13 @@ abstract class AbstractTreeNode<I, K, V> implements TreeNode<I, K, V> {
   }
 
   @Override
-  public Set<? extends TreeNode<I, K, V>> getChildren() {
+  public Set<? extends TreeNode> getChildren() {
     return Collections.unmodifiableSet(children);
   }
 
   @Override
-  public List<? extends TreeNode<I, K, V>> getPath() {
-    Collection<List<? extends TreeNode<I, K, V>>> paths = getPaths();
+  public List<? extends TreeNode> getPath() {
+    Collection<List<? extends TreeNode>> paths = getPaths();
     if (paths.size() == 1) {
       return paths.iterator().next();
     } else {
@@ -65,11 +65,11 @@ abstract class AbstractTreeNode<I, K, V> implements TreeNode<I, K, V> {
     }
   }
 
-  abstract void addedParent(AbstractTreeNode<I, K, V> child);
+  abstract void addedParent(AbstractTreeNode child);
   
-  abstract void removedParent(AbstractTreeNode<I, K, V> child);
+  abstract void removedParent(AbstractTreeNode child);
   
-  abstract Set<AbstractTreeNode<I, K, V>> getAncestors();
+  abstract Set<AbstractTreeNode> getAncestors();
 
   abstract Collection<ContextListener> getListeners();
 }

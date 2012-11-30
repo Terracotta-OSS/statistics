@@ -41,75 +41,75 @@ public class ChildrenTest {
   
   @Test
   public void testSingleNodeWithNoChildren() {
-    assertThat(query.execute(Collections.singleton(createTreeNode("foo"))), IsEmptyCollection.<TreeNode<String, Object, Object>>empty());
+    assertThat(query.execute(Collections.singleton(createTreeNode(A.class))), IsEmptyCollection.<TreeNode>empty());
   }
 
   @Test
   public void testMultipleNodesWithNoChildren() {
-    Set<TreeNode<String, Object, Object>> nodes = new HashSet<TreeNode<String, Object, Object>>();
-    nodes.add(createTreeNode("foo"));
-    nodes.add(createTreeNode("bar"));
-    assertThat(query.execute(nodes), IsEmptyCollection.<TreeNode<String, Object, Object>>empty());
+    Set<TreeNode> nodes = new HashSet<TreeNode>();
+    nodes.add(createTreeNode(A.class));
+    nodes.add(createTreeNode(B.class));
+    assertThat(query.execute(nodes), IsEmptyCollection.<TreeNode>empty());
   }
 
   @Test
   public void testSingleNodeWithChildren() {
-    Set<TreeNode<String, Object, Object>> children = new HashSet<TreeNode<String, Object, Object>>();
-    children.add(createTreeNode("foo"));
-    children.add(createTreeNode("bar"));
+    Set<TreeNode> children = new HashSet<TreeNode>();
+    children.add(createTreeNode(A.class));
+    children.add(createTreeNode(B.class));
     
-    TreeNode<String, Object, Object> node = createTreeNode("baz", children);
+    TreeNode node = createTreeNode(C.class, children);
     
     assertThat(query.execute(Collections.singleton(node)), equalTo(children));
   }
   
   @Test
   public void testMultipleNodesWithChildren() {
-    Set<TreeNode<String, Object, Object>> bazChildren = new HashSet<TreeNode<String, Object, Object>>();
-    bazChildren.add(createTreeNode("foo"));
-    bazChildren.add(createTreeNode("bar"));
+    Set<TreeNode> cChildren = new HashSet<TreeNode>();
+    cChildren.add(createTreeNode(A.class));
+    cChildren.add(createTreeNode(B.class));
     
-    TreeNode<String, Object, Object> baz = createTreeNode("baz", bazChildren);
+    TreeNode c = createTreeNode(C.class, cChildren);
     
-    Set<TreeNode<String, Object, Object>> eveChildren = new HashSet<TreeNode<String, Object, Object>>();
-    eveChildren.add(createTreeNode("alice"));
-    eveChildren.add(createTreeNode("bob"));
+    Set<TreeNode> fChildren = new HashSet<TreeNode>();
+    fChildren.add(createTreeNode(D.class));
+    fChildren.add(createTreeNode(E.class));
     
-    TreeNode<String, Object, Object> eve = createTreeNode("eve", eveChildren);
+    TreeNode f = createTreeNode(F.class, fChildren);
     
-    Set<TreeNode<String, Object, Object>> input = new HashSet<TreeNode<String, Object, Object>>();
-    input.add(baz);
-    input.add(eve);
+    Set<TreeNode> input = new HashSet<TreeNode>();
+    input.add(c);
+    input.add(f);
     
-    Set<TreeNode<String, Object, Object>> children = new HashSet<TreeNode<String, Object, Object>>();
-    children.addAll(eveChildren);
-    children.addAll(bazChildren);
+    Set<TreeNode> children = new HashSet<TreeNode>();
+    children.addAll(fChildren);
+    children.addAll(cChildren);
     
     assertThat(query.execute(input), equalTo(children));
   }
 
   @Test
   public void testMultipleNodesWithCommonChildren() {
-    TreeNode<String, Object, Object> alice = createTreeNode("alice");
+    TreeNode a = createTreeNode(A.class);
     
-    Set<TreeNode<String, Object, Object>> bazChildren = new HashSet<TreeNode<String, Object, Object>>();
-    bazChildren.add(createTreeNode("foo"));
-    bazChildren.add(alice);
+    Set<TreeNode> bazChildren = new HashSet<TreeNode>();
+    bazChildren.add(createTreeNode(B.class));
+    bazChildren.add(a);
     
-    TreeNode<String, Object, Object> baz = createTreeNode("baz", bazChildren);
+    TreeNode c = createTreeNode(C.class, bazChildren);
     
-    Set<TreeNode<String, Object, Object>> eveChildren = new HashSet<TreeNode<String, Object, Object>>();
-    eveChildren.add(createTreeNode("bob"));
-    eveChildren.add(alice);
+    Set<TreeNode> eChildren = new HashSet<TreeNode>();
+    eChildren.add(createTreeNode(D.class));
+    eChildren.add(a);
     
-    TreeNode<String, Object, Object> eve = createTreeNode("eve", eveChildren);
+    TreeNode e = createTreeNode(E.class, eChildren);
     
-    Set<TreeNode<String, Object, Object>> input = new HashSet<TreeNode<String, Object, Object>>();
-    input.add(baz);
-    input.add(eve);
+    Set<TreeNode> input = new HashSet<TreeNode>();
+    input.add(c);
+    input.add(e);
     
-    Set<TreeNode<String, Object, Object>> children = new HashSet<TreeNode<String, Object, Object>>();
-    children.addAll(eveChildren);
+    Set<TreeNode> children = new HashSet<TreeNode>();
+    children.addAll(eChildren);
     children.addAll(bazChildren);
     assertThat(children, hasSize(3));
     
@@ -119,20 +119,20 @@ public class ChildrenTest {
 
   @Test
   public void testNodeWIthChildrenAndExtraDescendants() {
-    Set<TreeNode<String, Object, Object>> bazChildren = new HashSet<TreeNode<String, Object, Object>>();
-    bazChildren.add(createTreeNode("foo"));
-    bazChildren.add(createTreeNode("bar"));
+    Set<TreeNode> cChildren = new HashSet<TreeNode>();
+    cChildren.add(createTreeNode(A.class));
+    cChildren.add(createTreeNode(B.class));
     
-    TreeNode<String, Object, Object> baz = createTreeNode("baz", bazChildren);
+    TreeNode c = createTreeNode(C.class, cChildren);
     
-    Set<TreeNode<String, Object, Object>> eveChildren = new HashSet<TreeNode<String, Object, Object>>();
-    eveChildren.add(createTreeNode("alice"));
-    eveChildren.add(createTreeNode("bob"));
-    eveChildren.add(baz);
+    Set<TreeNode> fChildren = new HashSet<TreeNode>();
+    fChildren.add(createTreeNode(D.class));
+    fChildren.add(createTreeNode(E.class));
+    fChildren.add(c);
     
-    TreeNode<String, Object, Object> eve = createTreeNode("eve", eveChildren);
+    TreeNode f = createTreeNode(F.class, fChildren);
         
-    assertThat(query.execute(Collections.singleton(eve)), equalTo(eveChildren));
+    assertThat(query.execute(Collections.singleton(f)), equalTo(fChildren));
     
   }
 }
