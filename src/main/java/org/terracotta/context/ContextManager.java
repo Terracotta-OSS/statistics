@@ -7,6 +7,9 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Collections;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
 import org.terracotta.context.annotations.ContextChild;
 import org.terracotta.context.annotations.ContextParent;
 import org.terracotta.context.extractor.ObjectContextExtractor;
@@ -17,7 +20,8 @@ import static org.terracotta.context.query.QueryBuilder.*;
 
 public class ContextManager {
 
-  private static final WeakIdentityHashMap<Object, MutableTreeNode> contextObjects = new WeakIdentityHashMap<Object, MutableTreeNode>();
+  private static final Logger LOGGER = LoggerFactory.getLogger(ContextManager.class);
+  private static final WeakIdentityHashMap<Object, MutableTreeNode> CONTEXT_OBJECTS = new WeakIdentityHashMap<Object, MutableTreeNode>();
 
   private final RootNode root = new RootNode();
   
@@ -68,16 +72,16 @@ public class ContextManager {
   }
   
   private static MutableTreeNode getTreeNode(Object object) {
-    return contextObjects.get(object);
+    return CONTEXT_OBJECTS.get(object);
   }
   
   private static MutableTreeNode getOrCreateTreeNode(Object object) {
-    MutableTreeNode node = contextObjects.get(object);
+    MutableTreeNode node = CONTEXT_OBJECTS.get(object);
     
     if (node == null) {
       ContextElement context = ObjectContextExtractor.extract(object);
       node = new MutableTreeNode(context);
-      MutableTreeNode racer = contextObjects.putIfAbsent(object, node);
+      MutableTreeNode racer = CONTEXT_OBJECTS.putIfAbsent(object, node);
       if (racer != null) {
         return racer;
       } else {
@@ -100,7 +104,7 @@ public class ContextManager {
           } catch (IllegalArgumentException ex) {
             throw new AssertionError(ex);
           } catch (IllegalAccessException ex) {
-            //XXX we should log this failure to traverse
+            LOGGER.warn("Failed to traverse {} due to: {}", f, ex);
             continue;
           }
           if (child != null) {
@@ -115,7 +119,7 @@ public class ContextManager {
           } catch (IllegalArgumentException ex) {
             throw new AssertionError(ex);
           } catch (IllegalAccessException ex) {
-            //XXX we should log this failure to traverse
+            LOGGER.warn("Failed to traverse {} due to: {}", f, ex);
             continue;
           }
           if (parent != null) {

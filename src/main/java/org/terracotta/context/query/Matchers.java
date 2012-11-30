@@ -65,7 +65,7 @@ public final class Matchers {
 
       @Override
       boolean matchesSafely(Class<?> t) {
-        return t instanceof Class && klazz.isAssignableFrom((Class) t);
+        return klazz.isAssignableFrom(t);
       }
 
       @Override
