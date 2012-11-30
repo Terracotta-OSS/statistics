@@ -12,12 +12,26 @@ import java.util.Map;
 import org.terracotta.context.ContextElement;
 import org.terracotta.context.annotations.ContextAttribute;
 
+/**
+ * Extracts context information from object instances and creates appropriate 
+ * enclosing {@links ContextElement} instances.
+ */
 public final class ObjectContextExtractor {
 
   private ObjectContextExtractor() {
     //singleton
   }
   
+  /**
+   * Returns a {@code ContextElement} instance for the supplied object.
+   * <p>
+   * The supplied object's class type is parsed for {@link ContextAttribute} 
+   * annotations and the associated attributes are extracted and returned in the
+   * form of a {@code ContextElement}.
+   * 
+   * @param from object to extract context for
+   * @return a {@code ContextElement}
+   */
   public static ContextElement extract(Object from) {
     Map<String, AttributeGetter<? extends Object>> attributes = new HashMap<String, AttributeGetter<? extends Object>>();
     if (from.getClass().isAnnotationPresent(ContextAttribute.class)) {

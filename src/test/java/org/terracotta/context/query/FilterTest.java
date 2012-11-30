@@ -49,7 +49,7 @@ public class FilterTest {
     buildQuery(new Matcher() {
 
       @Override
-      public boolean matchesSafely(Object object) {
+      protected boolean matchesSafely(Object object) {
         throw new UnsupportedOperationException();
       }
     }).execute(Collections.singleton(createTreeNode(A.class)));
@@ -64,7 +64,7 @@ public class FilterTest {
     assertThat(buildQuery(new Matcher() {
 
       @Override
-      boolean matchesSafely(Object object) {
+      protected boolean matchesSafely(Object object) {
         return false;
       }
     }).execute(input), IsEmptyCollection.<TreeNode>empty());
@@ -79,7 +79,7 @@ public class FilterTest {
     assertThat(buildQuery(new Matcher() {
 
       @Override
-      boolean matchesSafely(Object object) {
+      protected boolean matchesSafely(Object object) {
         return true;
       }
     }).execute(input), IsEqual.equalTo(input));
@@ -96,7 +96,7 @@ public class FilterTest {
       private boolean match;
       
       @Override
-      boolean matchesSafely(Object object) {
+      protected boolean matchesSafely(Object object) {
         return match ^= true;
       }
     }).execute(input), IsCollectionWithSize.hasSize(input.size() / 2));

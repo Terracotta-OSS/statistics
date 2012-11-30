@@ -15,7 +15,6 @@ import org.terracotta.context.annotations.ContextParent;
 import org.terracotta.context.extractor.ObjectContextExtractor;
 import org.terracotta.context.query.Query;
 import org.terracotta.context.query.QueryBuilder;
-import org.terracotta.context.util.WeakIdentityHashMap;
 
 import static org.terracotta.context.query.QueryBuilder.*;
 

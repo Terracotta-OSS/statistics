@@ -1,14 +1,14 @@
 /*
  * All content copyright Terracotta, Inc., unless otherwise indicated. All rights reserved.
  */
-package org.terracotta.context.util;
+package org.terracotta.context;
 
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class WeakIdentityHashMap<K, V> {
+class WeakIdentityHashMap<K, V> {
 
   private final ReferenceQueue<K> referenceQueue = new ReferenceQueue<K>();
   private final ConcurrentHashMap<Reference<K>, V> backing = new ConcurrentHashMap<Reference<K>, V>();
