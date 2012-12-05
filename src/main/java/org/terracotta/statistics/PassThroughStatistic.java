@@ -5,7 +5,7 @@ package org.terracotta.statistics;
 
 import java.util.concurrent.Callable;
 
-public class PassThroughStatistic<T extends Number> implements ValueStatistic<T> {
+class PassThroughStatistic<T extends Number> implements ValueStatistic<T> {
   
   private final Callable<T> source;
   

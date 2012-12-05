@@ -27,7 +27,7 @@ public interface OperationObserver<T extends Enum<T>> extends Observer {
   void begin();
   
   /**
-   * Called immediately after the operation completes with no interesting parameter.
+   * Called immediately after the operation completes with no interesting parameters.
    * 
    * @param result the operation result
    */
@@ -37,7 +37,7 @@ public interface OperationObserver<T extends Enum<T>> extends Observer {
    * Called immediately after the operation completes.
    * 
    * @param result the operation result
-   * @param parameter the operation parameter
+   * @param parameters the operation parameters
    */
-  void end(T result, long parameter);
+  void end(T result, long ... parameters);
 }

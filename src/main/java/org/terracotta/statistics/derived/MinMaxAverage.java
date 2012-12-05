@@ -37,14 +37,14 @@ public class MinMaxAverage implements EventObserver {
   
   
   @Override
-  public void event(final long parameter) {
+  public void event(final long ... parameters) {
     executor.execute(new Runnable() {
 
       @Override
       public void run() {
-        for (long max = maximum.get(); max < parameter && !maximum.compareAndSet(max, parameter); max = maximum.get());
-        for (long min = minimum.get(); min > parameter && !minimum.compareAndSet(min, parameter); min = minimum.get());
-        for (long sumBits = summation.get(); !summation.compareAndSet(sumBits, doubleToLongBits(longBitsToDouble(sumBits) + parameter)); sumBits = summation.get());
+        for (long max = maximum.get(); max < parameters[0] && !maximum.compareAndSet(max, parameters[0]); max = maximum.get());
+        for (long min = minimum.get(); min > parameters[0] && !minimum.compareAndSet(min, parameters[0]); min = minimum.get());
+        for (long sumBits = summation.get(); !summation.compareAndSet(sumBits, doubleToLongBits(longBitsToDouble(sumBits) + parameters[0])); sumBits = summation.get());
         count.incrementAndGet();
       }
     });

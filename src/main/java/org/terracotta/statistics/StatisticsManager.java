@@ -20,10 +20,6 @@ public class StatisticsManager {
   
   private final ContextManager contextManager = new ContextManager();
   
-  enum GetEventType {
-    HIT, MISS;
-  }
-  
   public static <T extends Enum<T>> OperationObserver<T> createOperationStatistic(Object context, Map<String, ? extends Object> properties, Class<T> eventTypes) {
     OperationStatistic<T> stat = new OperationStatistic<T>(properties, eventTypes);
     associate(context).withChild(stat);

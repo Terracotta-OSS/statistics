@@ -65,18 +65,18 @@ public class EventParameterSimpleMovingAverage implements EventObserver, ValueSt
   }
   
   @Override
-  public void event(long parameter) {
+  public void event(long ... parameters) {
     long time = time();
     while (true) {
       AveragePartition partition = activePartition.get();
       if (partition.targetFor(time)) {
-        partition.event(parameter);
+        partition.event(parameters[0]);
         return;
       } else {
         AveragePartition newPartition = new AveragePartition(time, partitionSize);
         if (activePartition.compareAndSet(partition, newPartition)) {
           archive(partition);
-          newPartition.event(parameter);
+          newPartition.event(parameters[0]);
           return;
         }
       }

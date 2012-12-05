@@ -22,5 +22,5 @@ public interface EventObserver extends Observer {
    * 
    * @param parameter the event parameter
    */
-  void event(long parameter);
+  void event(long ... parameters);
 }

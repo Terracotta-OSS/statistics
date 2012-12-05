@@ -73,7 +73,7 @@ public class EventRateSimpleMovingAverage implements EventObserver, ValueStatist
   }
   
   @Override
-  public void event(long parameter) {
+  public void event(long ... parameters) {
     long time = time();
     while (true) {
       CounterPartition partition = activePartition.get();

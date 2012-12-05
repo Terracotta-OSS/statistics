@@ -30,17 +30,17 @@ public class OperationResultFilter<T extends Enum<T>> extends AbstractSourceStat
   @Override
   public void end(T result) {
     if (target.equals(result)) {
-      for (EventObserver derived : derivedStatistics) {
-        derived.event(0);
+      for (EventObserver derived : derived()) {
+        derived.event();
       }
     }
   }
 
   @Override
-  public void end(T result, long parameter) {
+  public void end(T result, long ... parameters) {
     if (target.equals(result)) {
-      for (EventObserver derived : derivedStatistics) {
-        derived.event(parameter);
+      for (EventObserver derived : derived()) {
+        derived.event(parameters);
       }
     }
   }

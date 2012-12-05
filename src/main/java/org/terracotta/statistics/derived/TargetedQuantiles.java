@@ -30,8 +30,8 @@ public class TargetedQuantiles implements EventObserver {
   }
 
   @Override
-  public void event(long parameter) {
-    quantiles.insert(new long[] {parameter});
+  public void event(long ... parameters) {
+    quantiles.insert(new long[] {parameters[0]});
   }
 
   public long quantile(double quantile) {

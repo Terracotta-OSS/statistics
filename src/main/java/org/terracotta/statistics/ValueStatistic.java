@@ -3,10 +3,6 @@
  */
 package org.terracotta.statistics;
 
-/**
- *
- * @author cdennis
- */
 public interface ValueStatistic<T> {
   
   T value();

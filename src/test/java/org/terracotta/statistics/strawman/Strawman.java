@@ -51,8 +51,8 @@ public final class Strawman {
     hitLatency.addDerivedStatistic(new EventObserver() {
 
       @Override
-      public void event(long parameter) {
-        System.out.println("Event Latency : " + parameter);
+      public void event(long ... parameters) {
+        System.out.println("Event Latency : " + parameters[0]);
       }
     });
     

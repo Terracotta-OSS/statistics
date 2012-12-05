@@ -28,7 +28,7 @@ public class LatencySamplingTest {
     latency.addDerivedStatistic(new EventObserver() {
 
       @Override
-      public void event(long parameter) {
+      public void event(long ... parameters) {
         fail();
       }
     });
@@ -46,7 +46,7 @@ public class LatencySamplingTest {
     latency.addDerivedStatistic(new EventObserver() {
 
       @Override
-      public void event(long parameter) {
+      public void event(long ... parameters) {
         eventCount.incrementAndGet();
       }
     });
@@ -65,7 +65,7 @@ public class LatencySamplingTest {
     latency.addDerivedStatistic(new EventObserver() {
 
       @Override
-      public void event(long parameter) {
+      public void event(long ... parameters) {
         fail();
       }
    });
@@ -84,8 +84,8 @@ public class LatencySamplingTest {
     latency.addDerivedStatistic(new EventObserver() {
 
       @Override
-      public void event(long parameter) {
-        assertThat(parameter, greaterThanOrEqualTo(expected.get()));
+      public void event(long ... parameters) {
+        assertThat(parameters[0], greaterThanOrEqualTo(expected.get()));
       }
     });
     
