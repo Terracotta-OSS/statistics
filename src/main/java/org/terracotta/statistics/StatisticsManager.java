@@ -76,4 +76,8 @@ public class StatisticsManager {
   public static Dissociation dissociate(Object obj) {
     return ContextManager.dissociate(obj);
   }
+
+  public void uproot(Object obj) {
+     contextManager.uproot(obj);
+  }
 }
