@@ -20,6 +20,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.terracotta.context.annotations.ContextAttribute;
@@ -117,6 +118,18 @@ public class OperationStatistic<T extends Enum<T>> extends AbstractSourceStatist
     return counts.get(type).sum();
   }
 
+  public long sum(T ... types) {
+    long sum = 0;
+    for (T t : types) {
+      sum += counts.get(t).sum();
+    }
+    return sum;
+  }
+  
+  public long sum() {
+    return sum(type().getEnumConstants());
+  }
+  
   @Override
   public void begin() {
     for (OperationObserver<? super T> observer : derived()) {
