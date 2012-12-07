@@ -52,8 +52,8 @@ public class StatisticsManager {
     }
   }
   
-  public static <T extends Number> void createPassThroughStatistic(Object context, Callable<T> source) {
-    PassThroughStatistic<T> stat = new PassThroughStatistic<T>(source);
+  public static <T extends Number> void createPassThroughStatistic(Object context, Map<String, ? extends Object> properties, Callable<T> source) {
+    PassThroughStatistic<T> stat = new PassThroughStatistic<T>(properties, source);
     associate(context).withChild(stat);
   }
   

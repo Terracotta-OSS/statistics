@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.terracotta.statistics.ValueStatistic;
 import org.terracotta.statistics.jsr166e.LongAdder;
+import org.terracotta.statistics.jsr166e.LongMaxUpdater;
 import org.terracotta.statistics.observer.EventObserver;
 
 import static org.terracotta.statistics.Time.time;
@@ -54,28 +55,77 @@ public class EventParameterSimpleMovingAverage implements EventObserver, ValueSt
     long startTime = time() - windowSize;
     
     AveragePartition current = activePartition.get();
-    Average average = new Average();
-    if (!current.isBefore(startTime)) {
-      current.aggregate(average);
-    }
-    for (Iterator<AveragePartition> it = archive.iterator(); it.hasNext(); ) {
-      AveragePartition partition = it.next();
-      if (partition == current) {
-        break;
-      } else if (partition.isBefore(startTime)) {
-        it.remove();
-      } else {
-        partition.aggregate(average);
-      }
-    }
-    
-    if (average.count == 0) {
+    if (current.isBefore(startTime)) {
       return Double.NaN;
     } else {
-      return ((double) average.total) / average.count;
+      Average average = new Average();
+      current.aggregate(average);
+
+      for (Iterator<AveragePartition> it = archive.iterator(); it.hasNext(); ) {
+        AveragePartition partition = it.next();
+        if (partition == current) {
+          break;
+        } else if (partition.isBefore(startTime)) {
+          it.remove();
+        } else {
+          partition.aggregate(average);
+        }
+      }
+
+      if (average.count == 0) {
+        return Double.NaN;
+      } else {
+        return ((double) average.total) / average.count;
+      }
     }
   }
   
+  public final Long maximum() {
+    long startTime = time() - windowSize;
+    
+    AveragePartition current = activePartition.get();
+    if (current.isBefore(startTime)) {
+      return null;
+    } else {
+      long maximum = current.maximum();
+      for (Iterator<AveragePartition> it = archive.iterator(); it.hasNext(); ) {
+        AveragePartition partition = it.next();
+        if (partition == current) {
+          break;
+        } else if (partition.isBefore(startTime)) {
+          it.remove();
+        } else {
+          maximum = Math.max(maximum, partition.maximum());
+        }
+      }
+
+      return maximum;
+    }
+  }
+  
+  public final Long minimum() {
+    long startTime = time() - windowSize;
+    
+    AveragePartition current = activePartition.get();
+    if (current.isBefore(startTime)) {
+      return null;
+    } else {
+      long minimum = current.minimum();
+      for (Iterator<AveragePartition> it = archive.iterator(); it.hasNext(); ) {
+        AveragePartition partition = it.next();
+        if (partition == current) {
+          break;
+        } else if (partition.isBefore(startTime)) {
+          it.remove();
+        } else {
+          minimum = Math.min(minimum, partition.minimum());
+        }
+      }
+
+      return minimum;
+    }
+  }
+
   @Override
   public void event(long ... parameters) {
     long time = time();
@@ -110,7 +160,9 @@ public class EventParameterSimpleMovingAverage implements EventObserver, ValueSt
 
     private final LongAdder total = new LongAdder();
     private final LongAdder count = new LongAdder();
-
+    private final LongMaxUpdater maximum = new LongMaxUpdater();
+    private final LongMaxUpdater minimum = new LongMaxUpdater();
+    
     private final long start;
     private final long end;
     
@@ -138,11 +190,21 @@ public class EventParameterSimpleMovingAverage implements EventObserver, ValueSt
     public void event(long parameter) {
       total.add(parameter);
       count.increment();
+      maximum.update(parameter);
+      minimum.update(-parameter);
     }
     
     public void aggregate(Average average) {
       average.total += total.sum();
       average.count += count.sum();
+    }
+
+    public long maximum() {
+      return maximum.max();
+    }
+    
+    public long minimum() {
+      return -minimum.max();
     }
   }
   
