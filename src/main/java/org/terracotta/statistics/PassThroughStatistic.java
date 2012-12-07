@@ -17,19 +17,36 @@ package org.terracotta.statistics;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 import org.terracotta.context.annotations.ContextAttribute;
 
+@ContextAttribute("this")
 class PassThroughStatistic<T extends Number> implements ValueStatistic<T> {
-  
+
+  private final String name;
+  private final Set<String> tags;
   private final Map<String, Object> properties;
   private final Callable<T> source;
   
-  public PassThroughStatistic(Map<String, ? extends Object> properties, Callable<T> source) {
+  public PassThroughStatistic(String name, Set<String> tags, Map<String, ? extends Object> properties, Callable<T> source) {
+    this.name = name;
+    this.tags = Collections.unmodifiableSet(new HashSet<String>(tags));
     this.properties = Collections.unmodifiableMap(new HashMap<String, Object>(properties));
     this.source = source;
+  }
+
+  @ContextAttribute("name")
+  public String name() {
+    return name;
+  }
+
+  @ContextAttribute("tags")
+  public Set<String> tags() {
+    return tags;
   }
 
   /**

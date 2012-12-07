@@ -16,24 +16,39 @@
 package org.terracotta.statistics;
 
 
-import java.util.Collection;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
+import org.terracotta.context.ContextCreationListener;
 import org.terracotta.context.ContextElement;
 import org.terracotta.context.ContextManager;
-import org.terracotta.context.ContextManager.Association;
-import org.terracotta.context.ContextManager.Dissociation;
 import org.terracotta.context.TreeNode;
-import org.terracotta.context.query.Query;
 import org.terracotta.statistics.observer.OperationObserver;
 
-public class StatisticsManager {
+public class StatisticsManager extends ContextManager {
   
-  private final ContextManager contextManager = new ContextManager();
+  static {
+    ContextManager.registerContextCreationListener(new ContextCreationListener() {
+      @Override
+      public void contextCreated(Object object) {
+        parseStatisticAnnotations(object);
+      }
+    });
+  }
   
-  public static <T extends Enum<T>> OperationObserver<T> createOperationStatistic(Object context, Map<String, ? extends Object> properties, Class<T> eventTypes) {
-    OperationStatistic<T> stat = new OperationStatistic<T>(properties, eventTypes);
+  public static <T extends Enum<T>> OperationObserver<T> createOperationStatistic(Object context, String name, Set<String> tags, Class<T> eventTypes) {
+    return createOperationStatistic(context, name, tags, Collections.<String, Object>emptyMap(), eventTypes);
+  }
+  
+  public static <T extends Enum<T>> OperationObserver<T> createOperationStatistic(Object context, String name, Set<String> tags, Map<String, ? extends Object> properties, Class<T> eventTypes) {
+    OperationStatistic<T> stat = new OperationStatistic<T>(name, tags, properties, eventTypes);
     associate(context).withChild(stat);
     return stat;
   }
@@ -52,32 +67,36 @@ public class StatisticsManager {
     }
   }
   
-  public static <T extends Number> void createPassThroughStatistic(Object context, Map<String, ? extends Object> properties, Callable<T> source) {
-    PassThroughStatistic<T> stat = new PassThroughStatistic<T>(properties, source);
+  public static <T extends Number> void createPassThroughStatistic(Object context, String name, Set<String> tags, Callable<T> source) {
+    createPassThroughStatistic(context, name, tags, Collections.<String, Object>emptyMap(), source);
+  }
+  
+  public static <T extends Number> void createPassThroughStatistic(Object context, String name, Set<String> tags, Map<String, ? extends Object> properties, Callable<T> source) {
+    PassThroughStatistic<T> stat = new PassThroughStatistic<T>(name, tags, properties, source);
     associate(context).withChild(stat);
   }
-  
-  public Collection<? extends TreeNode> query(Query query) {
-    return contextManager.query(query);
-  }
-  
-  public TreeNode queryForSingleton(Query query) {
-    return contextManager.queryForSingleton(query);
-  }
-        
-  public void root(Object object) {
-    contextManager.root(object);
-  }
-  
-  public static Association associate(Object obj) {
-    return ContextManager.associate(obj);
-  }
 
-  public static Dissociation dissociate(Object obj) {
-    return ContextManager.dissociate(obj);
-  }
-
-  public void uproot(Object obj) {
-     contextManager.uproot(obj);
+  private static void parseStatisticAnnotations(final Object object) {
+    for (final Method m : object.getClass().getMethods()) {
+      Statistic anno = m.getAnnotation(Statistic.class);
+      if (anno != null) {
+        Class<?> returnType = m.getReturnType();
+        if (m.getParameterTypes().length != 0) {
+          throw new IllegalArgumentException("Statistic methods must be no-arg: " + m);
+        } else if (!Number.class.isAssignableFrom(returnType) && (!m.getReturnType().isPrimitive() || m.equals(Boolean.TYPE))) {
+          throw new IllegalArgumentException("Statistic methods must return a Number: " + m);
+        } else if (Modifier.isStatic(m.getModifiers())) {
+          throw new IllegalArgumentException("Statistic methods must be non-static: " + m);
+        } else {
+          Callable<Number> callable = new Callable<Number>() {
+            @Override
+            public Number call() throws Exception {
+              return (Number) m.invoke(object);
+            }
+          };
+          StatisticsManager.createPassThroughStatistic(object, anno.name(), new HashSet<String>(Arrays.asList(anno.tags())), callable);
+        }
+      } 
+    }
   }
 }

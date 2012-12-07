@@ -18,7 +18,9 @@ package org.terracotta.statistics;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.terracotta.context.annotations.ContextAttribute;
 import org.terracotta.statistics.jsr166e.LongAdder;
@@ -32,6 +34,8 @@ import org.terracotta.statistics.observer.OperationObserver;
 @ContextAttribute("this")
 public class OperationStatistic<T extends Enum<T>> extends AbstractSourceStatistic<OperationObserver<? super T>> implements OperationObserver<T> {
 
+  private final String name;
+  private final Set<String> tags;
   private final Map<String, Object> properties;
   private final Class<T> type;
   private final EnumMap<T, LongAdder> counts;
@@ -42,7 +46,9 @@ public class OperationStatistic<T extends Enum<T>> extends AbstractSourceStatist
    * @param properties a set of context properties
    * @param type operation result type
    */
-  public OperationStatistic(Map<String, ? extends Object> properties, Class<T> type) {
+  public OperationStatistic(String name, Set<String> tags, Map<String, ? extends Object> properties, Class<T> type) {
+    this.name = name;
+    this.tags = Collections.unmodifiableSet(new HashSet<String>(tags));
     this.properties = Collections.unmodifiableMap(new HashMap<String, Object>(properties));
     this.type = type;
     this.counts = new EnumMap<T, LongAdder>(type);
@@ -66,6 +72,16 @@ public class OperationStatistic<T extends Enum<T>> extends AbstractSourceStatist
         return adder.sum();
       }
     };
+  }
+  
+  @ContextAttribute("name")
+  public String name() {
+    return name;
+  }
+
+  @ContextAttribute("tags")
+  public Set<String> tags() {
+    return tags;
   }
   
   /**

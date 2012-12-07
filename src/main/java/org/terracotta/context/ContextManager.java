@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +39,8 @@ public class ContextManager {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ContextManager.class);
   private static final WeakIdentityHashMap<Object, MutableTreeNode> CONTEXT_OBJECTS = new WeakIdentityHashMap<Object, MutableTreeNode>();
-
+  private static final Collection<ContextCreationListener> contextCreationListeners = new CopyOnWriteArrayList<ContextCreationListener>();
+  
   private final RootNode root = new RootNode();
   
   /**
@@ -98,6 +100,14 @@ public class ContextManager {
   public static TreeNode nodeFor(Object object) {
     return getTreeNode(object);
   }
+
+  public static void registerContextCreationListener(ContextCreationListener listener) {
+    contextCreationListeners.add(listener);
+  }
+  
+  public static void deregisterContextCreationListener(ContextCreationListener listener) {
+    contextCreationListeners.remove(listener);
+  }
   
   private static void associate(Object child, Object parent) {
     getOrCreateTreeNode(parent).addChild(getOrCreateTreeNode(child));
@@ -122,6 +132,7 @@ public class ContextManager {
         return racer;
       } else {
         discoverAssociations(object);
+        contextCreated(object);
         return node;
       }
     } else {
@@ -163,6 +174,12 @@ public class ContextManager {
           }
         }
       }
+    }
+  }
+  
+  private static void contextCreated(Object object) {
+    for (ContextCreationListener listener : contextCreationListeners) {
+      listener.contextCreated(object);
     }
   }
 
