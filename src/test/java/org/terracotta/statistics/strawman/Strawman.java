@@ -26,6 +26,7 @@ import org.terracotta.statistics.derived.MinMaxAverage;
 import org.terracotta.statistics.observer.EventObserver;
 import org.terracotta.statistics.strawman.Cache.GetResult;
 
+import static java.util.EnumSet.*;
 import static org.terracotta.context.query.Matchers.*;
 import static org.terracotta.context.query.QueryBuilder.*;
 
@@ -44,7 +45,7 @@ public final class Strawman {
     System.out.println(query);
     TreeNode getStatisticNode = stats.queryForSingleton(query);
     OperationStatistic<GetResult> getStatistic = (OperationStatistic<GetResult>) getStatisticNode.getContext().attributes().get("this");
-    LatencySampling<Cache.GetResult> hitLatency = new LatencySampling(Cache.GetResult.HIT, 1.0f);
+    LatencySampling<Cache.GetResult> hitLatency = new LatencySampling(of(Cache.GetResult.HIT), 1.0f);
     MinMaxAverage hitLatencyStats = new MinMaxAverage();
     hitLatency.addDerivedStatistic(hitLatencyStats);
     getStatistic.addDerivedStatistic(hitLatency);

@@ -3,6 +3,10 @@
  * Expert Group and released to the public domain, as explained at
  * http://creativecommons.org/publicdomain/zero/1.0/
  */
+/*
+ * This class has been modified by cdennis@terracottatech.com to:
+ *  - use Tom Hawtin's VicariousThreadLocal to avoid memory leaks
+ */
 
 package org.terracotta.statistics.jsr166e;
 
@@ -71,7 +75,7 @@ public class ThreadLocalRandom extends Random {
 
     /**
      * Constructor called only by localRandom.initialValue.
-     */
+      */
     ThreadLocalRandom() {
         super();
         initialized = true;

@@ -17,10 +17,10 @@ package org.terracotta.statistics;
 
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.terracotta.context.annotations.ContextAttribute;
@@ -118,7 +118,7 @@ public class OperationStatistic<T extends Enum<T>> extends AbstractSourceStatist
     return counts.get(type).sum();
   }
 
-  public long sum(T ... types) {
+  public long sum(Set<T> types) {
     long sum = 0;
     for (T t : types) {
       sum += counts.get(t).sum();
@@ -127,7 +127,7 @@ public class OperationStatistic<T extends Enum<T>> extends AbstractSourceStatist
   }
   
   public long sum() {
-    return sum(type().getEnumConstants());
+    return sum(EnumSet.allOf(type));
   }
   
   @Override

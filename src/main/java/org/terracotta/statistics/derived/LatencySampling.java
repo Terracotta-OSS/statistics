@@ -15,6 +15,8 @@
  */
 package org.terracotta.statistics.derived;
 
+import java.util.EnumSet;
+import java.util.Set;
 import org.terracotta.statistics.AbstractSourceStatistic;
 import org.terracotta.statistics.jsr166e.ThreadLocalRandom;
 import org.terracotta.statistics.observer.EventObserver;
@@ -29,15 +31,15 @@ import static org.terracotta.statistics.Time.time;
 public class LatencySampling<T extends Enum<T>> extends AbstractSourceStatistic<EventObserver> implements OperationObserver<T> {
 
   private final ThreadLocal<Long> operationStartTime = new ThreadLocal<Long>();
-  private final T targetOperation;
+  private final Set<T> targetOperations;
   private final int ceiling;
   
-  public LatencySampling(T target, double sampling) {
+  public LatencySampling(Set<T> targets, double sampling) {
     if (sampling > 1.0 || sampling < 0.0) {
       throw new IllegalArgumentException();
     }
     this.ceiling = (int) (Integer.MAX_VALUE * sampling);
-    this.targetOperation = target;
+    this.targetOperations = EnumSet.copyOf(targets);
   }
 
   @Override
@@ -49,7 +51,7 @@ public class LatencySampling<T extends Enum<T>> extends AbstractSourceStatistic<
 
   @Override
   public void end(T result) {
-    if (targetOperation.equals(result)) {
+    if (targetOperations.contains(result)) {
       Long start  = operationStartTime.get();
       if (start != null) {
         long latency = time() - start.longValue();

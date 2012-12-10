@@ -15,6 +15,9 @@
  */
 package org.terracotta.statistics.derived;
 
+import java.util.EnumSet;
+import java.util.Set;
+
 import org.terracotta.statistics.AbstractSourceStatistic;
 import org.terracotta.statistics.observer.EventObserver;
 import org.terracotta.statistics.observer.OperationObserver;
@@ -25,10 +28,10 @@ import org.terracotta.statistics.observer.OperationObserver;
  */
 public class OperationResultFilter<T extends Enum<T>> extends AbstractSourceStatistic<EventObserver> implements OperationObserver<T> {
 
-  private final T target;
+  private final Set<T> targets;
 
-  public OperationResultFilter(T target, EventObserver ... observers) {
-    this.target = target;
+  public OperationResultFilter(Set<T> targets, EventObserver ... observers) {
+    this.targets = EnumSet.copyOf(targets);
     for (EventObserver observer : observers) {
       addDerivedStatistic(observer);
     }
@@ -41,7 +44,7 @@ public class OperationResultFilter<T extends Enum<T>> extends AbstractSourceStat
 
   @Override
   public void end(T result) {
-    if (target.equals(result)) {
+    if (targets.contains(result)) {
       for (EventObserver derived : derived()) {
         derived.event();
       }
@@ -50,7 +53,7 @@ public class OperationResultFilter<T extends Enum<T>> extends AbstractSourceStat
 
   @Override
   public void end(T result, long ... parameters) {
-    if (target.equals(result)) {
+    if (targets.contains(result)) {
       for (EventObserver derived : derived()) {
         derived.event(parameters);
       }
