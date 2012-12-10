@@ -32,7 +32,7 @@ import static org.terracotta.statistics.Time.time;
  *
  * @author cdennis
  */
-public class EventParameterSimpleMovingAverage implements EventObserver, ValueStatistic<Double> {
+public class EventParameterSimpleMovingAverage implements EventObserver {
 
   private static final int PARTITION_COUNT = 10;
 
@@ -51,6 +51,35 @@ public class EventParameterSimpleMovingAverage implements EventObserver, ValueSt
     return average();
   }
 
+  public ValueStatistic<Double> averageStatistic() {
+    return new ValueStatistic<Double>() {
+      @Override
+      public Double value() {
+        return average();
+      }
+    };
+  }
+  
+  public ValueStatistic<Long> minimumStatistic() {
+    return new ValueStatistic<Long>() {
+
+      @Override
+      public Long value() {
+        return minimum();
+      }
+    };
+  }
+  
+  public ValueStatistic<Long> maximumStatistic() {
+    return new ValueStatistic<Long>() {
+
+      @Override
+      public Long value() {
+        return maximum();
+      }
+    };
+  }
+  
   public final double average() {
     long startTime = time() - windowSize;
     

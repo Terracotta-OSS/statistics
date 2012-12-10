@@ -67,6 +67,6 @@ public class LatencySampling<T extends Enum<T>> extends AbstractSourceStatistic<
   }
   
   private boolean sample() {
-    return ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE) < ceiling;
+    return ceiling == 1.0 || ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE) < ceiling;
   }
 }
