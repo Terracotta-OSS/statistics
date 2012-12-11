@@ -15,6 +15,7 @@
  */
 package org.terracotta.statistics.archive;
 
+import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -115,6 +116,11 @@ public class StatisticSampler<T> {
     @Override
     public long getTimestamp() {
       return timestamp;
+    }
+    
+    @Override
+    public String toString() {
+      return getSample() + " @ " + new Date(getTimestamp());
     }
   }
   
