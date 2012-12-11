@@ -100,6 +100,16 @@ public class QueryBuilder {
   public QueryBuilder ensureUnique() {
     return chain(EnsureUnique.INSTANCE);
   }
+
+  /**
+   * Selects an empty node set.
+   * 
+   * @return this query builder
+   */
+  public QueryBuilder empty() {
+    current = EmptyQuery.INSTANCE;
+    return this;
+  }
   
   /**
    * Returns a query that represents the currently assembled transformation.
