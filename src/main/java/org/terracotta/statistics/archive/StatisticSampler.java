@@ -34,10 +34,10 @@ public class StatisticSampler<T> {
 
   private final boolean exclusiveExecutor;
   private final ScheduledExecutorService executor;
-  private final long period;
   private final Runnable task;
   
   private ScheduledFuture<?> currentExecution;
+  private long period;  
   
   public StatisticSampler(long time, TimeUnit unit, ValueStatistic<T> statistic, SampleSink<? super Timestamped<T>> sink) {
     this(null, time, unit, statistic, sink);
@@ -55,9 +55,17 @@ public class StatisticSampler<T> {
     this.task = new SamplingTask(statistic, sink);
   }
   
+  public synchronized void setPeriod(long time, TimeUnit unit) {
+    this.period = unit.toNanos(time);
+    if (currentExecution != null && !currentExecution.isDone()) {
+      stop();
+      start();
+    }
+  }
+
   public synchronized void start() {
     if (currentExecution == null || currentExecution.isDone()) {
-      currentExecution = executor.scheduleAtFixedRate(task, 0, period, TimeUnit.NANOSECONDS);
+      currentExecution = executor.scheduleAtFixedRate(task, period, period, TimeUnit.NANOSECONDS);
     } else {
       throw new IllegalStateException("Sampler is already running");
     }

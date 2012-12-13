@@ -36,15 +36,21 @@ public class EventParameterSimpleMovingAverage implements EventObserver {
 
   private static final int PARTITION_COUNT = 10;
 
-  private final long windowSize;
-  private final long partitionSize;
   private final Queue<AveragePartition> archive = new ConcurrentLinkedQueue<AveragePartition>();
   private final AtomicReference<AveragePartition> activePartition;
+  
+  private volatile long windowSize;
+  private volatile long partitionSize;
   
   public EventParameterSimpleMovingAverage(long time, TimeUnit unit) {
     this.windowSize  = unit.toNanos(time);
     this.partitionSize = windowSize / PARTITION_COUNT;
     this.activePartition = new AtomicReference<AveragePartition>(new AveragePartition(time(), partitionSize));
+  }
+
+  public void setWindow(long time, TimeUnit unit) {
+    this.windowSize = unit.toNanos(time);
+    this.partitionSize = windowSize / PARTITION_COUNT;
   }
 
   public Double value() {

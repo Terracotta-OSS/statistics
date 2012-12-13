@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
+import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.Test;
 import org.terracotta.statistics.ValueStatistic;
 
@@ -70,19 +71,15 @@ public class StatisticSamplerTest {
     StatisticArchive<String> archive = new StatisticArchive<String>(1);
     StatisticSampler<String> sampler = new StatisticSampler<String>(1L, TimeUnit.HOURS, new ValueStatistic<String>() {
 
-      private boolean fired = false;
       @Override
       public String value() {
-        if (fired) {
-          throw new AssertionError();
-        } else {
-          return "foo";
-        }
+        throw new AssertionError();
       }
     }, archive);
     try {
       sampler.start();
-      assertBy(1, TimeUnit.SECONDS, contentsOf(archive), contains(value(is("foo"))));
+      TimeUnit.SECONDS.sleep(1);
+      assertThat(archive.getArchive(), IsEmptyCollection.<Timestamped<String>>empty());
     } finally {
       sampler.shutdown();
     }

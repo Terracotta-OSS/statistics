@@ -35,10 +35,11 @@ public class EventRateSimpleMovingAverage implements EventObserver, ValueStatist
 
   private static final int PARTITION_COUNT = 10;
 
-  private final long windowSize;
-  private final long partitionSize;
   private final Queue<CounterPartition> archive = new ConcurrentLinkedQueue<CounterPartition>();
   private final AtomicReference<CounterPartition> activePartition;
+  
+  private volatile long windowSize;
+  private volatile long partitionSize;
   
   public EventRateSimpleMovingAverage(long time, TimeUnit unit) {
     this.windowSize  = unit.toNanos(time);
@@ -46,12 +47,17 @@ public class EventRateSimpleMovingAverage implements EventObserver, ValueStatist
     this.activePartition = new AtomicReference<CounterPartition>(new CounterPartition(time(), partitionSize));
   }
 
+  public void setWindow(long time, TimeUnit unit) {
+    this.windowSize = unit.toNanos(time);
+    this.partitionSize = windowSize / PARTITION_COUNT;
+  }
+
   @Override
   public Double value() {
-    return rateUsingNanos();
+    return rateUsingSeconds();
   }
   
-  public Double rateUsingNanos() {
+  public Double rateUsingSeconds() {
     long endTime = time();
     long startTime = endTime - windowSize;
     
@@ -77,11 +83,11 @@ public class EventRateSimpleMovingAverage implements EventObserver, ValueStatist
       }
     }
     
-    return ((double) count) / (endTime - actualStartTime);
+    return ((double) (TimeUnit.SECONDS.toNanos(1) * count)) / (endTime - actualStartTime);
   }
   
   public Double rate(TimeUnit base) {
-    return rateUsingNanos() * base.toNanos(1);
+    return rateUsingSeconds() * ((double) base.toNanos(1) / TimeUnit.SECONDS.toNanos(1));
   }
   
   @Override

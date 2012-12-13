@@ -31,6 +31,10 @@ public class CircularBuffer<E> {
     this.buffer = (E[]) new Object[size];
   }
   
+  public int capacity() {
+    return buffer.length;
+  }
+  
   public synchronized E insert(E object) {
     E old = buffer[writeIndex];
     buffer[writeIndex] = object;

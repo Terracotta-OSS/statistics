@@ -15,6 +15,8 @@
  */
 package org.terracotta.statistics;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
@@ -71,6 +73,25 @@ public class OperationStatistic<T extends Enum<T>> extends AbstractSourceStatist
       @Override
       public Long value() {
         return adder.sum();
+      }
+    };
+  }
+
+  public ValueStatistic<Long> statistic(Set<T> results) {
+    final Collection<LongAdder> adders = new ArrayList<LongAdder>();
+    for (T r : results) {
+      adders.add(counts.get(r));
+    }
+    
+    return new ValueStatistic<Long>() {
+
+      @Override
+      public Long value() {
+        long sum = 0;
+        for (LongAdder a : adders) {
+          sum += a.sum();
+        }
+        return sum;
       }
     };
   }

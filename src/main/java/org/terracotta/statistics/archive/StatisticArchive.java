@@ -25,8 +25,8 @@ import java.util.List;
  */
 public class StatisticArchive<T> implements SampleSink<Timestamped<T>> {
   
-  private final CircularBuffer<Timestamped<T>> buffer;
   private final SampleSink<? super Timestamped<T>> overspill;
+  private volatile CircularBuffer<Timestamped<T>> buffer;
   
   public StatisticArchive(int size) {
     this(size, DevNull.DEV_NULL);
@@ -37,8 +37,18 @@ public class StatisticArchive<T> implements SampleSink<Timestamped<T>> {
     this.overspill = overspill;
   }
   
+  public synchronized void setCapacity(int samples) {
+    if (samples != buffer.capacity()) {
+      CircularBuffer<Timestamped<T>> newBuffer = new CircularBuffer<Timestamped<T>>(samples);
+      for (Timestamped<T> sample : getArchive()) {
+        overspill.accept(newBuffer.insert(sample));
+      }
+      buffer = newBuffer;
+    }
+  }
+  
   @Override
-  public void accept(Timestamped<T> object) {
+  public synchronized void accept(Timestamped<T> object) {
     overspill.accept(buffer.insert(object));
   }
   
