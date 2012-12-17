@@ -79,6 +79,7 @@
           </licenseFamilies>
           <excludes>
             <exclude>nb-configuration.xml</exclude>
+            <exclude>.idea/**/*</exclude>
           </excludes>
         </configuration>
         <executions>
