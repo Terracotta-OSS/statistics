@@ -24,12 +24,12 @@ import java.util.concurrent.Callable;
 
 import org.terracotta.context.annotations.ContextAttribute;
 
-@ContextAttribute(value="this", weak=false)
+@ContextAttribute(value="this")
 class PassThroughStatistic<T extends Number> implements ValueStatistic<T> {
 
-  private final String name;
-  private final Set<String> tags;
-  private final Map<String, Object> properties;
+  @ContextAttribute("name") public final String name;
+  @ContextAttribute("tags") public final Set<String> tags;
+  @ContextAttribute("properties") public final Map<String, Object> properties;
   private final Callable<T> source;
   
   public PassThroughStatistic(String name, Set<String> tags, Map<String, ? extends Object> properties, Callable<T> source) {
@@ -39,29 +39,6 @@ class PassThroughStatistic<T extends Number> implements ValueStatistic<T> {
     this.source = source;
   }
 
-  @ContextAttribute("name")
-  public String name() {
-    return name;
-  }
-
-  @ContextAttribute("tags")
-  public Set<String> tags() {
-    return tags;
-  }
-
-  /**
-   * Return the properties of this statistic.
-   * <p>
-   * This method is annotated with {@code ContextAttribute} so these properties
-   * are extracted to an associated {@code ContextElement}.
-   * 
-   * @return the statistics properties
-   */
-  @ContextAttribute("properties")
-  public Map<String, Object> properties() {
-    return properties;
-  }
-  
   @Override
   public T value() {
     try {

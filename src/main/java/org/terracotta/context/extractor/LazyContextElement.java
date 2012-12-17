@@ -29,7 +29,7 @@ class LazyContextElement implements ContextElement {
 
   public LazyContextElement(Class identifier, Map<? extends String, AttributeGetter<? extends Object>> attributes) {
     this.identifier = identifier;
-    this.attributes = Collections.unmodifiableMap(new HashMap(attributes));
+    this.attributes = new HashMap(attributes);
   }
   
   @Override

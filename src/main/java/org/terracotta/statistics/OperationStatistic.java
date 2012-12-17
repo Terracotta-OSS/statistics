@@ -37,10 +37,10 @@ import org.terracotta.statistics.observer.OperationObserver;
 @ContextAttribute("this")
 public class OperationStatistic<T extends Enum<T>> extends AbstractSourceStatistic<OperationObserver<? super T>> implements OperationObserver<T> {
 
-  private final String name;
-  private final Set<String> tags;
-  private final Map<String, Object> properties;
-  private final Class<T> type;
+  @ContextAttribute("name") public final String name;
+  @ContextAttribute("tags") public final Set<String> tags;
+  @ContextAttribute("properties") public final Map<String, Object> properties;
+  @ContextAttribute("type") public final Class<T> type;
   private final EnumMap<T, LongAdder> counts;
   
   /**
@@ -94,39 +94,6 @@ public class OperationStatistic<T extends Enum<T>> extends AbstractSourceStatist
         return sum;
       }
     };
-  }
-  
-  @ContextAttribute("name")
-  public String name() {
-    return name;
-  }
-
-  @ContextAttribute("tags")
-  public Set<String> tags() {
-    return tags;
-  }
-  
-  /**
-   * Return the properties of this statistic.
-   * <p>
-   * This method is annotated with {@code ContextAttribute} so these properties
-   * are extracted to an associated {@code ContextElement}.
-   * 
-   * @return the statistics properties
-   */
-  @ContextAttribute("properties")
-  public Map<String, Object> properties() {
-    return properties;
-  }
-  
-  /**
-   * Return the result type of this operation.
-   * 
-   * @return the result type
-   */
-  @ContextAttribute("type")
-  public Class<T> type() {
-    return type;
   }
   
   /**

@@ -17,6 +17,7 @@ package org.terracotta.statistics;
 
 
 import java.lang.annotation.Annotation;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -88,15 +89,25 @@ public class StatisticsManager extends ContextManager {
         } else if (Modifier.isStatic(m.getModifiers())) {
           throw new IllegalArgumentException("Statistic methods must be non-static: " + m);
         } else {
-          Callable<Number> callable = new Callable<Number>() {
-            @Override
-            public Number call() throws Exception {
-              return (Number) m.invoke(object);
-            }
-          };
-          StatisticsManager.createPassThroughStatistic(object, anno.name(), new HashSet<String>(Arrays.asList(anno.tags())), callable);
+          StatisticsManager.createPassThroughStatistic(object, anno.name(), new HashSet<String>(Arrays.asList(anno.tags())), new MethodCallable<Number>(object, m));
         }
       } 
+    }
+  }
+  
+  static class MethodCallable<T> implements Callable<T> {
+
+    private final WeakReference<Object> targetRef;
+    private final Method method;
+    
+    MethodCallable(Object target, Method method) {
+      this.targetRef = new WeakReference<Object>(target);
+      this.method = method;
+    }
+
+    @Override
+    public T call() throws Exception {
+      return (T) method.invoke(targetRef.get());
     }
   }
 }
