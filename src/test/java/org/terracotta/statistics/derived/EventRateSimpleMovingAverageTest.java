@@ -66,7 +66,7 @@ public class EventRateSimpleMovingAverageTest {
     
     double firstRate = new EventDriver(stat, 10, 10, 20, TimeUnit.MILLISECONDS).call();
     double lowRate = stat.rate(TimeUnit.SECONDS);
-    assertThat(firstRate, closeTo(500.0, 50.0));
+    assertThat(lowRate, closeTo(firstRate, EXPECTED_ACCURACY * firstRate));
     
     double finalRate = new EventDriver(stat, 10, 20, 20, TimeUnit.MILLISECONDS).call();
     double rate = stat.rate(TimeUnit.SECONDS);
