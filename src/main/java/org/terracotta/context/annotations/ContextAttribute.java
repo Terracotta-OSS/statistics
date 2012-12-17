@@ -40,4 +40,6 @@ public @interface ContextAttribute {
    * @return the attribute name
    */
   String value();
+  
+  boolean weak() default true;
 }

@@ -24,10 +24,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import org.hamcrest.core.CombinableMatcher;
 import org.junit.Test;
 import org.terracotta.statistics.observer.EventObserver;
 
-import static org.hamcrest.core.CombinableMatcher.*;
 import static org.hamcrest.number.IsCloseTo.*;
 import static org.hamcrest.number.OrderingComparison.*;
 import static org.junit.Assert.assertThat;
@@ -70,7 +70,7 @@ public class EventRateSimpleMovingAverageTest {
     
     double finalRate = new EventDriver(stat, 10, 20, 20, TimeUnit.MILLISECONDS).call();
     double rate = stat.rate(TimeUnit.SECONDS);
-    assertThat(rate, both(greaterThan(lowRate)).and(lessThan(finalRate)));
+    assertThat(rate, CombinableMatcher.<Double>both(greaterThan(lowRate)).and(lessThan(finalRate)));
   }
 
   @Test

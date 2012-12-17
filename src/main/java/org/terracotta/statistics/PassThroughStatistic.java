@@ -24,7 +24,7 @@ import java.util.concurrent.Callable;
 
 import org.terracotta.context.annotations.ContextAttribute;
 
-@ContextAttribute("this")
+@ContextAttribute(value="this", weak=false)
 class PassThroughStatistic<T extends Number> implements ValueStatistic<T> {
 
   private final String name;

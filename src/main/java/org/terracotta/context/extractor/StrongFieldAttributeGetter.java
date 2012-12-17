@@ -15,30 +15,23 @@
  */
 package org.terracotta.context.extractor;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.lang.reflect.Field;
 
-abstract class MethodAttributeGetter<T> implements AttributeGetter<T> {
+/**
+ *
+ * @author cdennis
+ */
+class StrongFieldAttributeGetter<T> extends FieldAttributeGetter<T> {
 
-  private final Method method;
+  private final Object target;
   
-  MethodAttributeGetter(Method method) {
-    method.setAccessible(true);
-    this.method = method;
+  public StrongFieldAttributeGetter(Object target, Field field) {
+    super(field);
+    this.target = target;
   }
 
-  abstract Object target();
-  
   @Override
-  public T get() {
-    try {
-      return (T) method.invoke(target());
-    } catch (IllegalAccessException ex) {
-      throw new RuntimeException(ex);
-    } catch (IllegalArgumentException ex) {
-      throw new RuntimeException(ex);
-    } catch (InvocationTargetException ex) {
-      throw new RuntimeException(ex);
-    }
+  Object target() {
+    return target;
   }
 }

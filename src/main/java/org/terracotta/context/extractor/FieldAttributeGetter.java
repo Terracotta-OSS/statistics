@@ -17,20 +17,21 @@ package org.terracotta.context.extractor;
 
 import java.lang.reflect.Field;
 
-class FieldAttributeGetter<T> implements AttributeGetter<T> {
+abstract class FieldAttributeGetter<T> implements AttributeGetter<T> {
 
-  private final Object object;
   private final Field field;
   
-  FieldAttributeGetter(Object object, Field field) {
-    this.object = object;
+  FieldAttributeGetter(Field field) {
+    field.setAccessible(true);
     this.field = field;
   }
+
+  abstract Object target();
 
   @Override
   public T get() {
     try {
-      return (T) field.get(object);
+      return (T) field.get(target());
     } catch (IllegalArgumentException ex) {
       throw new RuntimeException(ex);
     } catch (IllegalAccessException ex) {

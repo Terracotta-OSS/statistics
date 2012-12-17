@@ -15,30 +15,24 @@
  */
 package org.terracotta.context.extractor;
 
-import java.lang.reflect.InvocationTargetException;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 
-abstract class MethodAttributeGetter<T> implements AttributeGetter<T> {
+/**
+ *
+ * @author cdennis
+ */
+class WeakMethodAttributeGetter<T> extends MethodAttributeGetter<T> {
 
-  private final Method method;
-  
-  MethodAttributeGetter(Method method) {
-    method.setAccessible(true);
-    this.method = method;
+  private final WeakReference<Object> targetRef;
+
+  WeakMethodAttributeGetter(Object target, Method method) {
+    super(method);
+    this.targetRef = new WeakReference<Object>(target);
   }
-
-  abstract Object target();
   
   @Override
-  public T get() {
-    try {
-      return (T) method.invoke(target());
-    } catch (IllegalAccessException ex) {
-      throw new RuntimeException(ex);
-    } catch (IllegalArgumentException ex) {
-      throw new RuntimeException(ex);
-    } catch (InvocationTargetException ex) {
-      throw new RuntimeException(ex);
-    }
+  Object target() {
+    return targetRef.get();
   }
 }

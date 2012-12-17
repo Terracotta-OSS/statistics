@@ -25,13 +25,11 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.hamcrest.collection.IsEmptyCollection;
+import org.hamcrest.core.CombinableMatcher;
 import org.junit.Test;
 import org.terracotta.statistics.ValueStatistic;
 
 import static org.hamcrest.collection.IsCollectionWithSize.*;
-import static org.hamcrest.collection.IsIterableContainingInOrder.*;
-import static org.hamcrest.core.CombinableMatcher.*;
-import static org.hamcrest.core.Is.*;
 import static org.hamcrest.number.OrderingComparison.*;
 import static org.junit.Assert.assertThat;
 import static org.terracotta.util.RetryAssert.assertBy;
@@ -92,7 +90,7 @@ public class StatisticSamplerTest {
     try {
       sampler.start();
       TimeUnit.SECONDS.sleep(1);
-      assertBy(1, TimeUnit.SECONDS, contentsOf(archive), hasSize(both(greaterThan(10)).and(lessThan(20))));
+      assertBy(1, TimeUnit.SECONDS, contentsOf(archive), hasSize(CombinableMatcher.<Integer>both(greaterThan(10)).and(lessThan(20))));
     } finally {
       sampler.shutdown();
     }

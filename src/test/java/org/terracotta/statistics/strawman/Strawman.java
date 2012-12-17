@@ -17,7 +17,9 @@ package org.terracotta.statistics.strawman;
 
 import java.util.Arrays;
 
+import org.terracotta.context.ContextElement;
 import org.terracotta.context.TreeNode;
+import org.terracotta.context.query.Matchers;
 import org.terracotta.context.query.Query;
 import org.terracotta.statistics.OperationStatistic;
 import org.terracotta.statistics.StatisticsManager;
@@ -41,7 +43,7 @@ public final class Strawman {
     StatisticsManager stats = new StatisticsManager();
     stats.root(manager);
 
-    Query query = queryBuilder().descendants().filter(context(allOf(identifier(subclassOf(OperationStatistic.class)), attributes(hasAttribute("name", "get"))))).build();
+    Query query = queryBuilder().descendants().filter(context(Matchers.<ContextElement>allOf(identifier(subclassOf(OperationStatistic.class)), attributes(hasAttribute("name", "get"))))).build();
     System.out.println(query);
     TreeNode getStatisticNode = stats.queryForSingleton(query);
     OperationStatistic<GetResult> getStatistic = (OperationStatistic<GetResult>) getStatisticNode.getContext().attributes().get("this");

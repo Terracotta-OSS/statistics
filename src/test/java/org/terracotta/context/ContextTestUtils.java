@@ -18,12 +18,12 @@ package org.terracotta.context;
 import java.util.Collection;
 import java.util.Collections;
 
+import org.hamcrest.core.IsCollectionContaining;
 import org.junit.Assert;
 import org.terracotta.context.annotations.ContextAttribute;
 import org.terracotta.context.annotations.ContextChild;
 import org.terracotta.context.annotations.ContextParent;
 
-import static org.hamcrest.core.IsCollectionContaining.*;
 import static org.hamcrest.core.IsSame.*;
 import static org.terracotta.context.query.Matchers.*;
 import static org.terracotta.context.query.QueryBuilder.*;
@@ -41,7 +41,7 @@ public final class ContextTestUtils {
   public static void validateAssociation(ContextManager manager, Object parent, Object child) {
     TreeNode parentNode = manager.queryForSingleton(queryBuilder().descendants().filter(context(attributes(hasAttribute("this", parent)))).build());
     TreeNode childNode = manager.queryForSingleton(queryBuilder().descendants().filter(context(attributes(hasAttribute("this", child)))).build());
-    Assert.assertThat((Collection<TreeNode>) parentNode.getChildren(), hasItem(sameInstance(childNode)));
+    Assert.assertThat((Collection<TreeNode>) parentNode.getChildren(), IsCollectionContaining.<TreeNode>hasItem(sameInstance(childNode)));
   }
   
   public static void validateNoAssociation(ContextManager manager, Object parent, Object child) {
