@@ -16,6 +16,7 @@
 package org.terracotta.context;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
@@ -132,7 +133,10 @@ public class ContextManager {
         return racer;
       } else {
         discoverAssociations(object);
-        contextCreated(object);
+        Object listenerHandle = contextCreated(object);
+        if (listenerHandle != null) {
+          node.connectListenerHandle(listenerHandle);
+        }
         return node;
       }
     } else {
@@ -177,10 +181,12 @@ public class ContextManager {
     }
   }
   
-  private static void contextCreated(Object object) {
+  private static Collection<?> contextCreated(Object object) {
+    Collection<Object> handles = new ArrayList<Object>();
     for (ContextCreationListener listener : contextCreationListeners) {
-      listener.contextCreated(object);
+      handles.add(listener.contextCreated(object));
     }
+    return handles;
   }
 
   /**

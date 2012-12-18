@@ -26,9 +26,10 @@ import java.util.concurrent.CopyOnWriteArraySet;
 class MutableTreeNode extends AbstractTreeNode {
 
   private final CopyOnWriteArraySet<AbstractTreeNode> parents = new CopyOnWriteArraySet<AbstractTreeNode>();
-
   private final ContextElement context;
 
+  private Object listenerHandle;
+  
   public MutableTreeNode(ContextElement context) {
     this.context = context;
   }
@@ -80,5 +81,13 @@ class MutableTreeNode extends AbstractTreeNode {
       }
     }
     return paths;
+  }
+  
+  void connectListenerHandle(Object o) {
+    if (listenerHandle == null) {
+      listenerHandle = o;
+    } else {
+      throw new AssertionError();
+    }
   }
 }

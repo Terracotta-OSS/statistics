@@ -57,10 +57,8 @@ public final class ObjectContextExtractor {
     ContextAttribute annotation = from.getClass().getAnnotation(ContextAttribute.class);
     if (annotation == null) {
       return Collections.emptyMap();
-    } else if (annotation.weak()) {
-      return Collections.singletonMap(annotation.value(), new WeakAttributeGetter<Object>(from));
     } else {
-      return Collections.singletonMap(annotation.value(), new DirectAttributeGetter<Object>(from));
+      return Collections.singletonMap(annotation.value(), new WeakAttributeGetter<Object>(from));
     }
   }
 
@@ -71,11 +69,7 @@ public final class ObjectContextExtractor {
       if (m.getParameterTypes().length == 0 && m.getReturnType() != Void.TYPE) {
         ContextAttribute annotation = m.getAnnotation(ContextAttribute.class);
         if (annotation != null) {
-          if (annotation.weak()) {
-            attributes.put(annotation.value(), new WeakMethodAttributeGetter(from, m));
-          } else {
-            attributes.put(annotation.value(), new StrongMethodAttributeGetter(from, m));
-          }
+          attributes.put(annotation.value(), new WeakMethodAttributeGetter(from, m));
         }
       }
     }
@@ -107,10 +101,8 @@ public final class ObjectContextExtractor {
       } catch (IllegalAccessException ex) {
         throw new RuntimeException(ex);
       }
-    } else if (annotation.weak()) {
-      return new WeakFieldAttributeGetter(from, f);
     } else {
-      return new StrongFieldAttributeGetter(from, f);
+      return new WeakFieldAttributeGetter(from, f);
     }
   }
 }

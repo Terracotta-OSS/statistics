@@ -20,7 +20,7 @@ import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.ConcurrentHashMap;
 
-class WeakIdentityHashMap<K, V> {
+public class WeakIdentityHashMap<K, V> {
 
   private final ReferenceQueue<K> referenceQueue = new ReferenceQueue<K>();
   private final ConcurrentHashMap<Reference<K>, V> backing = new ConcurrentHashMap<Reference<K>, V>();
