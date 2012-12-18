@@ -120,13 +120,13 @@ public class EventRateSimpleMovingAverageTest {
     public Double call() {
       long start = System.nanoTime();
       for (int i = 0; i < batches; i++) {
+        for (int j = 0; j < batchSize; j++) {
+          stat.event(0L);
+        }
         try {
           Thread.sleep(sleep);
         } catch (InterruptedException e) {
           throw new AssertionError(e);
-        }
-        for (int j = 0; j < batchSize; j++) {
-          stat.event(0L);
         }
       }
       long end = System.nanoTime();
