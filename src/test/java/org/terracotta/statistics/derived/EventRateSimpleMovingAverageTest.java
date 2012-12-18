@@ -16,12 +16,9 @@
 package org.terracotta.statistics.derived;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.hamcrest.core.CombinableMatcher;
@@ -81,16 +78,10 @@ public class EventRateSimpleMovingAverageTest {
 
     ExecutorService executor = Executors.newFixedThreadPool(2);
     try {
-      @SuppressWarnings("unchecked")
-      List<Future<Double>> futures = executor.invokeAll(Arrays.<Callable<Double>>asList(c1, c2));
-      double totalRate = 0f;
-      for (Future<Double> rate : futures) {
-        try {
-          totalRate += rate.get();
-        } catch (ExecutionException e) {
-          throw new AssertionError(e);
-        }
-      }
+      long start = System.nanoTime();
+      executor.invokeAll(Arrays.<Callable<Double>>asList(c1, c2));
+      long end = System.nanoTime();
+      double totalRate = ((double) TimeUnit.SECONDS.toNanos(1) * 2 * 10 * 20) / (end - start);
       assertThat(stat.rate(TimeUnit.SECONDS), closeTo(totalRate, EXPECTED_ACCURACY * totalRate));
     } finally {
       executor.shutdown();
