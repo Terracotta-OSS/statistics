@@ -83,7 +83,7 @@ public final class ObjectContextExtractor {
       for (Field f : c.getDeclaredFields()) {
         ContextAttribute annotation = f.getAnnotation(ContextAttribute.class);
         if (annotation != null) {
-          attributes.put(annotation.value(), createFieldAttributeGetter(annotation, from, f));
+          attributes.put(annotation.value(), createFieldAttributeGetter(from, f));
         }
       }
     }
@@ -91,7 +91,7 @@ public final class ObjectContextExtractor {
     return attributes;
   }
 
-  private static AttributeGetter<? extends Object> createFieldAttributeGetter(ContextAttribute annotation, Object from, Field f) {
+  private static AttributeGetter<? extends Object> createFieldAttributeGetter(Object from, Field f) {
     f.setAccessible(true);
     if (Modifier.isFinal(f.getModifiers())) {
       try {

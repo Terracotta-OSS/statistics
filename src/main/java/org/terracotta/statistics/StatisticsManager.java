@@ -16,13 +16,10 @@
 package org.terracotta.statistics;
 
 
-import java.lang.annotation.Annotation;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -40,8 +37,8 @@ public class StatisticsManager extends ContextManager {
   static {
     ContextManager.registerContextCreationListener(new ContextCreationListener() {
       @Override
-      public Object contextCreated(Object object) {
-        return parseStatisticAnnotations(object);
+      public void contextCreated(Object object) {
+        parseStatisticAnnotations(object);
       }
     });
   }
@@ -70,37 +67,30 @@ public class StatisticsManager extends ContextManager {
     }
   }
   
-  public static <T extends Number> Object createPassThroughStatistic(Object context, String name, Set<String> tags, Callable<T> source) {
-    return createPassThroughStatistic(context, name, tags, Collections.<String, Object>emptyMap(), source);
+  public static <T extends Number> void createPassThroughStatistic(Object context, String name, Set<String> tags, Callable<T> source) {
+    createPassThroughStatistic(context, name, tags, Collections.<String, Object>emptyMap(), source);
   }
   
-  public static <T extends Number> Object createPassThroughStatistic(Object context, String name, Set<String> tags, Map<String, ? extends Object> properties, Callable<T> source) {
-    PassThroughStatistic<T> stat = new PassThroughStatistic<T>(name, tags, properties, source);
+  public static <T extends Number> void createPassThroughStatistic(Object context, String name, Set<String> tags, Map<String, ? extends Object> properties, Callable<T> source) {
+    PassThroughStatistic<T> stat = new PassThroughStatistic<T>(context, name, tags, properties, source);
     associate(context).withChild(stat);
-    return stat;
   }
 
-  private static Collection<?> parseStatisticAnnotations(final Object object) {
-    Collection<Object> created = new ArrayList<Object>();
+  private static void parseStatisticAnnotations(final Object object) {
     for (final Method m : object.getClass().getMethods()) {
       Statistic anno = m.getAnnotation(Statistic.class);
       if (anno != null) {
         Class<?> returnType = m.getReturnType();
         if (m.getParameterTypes().length != 0) {
           throw new IllegalArgumentException("Statistic methods must be no-arg: " + m);
-        } else if (!Number.class.isAssignableFrom(returnType) && (!m.getReturnType().isPrimitive() || m.equals(Boolean.TYPE))) {
+        } else if (!Number.class.isAssignableFrom(returnType) && (!m.getReturnType().isPrimitive() || m.getReturnType().equals(Boolean.TYPE))) {
           throw new IllegalArgumentException("Statistic methods must return a Number: " + m);
         } else if (Modifier.isStatic(m.getModifiers())) {
           throw new IllegalArgumentException("Statistic methods must be non-static: " + m);
         } else {
-          created.add(StatisticsManager.createPassThroughStatistic(object, anno.name(), new HashSet<String>(Arrays.asList(anno.tags())), new MethodCallable<Number>(object, m)));
+          StatisticsManager.createPassThroughStatistic(object, anno.name(), new HashSet<String>(Arrays.asList(anno.tags())), new MethodCallable<Number>(object, m));
         }
       } 
-    }
-    if (created.isEmpty()) {
-      return null;
-    } else {
-      return created;
     }
   }
   

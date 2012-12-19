@@ -133,10 +133,7 @@ public class ContextManager {
         return racer;
       } else {
         discoverAssociations(object);
-        Object listenerHandle = contextCreated(object);
-        if (listenerHandle != null) {
-          node.connectListenerHandle(listenerHandle);
-        }
+        contextCreated(object);
         return node;
       }
     } else {
@@ -181,12 +178,10 @@ public class ContextManager {
     }
   }
   
-  private static Collection<?> contextCreated(Object object) {
-    Collection<Object> handles = new ArrayList<Object>();
+  private static void contextCreated(Object object) {
     for (ContextCreationListener listener : contextCreationListeners) {
-      handles.add(listener.contextCreated(object));
+      listener.contextCreated(object);
     }
-    return handles;
   }
 
   /**
