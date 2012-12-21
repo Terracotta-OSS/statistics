@@ -30,7 +30,7 @@ import org.terracotta.statistics.observer.Observer;
  */
 public class AbstractSourceStatistic<T extends Observer> implements SourceStatistic<T> {
 
-  private final Collection<T> derivedStatistics = new CopyOnWriteArrayList<T>();
+  protected final Collection<T> derivedStatistics = new CopyOnWriteArrayList<T>();
 
   @Override
   public void addDerivedStatistic(T derived) {
@@ -40,14 +40,5 @@ public class AbstractSourceStatistic<T extends Observer> implements SourceStatis
   @Override
   public void removeDerivedStatistic(T derived) {
     derivedStatistics.remove(derived);
-  }
-
-  /**
-   * Returns the registered derived statistics.
-   * 
-   * @return derived statistics
-   */
-  protected Iterable<T> derived() {
-    return derivedStatistics;
   }
 }

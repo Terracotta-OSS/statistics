@@ -55,8 +55,10 @@ public class LatencySampling<T extends Enum<T>> extends AbstractSourceStatistic<
       Long start  = operationStartTime.get();
       if (start != null) {
         long latency = time() - start.longValue();
-        for (EventObserver observer : derived()) {
-          observer.event(latency);
+        if (!derivedStatistics.isEmpty()) {
+          for (EventObserver observer : derivedStatistics) {
+            observer.event(latency);
+          }
         }
       }
     }

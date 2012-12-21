@@ -30,18 +30,16 @@ import org.terracotta.statistics.jsr166e.LongAdder;
 import org.terracotta.statistics.observer.OperationObserver;
 
 /**
- * An operation observer that tracks operation result counts and can drive further derived statistics.
- * 
- * @param <T> the operation result enum type
+ *
+ * @author cdennis
  */
 @ContextAttribute("this")
-public class OperationStatistic<T extends Enum<T>> extends AbstractSourceStatistic<OperationObserver<? super T>> implements OperationObserver<T> {
+public abstract class AbstractOperationStatistic<T extends Enum<T>> extends AbstractSourceStatistic<OperationObserver<? super T>> implements OperationStatistic<T> {
 
   @ContextAttribute("name") public final String name;
   @ContextAttribute("tags") public final Set<String> tags;
   @ContextAttribute("properties") public final Map<String, Object> properties;
   @ContextAttribute("type") public final Class<T> type;
-  private final EnumMap<T, LongAdder> counts;
   
   /**
    * Create an operation statistics for a given operation result type.
@@ -49,15 +47,16 @@ public class OperationStatistic<T extends Enum<T>> extends AbstractSourceStatist
    * @param properties a set of context properties
    * @param type operation result type
    */
-  public OperationStatistic(String name, Set<String> tags, Map<String, ? extends Object> properties, Class<T> type) {
+  AbstractOperationStatistic(String name, Set<String> tags, Map<String, ? extends Object> properties, Class<T> type) {
     this.name = name;
     this.tags = Collections.unmodifiableSet(new HashSet<String>(tags));
     this.properties = Collections.unmodifiableMap(new HashMap<String, Object>(properties));
     this.type = type;
-    this.counts = new EnumMap<T, LongAdder>(type);
-    for (T t : type.getEnumConstants()) {
-      counts.put(t, new LongAdder());
-    }
+  }
+  
+  @Override
+  public Class<T> type() {
+    return type;
   }
   
   /**
@@ -66,83 +65,39 @@ public class OperationStatistic<T extends Enum<T>> extends AbstractSourceStatist
    * @param result the result of interest 
    * @return a {@code ValueStatistic} instance
    */
-  public ValueStatistic<Long> statistic(T result) {
-    final LongAdder adder = counts.get(result);
+  @Override
+  public ValueStatistic<Long> statistic(final T result) {
     return new ValueStatistic<Long>() {
 
       @Override
       public Long value() {
-        return adder.sum();
+        return count(result);
       }
     };
   }
 
-  public ValueStatistic<Long> statistic(Set<T> results) {
-    final Collection<LongAdder> adders = new ArrayList<LongAdder>();
-    for (T r : results) {
-      adders.add(counts.get(r));
-    }
-    
+  @Override
+  public ValueStatistic<Long> statistic(final Set<T> results) {
     return new ValueStatistic<Long>() {
 
       @Override
       public Long value() {
-        long sum = 0;
-        for (LongAdder a : adders) {
-          sum += a.sum();
-        }
-        return sum;
+        return sum(results);
       }
     };
   }
   
-  /**
-   * Return the count of operations with the given type.
-   * 
-   * @param type the result type
-   * @return the operation count
-   */
-  public long count(T type) {
-    return counts.get(type).sum();
-  }
-
-  public long sum(Set<T> types) {
-    long sum = 0;
-    for (T t : types) {
-      sum += counts.get(t).sum();
-    }
-    return sum;
-  }
-  
+  @Override
   public long sum() {
     return sum(EnumSet.allOf(type));
   }
   
   @Override
   public void begin() {
-    for (OperationObserver<? super T> observer : derived()) {
-      observer.begin();
+    if (!derivedStatistics.isEmpty()) {
+      for (OperationObserver<? super T> observer : derivedStatistics) {
+        observer.begin();
+      }
     }
-  }
-
-  @Override
-  public void end(T result) {
-    counts.get(result).increment();
-    for (OperationObserver<? super T> observer : derived()) {
-      observer.end(result);
-    }
-  }
-  
-  @Override
-  public void end(T result, long ... parameters) {
-    counts.get(result).increment();
-    for (OperationObserver<? super T> observer : derived()) {
-      observer.end(result, parameters);
-    }
-  }
-  
-  @Override
-  public String toString() {
-    return counts.toString();
   }
 }

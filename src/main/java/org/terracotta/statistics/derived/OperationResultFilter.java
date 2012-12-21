@@ -44,8 +44,8 @@ public class OperationResultFilter<T extends Enum<T>> extends AbstractSourceStat
 
   @Override
   public void end(T result) {
-    if (targets.contains(result)) {
-      for (EventObserver derived : derived()) {
+    if (!derivedStatistics.isEmpty() && targets.contains(result)) {
+      for (EventObserver derived : derivedStatistics) {
         derived.event();
       }
     }
@@ -53,8 +53,8 @@ public class OperationResultFilter<T extends Enum<T>> extends AbstractSourceStat
 
   @Override
   public void end(T result, long ... parameters) {
-    if (targets.contains(result)) {
-      for (EventObserver derived : derived()) {
+    if (!derivedStatistics.isEmpty() && targets.contains(result)) {
+      for (EventObserver derived : derivedStatistics) {
         derived.event(parameters);
       }
     }

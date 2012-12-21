@@ -47,10 +47,14 @@ public class StatisticsManager extends ContextManager {
     return createOperationStatistic(context, name, tags, Collections.<String, Object>emptyMap(), eventTypes);
   }
   
-  public static <T extends Enum<T>> OperationObserver<T> createOperationStatistic(Object context, String name, Set<String> tags, Map<String, ? extends Object> properties, Class<T> eventTypes) {
-    OperationStatistic<T> stat = new OperationStatistic<T>(name, tags, properties, eventTypes);
+  public static <T extends Enum<T>> OperationObserver<T> createOperationStatistic(Object context, String name, Set<String> tags, Map<String, ? extends Object> properties, Class<T> resultType) {
+    OperationStatistic<T> stat = createOperationStatistic(name, tags, properties, resultType);
     associate(context).withChild(stat);
     return stat;
+  }
+
+  private static <T extends Enum<T>> OperationStatistic<T> createOperationStatistic(String name, Set<String> tags, Map<String, ? extends Object> properties, Class<T> resultType) {
+    return new GeneralOperationStatistic<T>(name, tags, properties, resultType);
   }
   
   public static <T extends Enum<T>> OperationStatistic<T> getOperationStatisticFor(OperationObserver<T> observer) {
@@ -59,7 +63,7 @@ public class StatisticsManager extends ContextManager {
       return null;
     } else {
       ContextElement context = node.getContext();
-      if (OperationStatistic.class.equals(context.identifier())) {
+      if (OperationStatistic.class.isAssignableFrom(context.identifier())) {
         return (OperationStatistic<T>) context.attributes().get("this");
       } else {
         throw new AssertionError();
