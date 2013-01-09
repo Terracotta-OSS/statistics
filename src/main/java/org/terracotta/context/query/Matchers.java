@@ -200,4 +200,14 @@ public final class Matchers {
       }
     };
   }
+  
+  public static <T> Matcher<T> not(final Matcher<T> matcher) {
+    return new Matcher<T>() {
+
+      @Override
+      protected boolean matchesSafely(T object) {
+        return !matcher.matches(object);
+      }
+    };
+  }
 }

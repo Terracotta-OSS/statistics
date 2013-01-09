@@ -30,7 +30,7 @@ import static org.terracotta.statistics.Time.absoluteTime;
  *
  * @author cdennis
  */
-public class StatisticSampler<T> {
+public class StatisticSampler<T extends Number> {
 
   private final boolean exclusiveExecutor;
   private final ScheduledExecutorService executor;
@@ -90,7 +90,7 @@ public class StatisticSampler<T> {
     }
   }
   
-  static class SamplingTask<T> implements Runnable {
+  static class SamplingTask<T extends Number> implements Runnable {
 
     private final ValueStatistic<T> statistic;
     private final SampleSink<Timestamped<T>> sink;

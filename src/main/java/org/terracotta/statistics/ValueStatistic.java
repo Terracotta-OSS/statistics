@@ -15,7 +15,7 @@
  */
 package org.terracotta.statistics;
 
-public interface ValueStatistic<T> {
+public interface ValueStatistic<T extends Number> {
   
   T value();
 }

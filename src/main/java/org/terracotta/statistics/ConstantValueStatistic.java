@@ -22,7 +22,7 @@ import java.util.Map;
  *
  * @author cdennis
  */
-public class ConstantValueStatistic<T> implements ValueStatistic<T> {
+public class ConstantValueStatistic<T extends Number> implements ValueStatistic<T> {
 
   private static final Map<Object, ValueStatistic<?>> common = new HashMap<Object, ValueStatistic<?>>();
   static {
@@ -31,7 +31,7 @@ public class ConstantValueStatistic<T> implements ValueStatistic<T> {
     common.put(null, new ConstantValueStatistic(null));
   }
   
-  public static <T> ValueStatistic<T> instance(T value) {
+  public static <T extends Number> ValueStatistic<T> instance(T value) {
     ValueStatistic<T> interned = (ValueStatistic<T>) common.get(value);
     if (interned == null) {
       return new ConstantValueStatistic<T>(value);

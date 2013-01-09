@@ -60,4 +60,6 @@ public interface TreeNode {
    * @return node context information
    */
   ContextElement getContext();
+  
+  String toTreeString();
 }

@@ -27,6 +27,7 @@ import org.hamcrest.TypeSafeMatcher;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.hamcrest.core.CombinableMatcher;
 import org.junit.Test;
+import org.terracotta.statistics.ConstantValueStatistic;
 import org.terracotta.statistics.ValueStatistic;
 
 import static org.hamcrest.collection.IsCollectionWithSize.*;
@@ -42,10 +43,10 @@ public class StatisticSamplerTest {
   
   @Test
   public void testUnstartedSampler() throws InterruptedException {
-    StatisticSampler<String> sampler = new StatisticSampler<String>(1L, TimeUnit.NANOSECONDS, new ValueStatistic<String>() {
+    StatisticSampler<Integer> sampler = new StatisticSampler<Integer>(1L, TimeUnit.NANOSECONDS, new ValueStatistic<Integer>() {
 
       @Override
-      public String value() {
+      public Integer value() {
         throw new AssertionError();
       }
     }, DevNull.DEV_NULL);
@@ -57,7 +58,7 @@ public class StatisticSamplerTest {
   public void testShutdownOfSharedExecutor() throws InterruptedException {
     ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     try {
-      StatisticSampler<String> sampler = new StatisticSampler<String>(executor, 1L, TimeUnit.NANOSECONDS, constantStatistic("foo"), DevNull.DEV_NULL);
+      StatisticSampler<Integer> sampler = new StatisticSampler<Integer>(executor, 1L, TimeUnit.NANOSECONDS, ConstantValueStatistic.instance(42), DevNull.DEV_NULL);
       sampler.shutdown();
     } finally {
       executor.shutdown();
@@ -66,18 +67,18 @@ public class StatisticSamplerTest {
   
   @Test
   public void testLongPeriodSampler() throws InterruptedException {
-    StatisticArchive<String> archive = new StatisticArchive<String>(1);
-    StatisticSampler<String> sampler = new StatisticSampler<String>(1L, TimeUnit.HOURS, new ValueStatistic<String>() {
+    StatisticArchive<Integer> archive = new StatisticArchive<Integer>(1);
+    StatisticSampler<Integer> sampler = new StatisticSampler<Integer>(1L, TimeUnit.HOURS, new ValueStatistic<Integer>() {
 
       @Override
-      public String value() {
+      public Integer value() {
         throw new AssertionError();
       }
     }, archive);
     try {
       sampler.start();
       TimeUnit.SECONDS.sleep(1);
-      assertThat(archive.getArchive(), IsEmptyCollection.<Timestamped<String>>empty());
+      assertThat(archive.getArchive(), IsEmptyCollection.<Timestamped<Integer>>empty());
     } finally {
       sampler.shutdown();
     }
@@ -85,8 +86,8 @@ public class StatisticSamplerTest {
   
   @Test
   public void testShortPeriodSampler() throws InterruptedException {
-    StatisticArchive<String> archive = new StatisticArchive<String>(20);
-    StatisticSampler<String> sampler = new StatisticSampler<String>(100L, TimeUnit.MILLISECONDS, constantStatistic("foo"), archive);
+    StatisticArchive<Integer> archive = new StatisticArchive<Integer>(20);
+    StatisticSampler<Integer> sampler = new StatisticSampler<Integer>(100L, TimeUnit.MILLISECONDS, ConstantValueStatistic.instance(42), archive);
     try {
       sampler.start();
       TimeUnit.SECONDS.sleep(1);
@@ -98,8 +99,8 @@ public class StatisticSamplerTest {
 
   @Test
   public void testStoppingAndStartingSampler() throws InterruptedException {
-    StatisticArchive<String> archive = new StatisticArchive<String>(20);
-    StatisticSampler<String> sampler = new StatisticSampler<String>(200L, TimeUnit.MILLISECONDS, constantStatistic("foo"), archive);
+    StatisticArchive<Integer> archive = new StatisticArchive<Integer>(20);
+    StatisticSampler<Integer> sampler = new StatisticSampler<Integer>(200L, TimeUnit.MILLISECONDS, ConstantValueStatistic.instance(42), archive);
     try {
       sampler.start();
       assertBy(1, TimeUnit.SECONDS, contentsOf(archive), hasSize(1));
@@ -135,16 +136,6 @@ public class StatisticSamplerTest {
       @Override
       public void describeTo(Description description) {
         description.appendText("sample value ").appendDescriptionOf(value);
-      }
-    };
-  }
-  
-  static <T> ValueStatistic<T> constantStatistic(final T value) {
-    return new ValueStatistic<T>() {
-
-      @Override
-      public T value() {
-        return value;
       }
     };
   }

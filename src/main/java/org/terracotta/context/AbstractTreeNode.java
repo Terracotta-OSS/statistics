@@ -15,6 +15,7 @@
  */
 package org.terracotta.context;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -77,6 +78,23 @@ abstract class AbstractTreeNode implements TreeNode {
     }
   }
 
+  @Override
+  public String toTreeString() {
+    return dumpSubtree(0, this);
+  }
+  
+  public static String dumpSubtree(int indent, TreeNode node) {
+    char[] indentChars = new char[indent];
+    Arrays.fill(indentChars, ' ');
+    StringBuilder sb = new StringBuilder();
+    String nodeString = node.toString();
+    sb.append(indentChars).append(nodeString).append("\n");
+    for (TreeNode child : node.getChildren()) {
+      sb.append(dumpSubtree(indent + nodeString.length(), child));
+    }
+    return sb.toString();
+  }
+  
   abstract void addedParent(AbstractTreeNode child);
   
   abstract void removedParent(AbstractTreeNode child);
@@ -84,4 +102,5 @@ abstract class AbstractTreeNode implements TreeNode {
   abstract Set<AbstractTreeNode> getAncestors();
 
   abstract Collection<ContextListener> getListeners();
+
 }
