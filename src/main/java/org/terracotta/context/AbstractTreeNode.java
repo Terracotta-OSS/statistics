@@ -90,7 +90,7 @@ abstract class AbstractTreeNode implements TreeNode {
     String nodeString = node.toString();
     sb.append(indentChars).append(nodeString).append("\n");
     for (TreeNode child : node.getChildren()) {
-      sb.append(dumpSubtree(indent + nodeString.length(), child));
+      sb.append(dumpSubtree(indent + 2, child));
     }
     return sb.toString();
   }
