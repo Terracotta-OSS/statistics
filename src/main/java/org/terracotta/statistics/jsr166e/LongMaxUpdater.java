@@ -42,7 +42,7 @@ public class LongMaxUpdater extends Striped64 implements Serializable {
      * Long.MIN_VALUE}.
      */
     public LongMaxUpdater() {
-        base = Long.MIN_VALUE;
+        BASE_UPDATER.set(this, Long.MIN_VALUE);
     }
 
     /**
@@ -112,7 +112,7 @@ public class LongMaxUpdater extends Striped64 implements Serializable {
     public long maxThenReset() {
         Cell[] as = cells;
         long max = base;
-        base = Long.MIN_VALUE;
+        BASE_UPDATER.set(this, Long.MIN_VALUE);
         if (as != null) {
             int n = as.length;
             for (int i = 0; i < n; ++i) {
@@ -178,9 +178,9 @@ public class LongMaxUpdater extends Striped64 implements Serializable {
     private void readObject(ObjectInputStream s)
         throws IOException, ClassNotFoundException {
         s.defaultReadObject();
-        busy = 0;
+        BUSY_UPDATER.set(this, 0);
         cells = null;
-        base = s.readLong();
+        BASE_UPDATER.set(this, s.readLong());
     }
 
 }
