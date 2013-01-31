@@ -18,7 +18,6 @@ package org.terracotta.statistics.derived;
 import static org.terracotta.statistics.Time.time;
 
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
@@ -114,15 +113,11 @@ public class EventRateSimpleMovingAverage implements EventObserver, ValueStatist
     archive.add(partition);
     
     long startTime = partition.end() - windowSize;
-    try {
-        for (CounterPartition earliest = archive.element(); earliest.isBefore(startTime); earliest = archive.element()) {
-          if (archive.remove(earliest)) {
+    for (CounterPartition earliest = archive.peek(); earliest!=null && earliest.isBefore(startTime); earliest = archive.peek()) {
+         if (archive.remove(earliest)) {
             break;
-          }
         }
-    } catch(NoSuchElementException nsee) {
-        ; // noop
-    }
+    } 
   }
   
   static class CounterPartition extends LongAdder {

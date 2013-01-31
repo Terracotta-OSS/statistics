@@ -15,6 +15,8 @@
  */
 package org.terracotta.statistics.derived;
 
+import static org.terracotta.statistics.Time.time;
+
 import java.util.Iterator;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -25,8 +27,6 @@ import org.terracotta.statistics.ValueStatistic;
 import org.terracotta.statistics.jsr166e.LongAdder;
 import org.terracotta.statistics.jsr166e.LongMaxUpdater;
 import org.terracotta.statistics.observer.EventObserver;
-
-import static org.terracotta.statistics.Time.time;
 
 /**
  *
@@ -184,7 +184,7 @@ public class EventParameterSimpleMovingAverage implements EventObserver {
     archive.add(partition);
     
     long startTime = partition.end() - windowSize;
-    for (AveragePartition earliest = archive.element(); earliest.isBefore(startTime); earliest = archive.element()) {
+    for (AveragePartition earliest = archive.peek(); earliest!=null && earliest.isBefore(startTime); earliest = archive.peek()) {
       if (archive.remove(earliest)) {
         break;
       }
