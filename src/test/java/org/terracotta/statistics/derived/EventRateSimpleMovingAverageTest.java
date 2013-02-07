@@ -22,6 +22,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.hamcrest.core.CombinableMatcher;
+import org.hamcrest.core.Is;
+import org.junit.Assert;
 import org.junit.Test;
 import org.terracotta.statistics.observer.EventObserver;
 
@@ -37,6 +39,13 @@ public class EventRateSimpleMovingAverageTest {
   
   private static final double EXPECTED_ACCURACY = 0.1;
   
+  @Test
+  public void testNoEventBehavior() {
+    //TODO this test should be mocked to use a timesource that doesn't advance
+    EventRateSimpleMovingAverage stat = new EventRateSimpleMovingAverage(1, TimeUnit.HOURS);
+    Assert.assertThat(stat.rateUsingSeconds(), Is.is(0.0));
+  }
+
   @Test
   public void testConsistentRate() throws InterruptedException {
     for (int rate = 1; rate < 10; rate++) {

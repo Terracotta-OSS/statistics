@@ -107,11 +107,7 @@ public class EventParameterSimpleMovingAverage implements EventObserver {
         }
       }
 
-      if (average.count == 0) {
-        return Double.NaN;
-      } else {
-        return ((double) average.total) / average.count;
-      }
+      return ((double) average.total) / average.count;
     }
   }
   

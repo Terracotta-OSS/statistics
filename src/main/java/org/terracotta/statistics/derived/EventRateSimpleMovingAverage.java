@@ -83,7 +83,11 @@ public class EventRateSimpleMovingAverage implements EventObserver, ValueStatist
       }
     }
     
-    return ((double) (TimeUnit.SECONDS.toNanos(1) * count)) / (endTime - actualStartTime);
+    if (count == 0L) {
+      return 0.0;
+    } else {
+      return ((double) (TimeUnit.SECONDS.toNanos(1) * count)) / (endTime - actualStartTime);
+    }
   }
   
   public Double rate(TimeUnit base) {
