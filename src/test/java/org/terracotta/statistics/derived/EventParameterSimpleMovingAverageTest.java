@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 
 import static org.hamcrest.core.Is.*;
+import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 
 public class EventParameterSimpleMovingAverageTest {
@@ -27,6 +28,8 @@ public class EventParameterSimpleMovingAverageTest {
   @Test
   public void testNoEventsAverage() {
     assertThat(new EventParameterSimpleMovingAverage(1, TimeUnit.SECONDS).average(), is(Double.NaN));
+    assertThat(new EventParameterSimpleMovingAverage(1, TimeUnit.SECONDS).minimum(), nullValue());
+    assertThat(new EventParameterSimpleMovingAverage(1, TimeUnit.SECONDS).maximum(), nullValue());
   }
   
   @Test
@@ -34,6 +37,8 @@ public class EventParameterSimpleMovingAverageTest {
     EventParameterSimpleMovingAverage average = new EventParameterSimpleMovingAverage(1, TimeUnit.DAYS);
     average.event(1L);
     assertThat(average.average(), is(1.0));
+    assertThat(average.minimum(), is(1L));
+    assertThat(average.maximum(), is(1L));
   }
 
   @Test
@@ -42,6 +47,8 @@ public class EventParameterSimpleMovingAverageTest {
     average.event(1L);
     TimeUnit.MILLISECONDS.sleep(300);
     assertThat(average.average(), is(Double.NaN));
+    assertThat(average.minimum(), nullValue());
+    assertThat(average.maximum(), nullValue());
   }
 
   @Test
@@ -50,6 +57,8 @@ public class EventParameterSimpleMovingAverageTest {
     average.event(1L);
     average.event(3L);
     assertThat(average.average(), is(2.0));
+    assertThat(average.minimum(), is(1L));
+    assertThat(average.maximum(), is(3L));
   }
   
   @Test
@@ -58,11 +67,19 @@ public class EventParameterSimpleMovingAverageTest {
     average.event(1L);
     TimeUnit.MILLISECONDS.sleep(50);
     assertThat(average.average(), is(1.0));
+    assertThat(average.minimum(), is(1L));
+    assertThat(average.maximum(), is(1L));
     average.event(3L);
     assertThat(average.average(), is(2.0));
+    assertThat(average.minimum(), is(1L));
+    assertThat(average.maximum(), is(3L));
     TimeUnit.MILLISECONDS.sleep(75);
     assertThat(average.average(), is(3.0));
+    assertThat(average.minimum(), is(3L));
+    assertThat(average.maximum(), is(3L));
     TimeUnit.MILLISECONDS.sleep(50);
     assertThat(average.average(), is(Double.NaN));
+    assertThat(average.minimum(), nullValue());
+    assertThat(average.maximum(), nullValue());
   }
 }

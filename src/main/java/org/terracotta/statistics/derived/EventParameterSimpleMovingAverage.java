@@ -45,7 +45,7 @@ public class EventParameterSimpleMovingAverage implements EventObserver {
   public EventParameterSimpleMovingAverage(long time, TimeUnit unit) {
     this.windowSize  = unit.toNanos(time);
     this.partitionSize = windowSize / PARTITION_COUNT;
-    this.activePartition = new AtomicReference<AveragePartition>(new AveragePartition(time(), partitionSize));
+    this.activePartition = new AtomicReference<AveragePartition>(new AveragePartition(Long.MIN_VALUE, partitionSize));
   }
 
   public void setWindow(long time, TimeUnit unit) {
