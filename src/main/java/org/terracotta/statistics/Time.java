@@ -20,6 +20,19 @@ package org.terracotta.statistics;
  */
 public final class Time {
   
+  private static volatile TimeSource TIME_SOURCE = new TimeSource() {
+
+    @Override
+    public long time() {
+      return System.nanoTime();
+    }
+
+    @Override
+    public long absoluteTime() {
+      return System.currentTimeMillis();
+    }
+  };
+
   private Time() {
     //static
   }
@@ -34,7 +47,7 @@ public final class Time {
    * @return a time in nanoseconds
    */
   public static long time() {
-    return System.nanoTime();
+    return TIME_SOURCE.time();
   }
   
   /**
@@ -46,6 +59,12 @@ public final class Time {
    * @return a Unix timestamp
    */
   public static long absoluteTime() {
-    return System.currentTimeMillis();
+    return TIME_SOURCE.absoluteTime();
+  }
+  
+  public interface TimeSource {
+    long time();
+
+    long absoluteTime();
   }
 }

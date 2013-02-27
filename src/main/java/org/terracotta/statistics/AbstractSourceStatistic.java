@@ -18,7 +18,7 @@ package org.terracotta.statistics;
 import java.util.Collection;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.terracotta.statistics.observer.Observer;
+import org.terracotta.statistics.observer.ChainedObserver;
 
 /**
  * An abstract {@code SourceStatistic} that handles derived statistic
@@ -28,7 +28,7 @@ import org.terracotta.statistics.observer.Observer;
  * {@link #derived()} method.  Concrete implementations of this class should
  * fire on the contents of this {@code Iterable} to update the derived statistics.
  */
-public class AbstractSourceStatistic<T extends Observer> implements SourceStatistic<T> {
+public class AbstractSourceStatistic<T extends ChainedObserver> implements SourceStatistic<T> {
 
   protected final Collection<T> derivedStatistics = new CopyOnWriteArrayList<T>();
 

@@ -19,43 +19,43 @@ import java.util.EnumSet;
 import java.util.Set;
 
 import org.terracotta.statistics.AbstractSourceStatistic;
-import org.terracotta.statistics.observer.EventObserver;
-import org.terracotta.statistics.observer.OperationObserver;
+import org.terracotta.statistics.observer.ChainedEventObserver;
+import org.terracotta.statistics.observer.ChainedOperationObserver;
 
 /**
  *
  * @author cdennis
  */
-public class OperationResultFilter<T extends Enum<T>> extends AbstractSourceStatistic<EventObserver> implements OperationObserver<T> {
+public class OperationResultFilter<T extends Enum<T>> extends AbstractSourceStatistic<ChainedEventObserver> implements ChainedOperationObserver<T> {
 
   private final Set<T> targets;
 
-  public OperationResultFilter(Set<T> targets, EventObserver ... observers) {
+  public OperationResultFilter(Set<T> targets, ChainedEventObserver ... observers) {
     this.targets = EnumSet.copyOf(targets);
-    for (EventObserver observer : observers) {
+    for (ChainedEventObserver observer : observers) {
       addDerivedStatistic(observer);
     }
   }
   
   @Override
-  public void begin() {
+  public void begin(long time) {
     //no-op
   }
 
   @Override
-  public void end(T result) {
+  public void end(long time, T result) {
     if (!derivedStatistics.isEmpty() && targets.contains(result)) {
-      for (EventObserver derived : derivedStatistics) {
-        derived.event();
+      for (ChainedEventObserver derived : derivedStatistics) {
+        derived.event(time);
       }
     }
   }
 
   @Override
-  public void end(T result, long ... parameters) {
+  public void end(long time, T result, long ... parameters) {
     if (!derivedStatistics.isEmpty() && targets.contains(result)) {
-      for (EventObserver derived : derivedStatistics) {
-        derived.event(parameters);
+      for (ChainedEventObserver derived : derivedStatistics) {
+        derived.event(time, parameters);
       }
     }
   }

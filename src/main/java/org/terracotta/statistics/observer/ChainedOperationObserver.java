@@ -16,23 +16,14 @@
 package org.terracotta.statistics.observer;
 
 /**
- * Event observers track the occurrence of singular events.
- * <p>
- * Events can have an associated parameter the use of which is left up to
- * the implementors of both the producer and consumer of events.
+ *
+ * @author cdennis
  */
-public interface EventObserver extends Observer {
+public interface ChainedOperationObserver<T extends Enum<T>> extends ChainedObserver  {
   
-  /*
-   * The parameter argument is really a constrained and collapsed to primitive
-   * generic type with no bounds.  So the "real" class declaration should be:
-   * @{code interface EventObserver<T>}
-   */
+  void begin(long time);
   
-  /**
-   * Called to indicate an event happened.
-   * 
-   * @param parameter the event parameter
-   */
-  void event(long ... parameters);
+  void end(long time, T result);
+  
+  void end(long time, T result, long ... parameters);
 }

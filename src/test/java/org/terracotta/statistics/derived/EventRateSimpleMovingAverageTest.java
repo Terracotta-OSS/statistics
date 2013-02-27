@@ -17,15 +17,21 @@ package org.terracotta.statistics.derived;
 
 import java.util.Arrays;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.hamcrest.core.CombinableMatcher;
 import org.hamcrest.core.Is;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Test;
-import org.terracotta.statistics.observer.EventObserver;
+import org.terracotta.statistics.MutableTimeSource;
+import org.terracotta.statistics.Time;
+import org.terracotta.statistics.TimeMocking;
+import org.terracotta.statistics.observer.ChainedEventObserver;
 
 import static org.hamcrest.number.IsCloseTo.*;
 import static org.hamcrest.number.OrderingComparison.*;
@@ -39,9 +45,15 @@ public class EventRateSimpleMovingAverageTest {
   
   private static final double EXPECTED_ACCURACY = 0.1;
   
+  public static final MutableTimeSource SOURCE = TimeMocking.push(new MutableTimeSource());
+  
+  @AfterClass
+  public static void installTimeSource() {
+    TimeMocking.pop();
+  }
+  
   @Test
   public void testNoEventBehavior() {
-    //TODO this test should be mocked to use a timesource that doesn't advance
     EventRateSimpleMovingAverage stat = new EventRateSimpleMovingAverage(1, TimeUnit.HOURS);
     Assert.assertThat(stat.rateUsingSeconds(), Is.is(0.0));
   }
@@ -80,17 +92,17 @@ public class EventRateSimpleMovingAverageTest {
   }
 
   @Test
-  public void testContinuousRateSplitAcrossTwoThreads() throws InterruptedException {
+  public void testContinuousRateSplitAcrossTwoThreads() throws InterruptedException, ExecutionException {
     EventRateSimpleMovingAverage stat = new EventRateSimpleMovingAverage(1, TimeUnit.SECONDS);
-    Callable<Double> c1 = new EventDriver(stat, 10, 20, 20, TimeUnit.MILLISECONDS);
-    Callable<Double> c2 = new EventDriver(stat, 10, 20, 20, TimeUnit.MILLISECONDS);
+    Callable<Double> c1 = new EventDriver(stat, 10, 20, 20, TimeUnit.MILLISECONDS, true);
+    Callable<Double> c2 = new EventDriver(stat, 10, 20, 20, TimeUnit.MILLISECONDS, false);
 
     ExecutorService executor = Executors.newFixedThreadPool(2);
     try {
-      long start = System.nanoTime();
-      executor.invokeAll(Arrays.<Callable<Double>>asList(c1, c2));
-      long end = System.nanoTime();
-      double totalRate = ((double) TimeUnit.SECONDS.toNanos(1) * 2 * 10 * 20) / (end - start);
+      double totalRate = 0.0;
+      for (Future<Double> f : executor.invokeAll(Arrays.<Callable<Double>>asList(c1, c2))) {
+        totalRate += f.get().doubleValue();
+      }
       assertThat(stat.rate(TimeUnit.SECONDS), closeTo(totalRate, EXPECTED_ACCURACY * totalRate));
     } finally {
       executor.shutdown();
@@ -99,38 +111,39 @@ public class EventRateSimpleMovingAverageTest {
 
   static class EventDriver implements Callable<Double> {
 
-    private final EventObserver stat;
+    private final ChainedEventObserver stat;
     private final int batches;
     private final int batchSize;
     private final long sleep;
+    private final boolean advanceTime;
     
-    EventDriver(EventObserver stat, int events, long period, TimeUnit unit) {
+    EventDriver(ChainedEventObserver stat, int events, long period, TimeUnit unit) {
       this(stat, events, 1, period, unit);
     }
     
-    EventDriver(EventObserver stat, int batches, int batchSize, long period, TimeUnit unit) {
-      
+    EventDriver(ChainedEventObserver stat, int batches, int batchSize, long period, TimeUnit unit) {
+      this(stat, batches, batchSize, period, unit, true);
+    }
+    
+    EventDriver(ChainedEventObserver stat, int batches, int batchSize, long period, TimeUnit unit, boolean advanceTime) {
       this.stat = stat;
       this.batches = batches;
       this.batchSize = batchSize;
-      this.sleep = unit.toMillis(period);
+      this.sleep = unit.toNanos(period);
+      this.advanceTime = advanceTime;
     }
     
     @Override
     public Double call() {
-      long start = System.nanoTime();
       for (int i = 0; i < batches; i++) {
         for (int j = 0; j < batchSize; j++) {
-          stat.event(0L);
+          stat.event(Time.time(), 0L);
         }
-        try {
-          Thread.sleep(sleep);
-        } catch (InterruptedException e) {
-          throw new AssertionError(e);
+        if (advanceTime) {
+          SOURCE.advanceTime(sleep, TimeUnit.NANOSECONDS);
         }
       }
-      long end = System.nanoTime();
-      return ((double) TimeUnit.SECONDS.toNanos(1) * batches * batchSize) / (end - start);
+      return ((double) TimeUnit.SECONDS.toNanos(1) * batches * batchSize) / (sleep * batches);
     }
   }
 }

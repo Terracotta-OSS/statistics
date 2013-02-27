@@ -17,13 +17,24 @@ package org.terracotta.statistics.derived;
 
 import java.util.concurrent.TimeUnit;
 
+import org.junit.AfterClass;
 import org.junit.Test;
+import org.terracotta.statistics.MutableTimeSource;
+import org.terracotta.statistics.Time;
+import org.terracotta.statistics.TimeMocking;
 
 import static org.hamcrest.core.Is.*;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 
 public class EventParameterSimpleMovingAverageTest {
+  
+  public static final MutableTimeSource SOURCE = TimeMocking.push(new MutableTimeSource());
+  
+  @AfterClass
+  public static void installTimeSource() {
+    TimeMocking.pop();
+  }
   
   @Test
   public void testNoEventsAverage() {
@@ -35,7 +46,7 @@ public class EventParameterSimpleMovingAverageTest {
   @Test
   public void testSingleEventAverage() {
     EventParameterSimpleMovingAverage average = new EventParameterSimpleMovingAverage(1, TimeUnit.DAYS);
-    average.event(1L);
+    average.event(Time.time(), 1L);
     assertThat(average.average(), is(1.0));
     assertThat(average.minimum(), is(1L));
     assertThat(average.maximum(), is(1L));
@@ -44,8 +55,8 @@ public class EventParameterSimpleMovingAverageTest {
   @Test
   public void testExpiredEventAverage() throws InterruptedException {
     EventParameterSimpleMovingAverage average = new EventParameterSimpleMovingAverage(100, TimeUnit.MILLISECONDS);
-    average.event(1L);
-    TimeUnit.MILLISECONDS.sleep(300);
+    average.event(Time.time(), 1L);
+    SOURCE.advanceTime(300, TimeUnit.MILLISECONDS);
     assertThat(average.average(), is(Double.NaN));
     assertThat(average.minimum(), nullValue());
     assertThat(average.maximum(), nullValue());
@@ -54,8 +65,8 @@ public class EventParameterSimpleMovingAverageTest {
   @Test
   public void testDoubleEventAverage() {
     EventParameterSimpleMovingAverage average = new EventParameterSimpleMovingAverage(1, TimeUnit.DAYS);
-    average.event(1L);
-    average.event(3L);
+    average.event(Time.time(), 1L);
+    average.event(Time.time(), 3L);
     assertThat(average.average(), is(2.0));
     assertThat(average.minimum(), is(1L));
     assertThat(average.maximum(), is(3L));
@@ -64,20 +75,20 @@ public class EventParameterSimpleMovingAverageTest {
   @Test
   public void testAverageMoves() throws InterruptedException {
     EventParameterSimpleMovingAverage average = new EventParameterSimpleMovingAverage(100, TimeUnit.MILLISECONDS);
-    average.event(1L);
-    TimeUnit.MILLISECONDS.sleep(50);
+    average.event(Time.time(), 1L);
+    SOURCE.advanceTime(50, TimeUnit.MILLISECONDS);
     assertThat(average.average(), is(1.0));
     assertThat(average.minimum(), is(1L));
     assertThat(average.maximum(), is(1L));
-    average.event(3L);
+    average.event(Time.time(), 3L);
     assertThat(average.average(), is(2.0));
     assertThat(average.minimum(), is(1L));
     assertThat(average.maximum(), is(3L));
-    TimeUnit.MILLISECONDS.sleep(75);
+    SOURCE.advanceTime(75, TimeUnit.MILLISECONDS);
     assertThat(average.average(), is(3.0));
     assertThat(average.minimum(), is(3L));
     assertThat(average.maximum(), is(3L));
-    TimeUnit.MILLISECONDS.sleep(50);
+    SOURCE.advanceTime(50, TimeUnit.MILLISECONDS);
     assertThat(average.average(), is(Double.NaN));
     assertThat(average.minimum(), nullValue());
     assertThat(average.maximum(), nullValue());

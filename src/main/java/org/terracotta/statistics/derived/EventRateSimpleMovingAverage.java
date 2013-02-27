@@ -25,13 +25,13 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.terracotta.statistics.ValueStatistic;
 import org.terracotta.statistics.jsr166e.LongAdder;
-import org.terracotta.statistics.observer.EventObserver;
+import org.terracotta.statistics.observer.ChainedEventObserver;
 
 /**
  *
  * @author cdennis
  */
-public class EventRateSimpleMovingAverage implements EventObserver, ValueStatistic<Double> {
+public class EventRateSimpleMovingAverage implements ChainedEventObserver, ValueStatistic<Double> {
 
   private static final int PARTITION_COUNT = 10;
 
@@ -95,8 +95,7 @@ public class EventRateSimpleMovingAverage implements EventObserver, ValueStatist
   }
   
   @Override
-  public void event(long ... parameters) {
-    long time = time();
+  public void event(long time, long ... parameters) {
     while (true) {
       CounterPartition partition = activePartition.get();
       if (partition.targetFor(time)) {

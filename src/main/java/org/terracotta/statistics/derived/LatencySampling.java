@@ -19,16 +19,14 @@ import java.util.EnumSet;
 import java.util.Set;
 import org.terracotta.statistics.AbstractSourceStatistic;
 import org.terracotta.statistics.jsr166e.ThreadLocalRandom;
-import org.terracotta.statistics.observer.EventObserver;
-import org.terracotta.statistics.observer.OperationObserver;
-
-import static org.terracotta.statistics.Time.time;
+import org.terracotta.statistics.observer.ChainedEventObserver;
+import org.terracotta.statistics.observer.ChainedOperationObserver;
 
 /**
  *
  * @author cdennis
  */
-public class LatencySampling<T extends Enum<T>> extends AbstractSourceStatistic<EventObserver> implements OperationObserver<T> {
+public class LatencySampling<T extends Enum<T>> extends AbstractSourceStatistic<ChainedEventObserver> implements ChainedOperationObserver<T> {
 
   private final ThreadLocal<Long> operationStartTime = new ThreadLocal<Long>();
   private final Set<T> targetOperations;
@@ -43,21 +41,21 @@ public class LatencySampling<T extends Enum<T>> extends AbstractSourceStatistic<
   }
 
   @Override
-  public void begin() {
+  public void begin(long time) {
     if (sample()) {
-      operationStartTime.set(time());
+      operationStartTime.set(time);
     }
   }
 
   @Override
-  public void end(T result) {
+  public void end(long time, T result) {
     if (targetOperations.contains(result)) {
       Long start  = operationStartTime.get();
       if (start != null) {
-        long latency = time() - start.longValue();
+        long latency = time - start.longValue();
         if (!derivedStatistics.isEmpty()) {
-          for (EventObserver observer : derivedStatistics) {
-            observer.event(latency);
+          for (ChainedEventObserver observer : derivedStatistics) {
+            observer.event(time, latency);
           }
         }
       }
@@ -66,8 +64,8 @@ public class LatencySampling<T extends Enum<T>> extends AbstractSourceStatistic<
   }
 
   @Override
-  public void end(T result, long ... parameters) {
-    end(result);
+  public void end(long time, T result, long ... parameters) {
+    end(time, result);
   }
   
   private boolean sample() {

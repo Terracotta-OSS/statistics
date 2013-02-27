@@ -27,6 +27,6 @@ package org.terracotta.statistics.observer;
  * tracking higher order statistics.</li>
  * </ol>
  */
-public interface Observer {
+public interface ChainedObserver {
   
 }

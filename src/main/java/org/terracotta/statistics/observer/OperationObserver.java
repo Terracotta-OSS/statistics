@@ -31,7 +31,7 @@ package org.terracotta.statistics.observer;
  * 
  * @param <T> Enum type representing the possible operations 'results'
  */
-public interface OperationObserver<T extends Enum<T>> extends Observer {
+public interface OperationObserver<T extends Enum<T>> {
   
   /**
    * Called immediately prior to the operation beginning.

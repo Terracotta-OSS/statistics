@@ -15,7 +15,7 @@
  */
 package org.terracotta.statistics;
 
-import org.terracotta.statistics.observer.Observer;
+import org.terracotta.statistics.observer.ChainedObserver;
 
 /**
  * Source statistic implementations support derived statistics.
@@ -25,7 +25,7 @@ import org.terracotta.statistics.observer.Observer;
  * 
  * @param <T> Supported derived observer type
  */
-public interface SourceStatistic<T extends Observer> {
+public interface SourceStatistic<T extends ChainedObserver> {
   
   /**
    * Register the given {@code Observer} to be called by this {@code SourceStatistic}

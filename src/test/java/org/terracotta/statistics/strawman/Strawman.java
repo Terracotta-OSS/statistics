@@ -25,7 +25,7 @@ import org.terracotta.statistics.OperationStatistic;
 import org.terracotta.statistics.StatisticsManager;
 import org.terracotta.statistics.derived.LatencySampling;
 import org.terracotta.statistics.derived.MinMaxAverage;
-import org.terracotta.statistics.observer.EventObserver;
+import org.terracotta.statistics.observer.ChainedEventObserver;
 import org.terracotta.statistics.strawman.Cache.GetResult;
 
 import static java.util.EnumSet.*;
@@ -63,10 +63,10 @@ public final class Strawman {
     System.err.println("MISSES      : " + getStatistic.count(GetResult.MISS));
     System.err.println("HIT LATENCY : " + hitLatencyStats.mean());
 
-    hitLatency.addDerivedStatistic(new EventObserver() {
+    hitLatency.addDerivedStatistic(new ChainedEventObserver() {
 
       @Override
-      public void event(long ... parameters) {
+      public void event(long time, long ... parameters) {
         System.out.println("Event Latency : " + parameters[0]);
       }
     });

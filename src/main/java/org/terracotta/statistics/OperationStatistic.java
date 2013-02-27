@@ -17,13 +17,14 @@ package org.terracotta.statistics;
 
 import java.util.Set;
 
+import org.terracotta.statistics.observer.ChainedOperationObserver;
 import org.terracotta.statistics.observer.OperationObserver;
 
 /**
  *
  * @author cdennis
  */
-public interface OperationStatistic<T extends Enum<T>> extends OperationObserver<T>, SourceStatistic<OperationObserver<? super T>> {
+public interface OperationStatistic<T extends Enum<T>> extends OperationObserver<T>, SourceStatistic<ChainedOperationObserver<? super T>> {
 
   public Class<T> type();
   

@@ -32,19 +32,19 @@ public class MinMaxAverageTest {
     MinMaxAverage stats = new MinMaxAverage();
     
     assertThat(stats.min(), nullValue());
-    stats.event(100L);
+    stats.event(0, 100L);
     assertThat(stats.min(), is(100L));
-    stats.event(200L);
+    stats.event(0, 200L);
     assertThat(stats.min(), is(100L));
-    stats.event(99L);
+    stats.event(0, 99L);
     assertThat(stats.min(), is(99L));
-    stats.event(0L);
+    stats.event(0, 0L);
     assertThat(stats.min(), is(0L));
-    stats.event(-1L);
+    stats.event(0, -1L);
     assertThat(stats.min(), is(-1L));
-    stats.event(1L);
+    stats.event(0, 1L);
     assertThat(stats.min(), is(-1L));
-    stats.event(Long.MIN_VALUE);
+    stats.event(0, Long.MIN_VALUE);
     assertThat(stats.min(), is(Long.MIN_VALUE));
   }
 
@@ -53,19 +53,19 @@ public class MinMaxAverageTest {
     MinMaxAverage stats = new MinMaxAverage();
     
     assertThat(stats.max(), nullValue());
-    stats.event(-100L);
+    stats.event(0, -100L);
     assertThat(stats.max(), is(-100L));
-    stats.event(-200L);
+    stats.event(0, -200L);
     assertThat(stats.max(), is(-100L));
-    stats.event(-99L);
+    stats.event(0, -99L);
     assertThat(stats.max(), is(-99L));
-    stats.event(0L);
+    stats.event(0, 0L);
     assertThat(stats.max(), is(0L));
-    stats.event(1L);
+    stats.event(0, 1L);
     assertThat(stats.max(), is(1L));
-    stats.event(-1L);
+    stats.event(0, -1L);
     assertThat(stats.max(), is(1L));
-    stats.event(Long.MAX_VALUE);
+    stats.event(0, Long.MAX_VALUE);
     assertThat(stats.max(), is(Long.MAX_VALUE));
   }
 
@@ -74,12 +74,12 @@ public class MinMaxAverageTest {
     MinMaxAverage stats = new MinMaxAverage();
 
     assertThat(stats.mean(), nullValue());
-    stats.event(1L);
+    stats.event(0, 1L);
     assertThat(stats.mean(), is(1.0));
-    stats.event(3L);
+    stats.event(0, 3L);
     assertThat(stats.mean(), is(2.0));
-    stats.event(0L);
-    stats.event(0L);
+    stats.event(0, 0L);
+    stats.event(0, 0L);
     assertThat(stats.mean(), is(1.0));
   }
 }

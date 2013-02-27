@@ -19,7 +19,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.terracotta.statistics.ValueStatistic;
-import org.terracotta.statistics.observer.EventObserver;
+import org.terracotta.statistics.observer.ChainedEventObserver;
 import org.terracotta.statistics.util.InThreadExecutor;
 
 import static java.lang.Double.doubleToLongBits;
@@ -29,7 +29,7 @@ import static java.lang.Double.longBitsToDouble;
  *
  * @author cdennis
  */
-public class MinMaxAverage implements EventObserver {
+public class MinMaxAverage implements ChainedEventObserver {
 
   private final AtomicLong maximum = new AtomicLong(Long.MIN_VALUE);
   private final AtomicLong minimum = new AtomicLong(Long.MAX_VALUE);
@@ -49,7 +49,7 @@ public class MinMaxAverage implements EventObserver {
   
   
   @Override
-  public void event(final long ... parameters) {
+  public void event(long time, final long ... parameters) {
     executor.execute(new Runnable() {
 
       @Override

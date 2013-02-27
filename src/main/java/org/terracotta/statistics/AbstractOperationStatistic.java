@@ -15,10 +15,7 @@
  */
 package org.terracotta.statistics;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,15 +23,14 @@ import java.util.Map;
 import java.util.Set;
 
 import org.terracotta.context.annotations.ContextAttribute;
-import org.terracotta.statistics.jsr166e.LongAdder;
-import org.terracotta.statistics.observer.OperationObserver;
+import org.terracotta.statistics.observer.ChainedOperationObserver;
 
 /**
  *
  * @author cdennis
  */
 @ContextAttribute("this")
-public abstract class AbstractOperationStatistic<T extends Enum<T>> extends AbstractSourceStatistic<OperationObserver<? super T>> implements OperationStatistic<T> {
+public abstract class AbstractOperationStatistic<T extends Enum<T>> extends AbstractSourceStatistic<ChainedOperationObserver<? super T>> implements OperationStatistic<T> {
 
   @ContextAttribute("name") public final String name;
   @ContextAttribute("tags") public final Set<String> tags;
@@ -95,8 +91,9 @@ public abstract class AbstractOperationStatistic<T extends Enum<T>> extends Abst
   @Override
   public void begin() {
     if (!derivedStatistics.isEmpty()) {
-      for (OperationObserver<? super T> observer : derivedStatistics) {
-        observer.begin();
+      long time = Time.time();
+      for (ChainedOperationObserver<? super T> observer : derivedStatistics) {
+        observer.begin(time);
       }
     }
   }

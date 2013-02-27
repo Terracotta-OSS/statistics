@@ -21,6 +21,7 @@ import java.util.Set;
 
 import org.terracotta.statistics.jsr166e.LongAdder;
 import org.terracotta.statistics.observer.OperationObserver;
+import org.terracotta.statistics.observer.ChainedOperationObserver;
 
 /**
  * An operation observer that tracks operation result counts and can drive further derived statistics.
@@ -69,8 +70,9 @@ class GeneralOperationStatistic<T extends Enum<T>> extends AbstractOperationStat
   public void end(T result) {
     counts.get(result).increment();
     if (!derivedStatistics.isEmpty()) {
-      for (OperationObserver<? super T> observer : derivedStatistics) {
-        observer.end(result);
+      long time = Time.time();
+      for (ChainedOperationObserver<? super T> observer : derivedStatistics) {
+        observer.end(time, result);
       }
     }
   }
@@ -79,8 +81,9 @@ class GeneralOperationStatistic<T extends Enum<T>> extends AbstractOperationStat
   public void end(T result, long ... parameters) {
     counts.get(result).increment();
     if (!derivedStatistics.isEmpty()) {
-      for (OperationObserver<? super T> observer : derivedStatistics) {
-        observer.end(result, parameters);
+      long time = Time.time();
+      for (ChainedOperationObserver<? super T> observer : derivedStatistics) {
+        observer.end(time, result, parameters);
       }
     }
   }
