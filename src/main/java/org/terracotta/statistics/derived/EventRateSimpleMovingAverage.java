@@ -58,18 +58,17 @@ public class EventRateSimpleMovingAverage implements ChainedEventObserver, Value
   }
   
   public Double rateUsingSeconds() {
-    long endTime = time();
-    long startTime = endTime - windowSize;
+    final long endTime = time();
+    final long startTime = endTime - windowSize;
     
     CounterPartition current = activePartition.get();
     long count;
-    long actualStartTime;
+    long actualStartTime = startTime;
     if (current.isBefore(startTime)) {
       count = 0;
-      actualStartTime = startTime;
     } else {
       count = current.sum();
-      actualStartTime = current.start();
+      actualStartTime = Math.min(actualStartTime, current.start());
     }
     for (Iterator<CounterPartition> it = archive.iterator(); it.hasNext(); ) {
       CounterPartition partition = it.next();

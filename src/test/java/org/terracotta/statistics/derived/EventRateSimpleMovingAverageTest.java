@@ -61,7 +61,7 @@ public class EventRateSimpleMovingAverageTest {
   @Test
   public void testConsistentRate() throws InterruptedException {
     for (int rate = 1; rate < 10; rate++) {
-      EventRateSimpleMovingAverage stat = new EventRateSimpleMovingAverage(1, TimeUnit.SECONDS);
+      EventRateSimpleMovingAverage stat = new EventRateSimpleMovingAverage(100, TimeUnit.MILLISECONDS);
       double actualRate = new EventDriver(stat, 10, rate, 20, TimeUnit.MILLISECONDS).call();
       assertThat(stat.rate(TimeUnit.SECONDS), closeTo(actualRate, EXPECTED_ACCURACY * actualRate));
     }
@@ -82,7 +82,7 @@ public class EventRateSimpleMovingAverageTest {
   public void testChangingRateWithLongPeriodDoesntReach() throws InterruptedException {
     EventRateSimpleMovingAverage stat = new EventRateSimpleMovingAverage(60, TimeUnit.SECONDS);    
     
-    double firstRate = new EventDriver(stat, 10, 10, 20, TimeUnit.MILLISECONDS).call();
+    double firstRate = new EventDriver(stat, 5000, 10, 20, TimeUnit.MILLISECONDS).call();
     double lowRate = stat.rate(TimeUnit.SECONDS);
     assertThat(lowRate, closeTo(firstRate, EXPECTED_ACCURACY * firstRate));
     
@@ -94,8 +94,8 @@ public class EventRateSimpleMovingAverageTest {
   @Test
   public void testContinuousRateSplitAcrossTwoThreads() throws InterruptedException, ExecutionException {
     EventRateSimpleMovingAverage stat = new EventRateSimpleMovingAverage(1, TimeUnit.SECONDS);
-    Callable<Double> c1 = new EventDriver(stat, 10, 20, 20, TimeUnit.MILLISECONDS, true);
-    Callable<Double> c2 = new EventDriver(stat, 10, 20, 20, TimeUnit.MILLISECONDS, false);
+    Callable<Double> c1 = new EventDriver(stat, 50, 20, 20, TimeUnit.MILLISECONDS, true);
+    Callable<Double> c2 = new EventDriver(stat, 50, 20, 20, TimeUnit.MILLISECONDS, false);
 
     ExecutorService executor = Executors.newFixedThreadPool(2);
     try {
@@ -106,6 +106,19 @@ public class EventRateSimpleMovingAverageTest {
       assertThat(stat.rate(TimeUnit.SECONDS), closeTo(totalRate, EXPECTED_ACCURACY * totalRate));
     } finally {
       executor.shutdown();
+    }
+  }
+
+  @Test
+  public void testWindowThresholdEffects() throws InterruptedException {
+    EventRateSimpleMovingAverage stat = new EventRateSimpleMovingAverage(1, TimeUnit.SECONDS);
+    for (long cycles = 0; cycles < 3; cycles++) {
+        SOURCE.advanceTime(100, TimeUnit.MILLISECONDS);
+        stat.event(Time.time());
+        for (long after = 0; after <= 1000; after += 1) {
+          assertThat(stat.rateUsingSeconds(), lessThanOrEqualTo(1.0));
+          SOURCE.advanceTime(1, TimeUnit.MILLISECONDS);
+      }
     }
   }
 
