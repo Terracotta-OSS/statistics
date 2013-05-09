@@ -39,8 +39,8 @@ public class EventParameterSimpleMovingAverageTest {
   @Test
   public void testNoEventsAverage() {
     assertThat(new EventParameterSimpleMovingAverage(1, TimeUnit.SECONDS).average(), is(Double.NaN));
-    assertThat(new EventParameterSimpleMovingAverage(1, TimeUnit.SECONDS).minimum(), nullValue());
-    assertThat(new EventParameterSimpleMovingAverage(1, TimeUnit.SECONDS).maximum(), nullValue());
+    assertThat(new EventParameterSimpleMovingAverage(1, TimeUnit.SECONDS).minimum(), is(Long.MIN_VALUE));
+    assertThat(new EventParameterSimpleMovingAverage(1, TimeUnit.SECONDS).maximum(), is(Long.MAX_VALUE));
   }
   
   @Test
@@ -58,8 +58,8 @@ public class EventParameterSimpleMovingAverageTest {
     average.event(Time.time(), 1L);
     SOURCE.advanceTime(300, TimeUnit.MILLISECONDS);
     assertThat(average.average(), is(Double.NaN));
-    assertThat(average.minimum(), nullValue());
-    assertThat(average.maximum(), nullValue());
+    assertThat(average.minimum(), is(Long.MIN_VALUE));
+    assertThat(average.maximum(), is(Long.MAX_VALUE));
   }
 
   @Test
@@ -90,7 +90,7 @@ public class EventParameterSimpleMovingAverageTest {
     assertThat(average.maximum(), is(3L));
     SOURCE.advanceTime(50, TimeUnit.MILLISECONDS);
     assertThat(average.average(), is(Double.NaN));
-    assertThat(average.minimum(), nullValue());
-    assertThat(average.maximum(), nullValue());
+    assertThat(average.minimum(), is(Long.MIN_VALUE));
+    assertThat(average.maximum(), is(Long.MAX_VALUE));
   }
 }

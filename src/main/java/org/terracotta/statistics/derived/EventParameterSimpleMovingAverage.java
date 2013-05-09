@@ -86,6 +86,10 @@ public class EventParameterSimpleMovingAverage implements ChainedEventObserver {
     };
   }
   
+  /**
+   * Average.
+   * @return Double.NaN if no values exists. 
+   */
   public final double average() {
     long startTime = time() - windowSize;
     
@@ -111,12 +115,16 @@ public class EventParameterSimpleMovingAverage implements ChainedEventObserver {
     }
   }
   
+  /**
+   * Max
+   * @return Long.MAX_VALUE if no values exist. 
+   */
   public final Long maximum() {
     long startTime = time() - windowSize;
     
     AveragePartition current = activePartition.get();
     if (current.isBefore(startTime)) {
-      return null;
+      return Long.MAX_VALUE;
     } else {
       long maximum = current.maximum();
       for (Iterator<AveragePartition> it = archive.iterator(); it.hasNext(); ) {
@@ -134,12 +142,16 @@ public class EventParameterSimpleMovingAverage implements ChainedEventObserver {
     }
   }
   
+  /**
+   * Min
+   * @return Long.MIN_VALUE if no values exist
+   */
   public final Long minimum() {
     long startTime = time() - windowSize;
     
     AveragePartition current = activePartition.get();
     if (current.isBefore(startTime)) {
-      return null;
+      return Long.MIN_VALUE;
     } else {
       long minimum = current.minimum();
       for (Iterator<AveragePartition> it = archive.iterator(); it.hasNext(); ) {
