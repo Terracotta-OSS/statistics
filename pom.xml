@@ -118,6 +118,6 @@
 
   <scm>
     <connection>scm:svn:http://svn.terracotta.org/svn/forge/projects/statistics/trunk</connection>
-    <developerConnection>scm:svn:https://svn.terracotta.org/svn/forge/projects/statistics/trunk</developerConnection>
+    <developerConnection>scm:svn:https://svn.terracotta.org/repo/forge/projects/statistics/trunk</developerConnection>
   </scm>
 </project>
