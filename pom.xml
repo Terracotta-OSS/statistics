@@ -115,4 +115,9 @@
       <url>http://www.terracotta.org/download/reflector/releases</url>
     </pluginRepository> 
   </pluginRepositories>
+
+  <scm>
+    <connection>scm:svn:http://svn.terracotta.org/svn/forge/projects/statistics/trunk</connection>
+    <developerConnection>scm:svn:https://svn.terracotta.org/svn/forge/projects/statistics/trunk</developerConnection>
+  </scm>
 </project>
