@@ -18,13 +18,13 @@
     <artifactId>forge-parent</artifactId>
     <groupId>org.terracotta.forge</groupId>
     <version>3.0</version>
-    <relativePath/>
+    <relativePath />
   </parent>
 
   <name>Terracotta Statistics</name>
   <groupId>org.terracotta.internal</groupId>
   <artifactId>statistics</artifactId>
-  <version>1.1-SNAPSHOT</version>
+  <version>1.0.1</version>
   <packaging>jar</packaging>
 
   <dependencies>
@@ -65,14 +65,14 @@
             <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense">
               <licenseFamilyCategory>CC</licenseFamilyCategory>
               <licenseFamilyName>Creative Commons CC0 1.0 Universal</licenseFamilyName>
-              <notes></notes>
+              <notes />
               <patterns>
                 <pattern>http://creativecommons.org/publicdomain/zero/1.0/</pattern>
               </patterns>
             </license>            
           </licenses>
           <licenseFamilies>
-            <licenseFamily implementation="org.apache.rat.license.Apache20LicenseFamily"/>
+            <licenseFamily implementation="org.apache.rat.license.Apache20LicenseFamily" />
             <licenseFamily implementation="org.apache.rat.license.SimpleLicenseFamily">
               <familyName>Creative Commons CC0 1.0 Universal</familyName>
             </licenseFamily>
@@ -117,7 +117,7 @@
   </pluginRepositories>
 
   <scm>
-    <connection>scm:svn:http://svn.terracotta.org/svn/forge/projects/statistics/trunk</connection>
-    <developerConnection>scm:svn:https://svn.terracotta.org/repo/forge/projects/statistics/trunk</developerConnection>
+    <connection>scm:svn:http://svn.terracotta.org/svn/forge/projects/statistics/tags/statistics-1.0.1</connection>
+    <developerConnection>scm:svn:https://svn.terracotta.org/repo/forge/projects/statistics/tags/statistics-1.0.1</developerConnection>
   </scm>
 </project>
