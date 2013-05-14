@@ -24,7 +24,7 @@
   <name>Terracotta Statistics</name>
   <groupId>org.terracotta.internal</groupId>
   <artifactId>statistics</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.2-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <dependencies>
@@ -117,7 +117,7 @@
   </pluginRepositories>
 
   <scm>
-    <connection>scm:svn:http://svn.terracotta.org/svn/forge/projects/statistics/tags/statistics-1.0.1</connection>
-    <developerConnection>scm:svn:https://svn.terracotta.org/repo/forge/projects/statistics/tags/statistics-1.0.1</developerConnection>
+    <connection>scm:svn:http://svn.terracotta.org/svn/forge/projects/statistics/trunk</connection>
+    <developerConnection>scm:svn:https://svn.terracotta.org/repo/forge/projects/statistics/trunk</developerConnection>
   </scm>
 </project>
