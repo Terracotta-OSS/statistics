@@ -17,6 +17,9 @@ package org.terracotta.statistics.derived;
 
 import java.util.EnumSet;
 import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.terracotta.statistics.AbstractSourceStatistic;
 import org.terracotta.statistics.jsr166e.ThreadLocalRandom;
 import org.terracotta.statistics.observer.ChainedEventObserver;
@@ -27,6 +30,8 @@ import org.terracotta.statistics.observer.ChainedOperationObserver;
  * @author cdennis
  */
 public class LatencySampling<T extends Enum<T>> extends AbstractSourceStatistic<ChainedEventObserver> implements ChainedOperationObserver<T> {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(LatencySampling.class);
 
   private final ThreadLocal<Long> operationStartTime = new ThreadLocal<Long>();
   private final Set<T> targetOperations;
@@ -54,8 +59,12 @@ public class LatencySampling<T extends Enum<T>> extends AbstractSourceStatistic<
       if (start != null) {
         long latency = time - start.longValue();
         if (!derivedStatistics.isEmpty()) {
-          for (ChainedEventObserver observer : derivedStatistics) {
-            observer.event(time, latency);
+          if (latency < 0) {
+            LOGGER.info("Dropping {} event with negative latency {} (possible backwards nanoTime() movement)", result, time);
+          } else {
+            for (ChainedEventObserver observer : derivedStatistics) {
+              observer.event(time, latency);
+            }
           }
         }
       }
