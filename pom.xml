@@ -17,7 +17,7 @@
   <parent>
     <artifactId>forge-parent</artifactId>
     <groupId>org.terracotta.forge</groupId>
-    <version>3.0</version>
+    <version>3.7</version>
     <relativePath />
   </parent>
 
@@ -115,6 +115,20 @@
       <url>http://www.terracotta.org/download/reflector/releases</url>
     </pluginRepository> 
   </pluginRepositories>
+
+  <distributionManagement>
+    <repository>
+      <id>terracotta-os-releases</id>
+      <name>Terracotta OS Releases Repository</name>
+      <url>${terracotta-os-releases-url}</url>
+    </repository>
+    <snapshotRepository>
+      <id>terracotta-os-snapshots</id>
+      <uniqueVersion>false</uniqueVersion>
+      <name>Terracotta OS Snapshots Repository</name>
+      <url>${terracotta-os-snapshots-url}</url>
+    </snapshotRepository>
+  </distributionManagement>
 
   <scm>
     <connection>scm:svn:http://svn.terracotta.org/svn/forge/projects/statistics/trunk</connection>
