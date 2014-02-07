@@ -25,7 +25,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 abstract class AbstractTreeNode implements TreeNode {
 
-  private final CopyOnWriteArraySet<TreeNode> children = new CopyOnWriteArraySet<TreeNode>();
+  private final CopyOnWriteArraySet<AbstractTreeNode> children = new CopyOnWriteArraySet<AbstractTreeNode>();
   
   public boolean addChild(AbstractTreeNode child) {
     synchronized (this) {
@@ -64,7 +64,7 @@ abstract class AbstractTreeNode implements TreeNode {
   }
 
   @Override
-  public Set<? extends TreeNode> getChildren() {
+  public Set<? extends AbstractTreeNode> getChildren() {
     return Collections.unmodifiableSet(children);
   }
 
@@ -103,4 +103,13 @@ abstract class AbstractTreeNode implements TreeNode {
 
   abstract Collection<ContextListener> getListeners();
 
+  @Override
+  public void clean() {
+    for (AbstractTreeNode child : getChildren()) {
+      removeChild(child);
+    }
+    for (AbstractTreeNode parent : getAncestors()) {
+      parent.removeChild(this);
+    }
+  }
 }

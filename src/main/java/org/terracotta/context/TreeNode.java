@@ -26,7 +26,7 @@ import java.util.Set;
  * with a Java object and to information regarding the contexts position within
  * the overall context tree or trees.
  */
-public interface TreeNode {
+public interface TreeNode extends WeakIdentityHashMap.Cleanable {
   
   /**
    * Returns the immediate children of this context.

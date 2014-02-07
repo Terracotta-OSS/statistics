@@ -20,26 +20,42 @@ import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class WeakIdentityHashMap<K, V> {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(WeakIdentityHashMap.class);
+  
   private final ReferenceQueue<K> referenceQueue = new ReferenceQueue<K>();
   private final ConcurrentHashMap<Reference<K>, V> backing = new ConcurrentHashMap<Reference<K>, V>();
 
   public V get(K key) {
     clean();
-    return backing.get(new IdentityWeakReference<K>(key));
+    return backing.get(createReference(key, null));
   }
 
   public V putIfAbsent(K key, V value) {
     clean();
-    return backing.putIfAbsent(new IdentityWeakReference<K>(key, referenceQueue), value);
+    return backing.putIfAbsent(createReference(key, referenceQueue), value);
   }
 
   private void clean() {
     Reference<? extends K> ref;
     while ((ref = referenceQueue.poll()) != null) {
-      backing.remove(ref);
+      V dead = backing.remove(ref);
+      if (dead instanceof Cleanable) {
+        try {
+          ((Cleanable) dead).clean();
+        } catch (Throwable t) {
+          LOGGER.warn("Cleaning failed with : {}", t);
+        }
+      }
     }
+  }
+  
+  protected Reference<K> createReference(K key, ReferenceQueue<? super K> queue) {
+    return new IdentityWeakReference<K>(key, queue);
   }
   
   static class IdentityWeakReference<T> extends WeakReference<T> {
@@ -72,5 +88,9 @@ public class WeakIdentityHashMap<K, V> {
         return false;
       }
     }
+  }
+  
+  public interface Cleanable {
+    void clean();
   }
 }

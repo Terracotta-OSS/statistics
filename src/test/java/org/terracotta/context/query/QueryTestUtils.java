@@ -85,6 +85,11 @@ public class QueryTestUtils {
     public String toTreeString() {
       throw new UnsupportedOperationException("Not supported yet.");
     }
+
+    @Override
+    public void clean() {
+      throw new UnsupportedOperationException("Not supported yet.");
+    }
   }
   
   static class ImmutableContextElement implements ContextElement {
