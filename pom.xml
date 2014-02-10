@@ -22,13 +22,10 @@
   <name>Terracotta Statistics</name>
   <groupId>org.terracotta.internal</groupId>
   <artifactId>statistics</artifactId>
-  <version>1.0.2</version>
+  <version>1.0.3-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <properties>
-    <metadata.build.jenkins.url>http://jenkins.terracotta.eur.ad.sag:8080/job/statistics_releaser/1/</metadata.build.jenkins.url>
-    <metadata.build.maven.active.profiles>terracotta-repositories,release,tc-publish</metadata.build.maven.active.profiles>
-    <metadata.svn.revision>42671</metadata.svn.revision>
   </properties>
 
   <dependencies>
@@ -135,7 +132,7 @@
   </distributionManagement>
 
   <scm>
-    <connection>scm:svn:http://svn.terracotta.org/svn/forge/projects/statistics/tags/release-1.0.2</connection>
-    <developerConnection>scm:svn:https://svn.terracotta.org/repo/forge/projects/statistics/tags/release-1.0.2</developerConnection>
+    <connection>scm:svn:http://svn.terracotta.org/svn/forge/projects/statistics/trunk</connection>
+    <developerConnection>scm:svn:https://svn.terracotta.org/repo/forge/projects/statistics/trunk</developerConnection>
   </scm>
 </project>
