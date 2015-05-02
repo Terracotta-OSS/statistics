@@ -26,6 +26,16 @@ import org.junit.Test;
 public class ExponentialHistogramTest {
   
   @Test
+  public void testPerformance() {
+    ExponentialHistogram eh = new ExponentialHistogram(0.7f, 7100);
+    long start = System.nanoTime();
+    for (int i = 0; i < 142000; i++) {
+      eh.insert(i);
+    }
+    long last = System.nanoTime() - start;
+    System.out.println(last);
+  }
+  @Test
   public void testMousaviZanioloCounting() {
     ExponentialHistogram eh = new ExponentialHistogram(0.5f, 35);
     inject(eh, 16, 25);
@@ -37,15 +47,15 @@ public class ExponentialHistogramTest {
     inject(eh, 1, 53);
     inject(eh, 1, 55);
     assertThat(eh.count(), is(30L));
-    assertThat(eh.toString(), is("count = 30 : [[1@55], [1@53], [2@51], [2@48], [4@43], [4@39], [8@34], [16@25]]"));
+    assertThat(eh.toString(), is("count = 30 : [1@55], [1@53], [2@51], [2@48], [4@43], [4@39], [8@34], [16@25]"));
     
     eh.insertAndExpire(58);
     assertThat(eh.count(), is(31L));
-    assertThat(eh.toString(), is("count = 31 : [[1@58], [1@55], [1@53], [2@51], [2@48], [4@43], [4@39], [8@34], [16@25]]"));
+    assertThat(eh.toString(), is("count = 31 : [1@58], [1@55], [1@53], [2@51], [2@48], [4@43], [4@39], [8@34], [16@25]"));
 
     eh.insertAndExpire(60);
     assertThat(eh.count(), is(20L));
-    assertThat(eh.toString(), is("count = 20 : [[1@60], [1@58], [2@55], [4@51], [8@43], [8@34]]"));
+    assertThat(eh.toString(), is("count = 20 : [1@60], [1@58], [2@55], [4@51], [8@43], [8@34]"));
   }
 
   @Test
@@ -57,7 +67,7 @@ public class ExponentialHistogramTest {
     inject(ehl, 1, 53);
     inject(ehl, 1, 55);
     assertThat(ehl.count(), is(10L));
-    assertThat(ehl.toString(), is("count = 10 : [[1@55], [1@53], [2@52], [4@48], [4@39]]"));
+    assertThat(ehl.toString(), is("count = 10 : [1@55], [1@53], [2@52], [4@48], [4@39]"));
     
     ExponentialHistogram ehr = new ExponentialHistogram(0.5f, Long.MAX_VALUE);
     inject(ehr, 4, 13);
@@ -68,11 +78,11 @@ public class ExponentialHistogramTest {
     inject(ehr, 1, 56);
     inject(ehr, 1, 58);
     assertThat(ehr.count(), is(13L));
-    assertThat(ehr.toString(), is("count = 13 : [[1@58], [1@56], [1@50], [2@32], [2@29], [4@25], [4@13]]"));
+    assertThat(ehr.toString(), is("count = 13 : [1@58], [1@56], [1@50], [2@32], [2@29], [4@25], [4@13]"));
     
     ExponentialHistogram eh = new ExponentialHistogram(ehl, ehr);
     assertThat(eh.count(), is(23L));
-    assertThat(eh.toString(), is("count = 23 : [[1@58], [1@56], [1@55], [2@53], [2@52], [4@48], [8@39], [8@25]]"));
+    assertThat(eh.toString(), is("count = 23 : [1@58], [1@56], [1@55], [2@53], [2@52], [4@48], [8@39], [8@25]"));
   }
   
   private static void inject(ExponentialHistogram eh, int count, int before) {

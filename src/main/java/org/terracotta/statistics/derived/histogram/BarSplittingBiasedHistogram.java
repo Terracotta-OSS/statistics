@@ -35,6 +35,8 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
   private final double alphaRho;
   private final List<Bar> bars;
   
+  private long size;
+  
   public BarSplittingBiasedHistogram(double maxCoefficient, double phi, int expansionFactor, int bucketCount, float barEpsilon, long window) {
     this.maxCoefficient = maxCoefficient;
     this.bucketCount = bucketCount;
@@ -60,12 +62,12 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
   public void event(long value, long time) {
     int barIndex = getBarIndex(value);
     Bar bar = bars.get(barIndex);
+    long before = bar.count();
     bar.insert(value, time);
+    bar.expire(time);
+    size += bar.count() - before;
     if (bar.count() > maxBarSize(barIndex)) {
       split(bar);
-    }
-    for (Bar b : bars) {
-      b.expire(time);
     }
   }
 
@@ -108,15 +110,18 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
     }
     throw new AssertionError();
   }
+
   private long maxBarSize(int barIndex) {
     return max(1L, (long) (maxCoefficient * size() * alphaRho * Math.pow(rho, barIndex)));
   }
 
   private void split(Bar x) {
-    if (bars.size() == barCount && !mergeBars()) {
-      return;
+    if (bars.size() < barCount || mergeBars()) {
+      long before = x.count();
+      Bar split = x.split(rho);
+      bars.add(bars.indexOf(x) + 1, split);
+      size += (x.count() + split.count()) - before;
     }
-    bars.add(bars.indexOf(x) + 1, x.split(rho));
   }
 
   private boolean mergeBars() {
@@ -152,7 +157,10 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
       //Priority #2: two adjacent bars with minimum aggregate size (< maxSize)
       Bar a = bars.remove(lowestAggregateIndex);
       Bar b = bars.remove(lowestAggregateIndex);
+      long before = a.count() + b.count();
+      Bar merge = a.merge(b);
       bars.add(lowestAggregateIndex, a.merge(b));
+      size += merge.count() - before;
       return true;
     } else {
       return false;
@@ -190,10 +198,6 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
   }
   
   private long size() {
-    long size = 0;
-    for (Bar b : bars) {
-      size += b.count();
-    }
     return size;
   }
 

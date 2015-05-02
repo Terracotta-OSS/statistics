@@ -246,7 +246,7 @@ public class BarSplittingHistogram implements Histogram<Double> {
     }
 
     public Bar split() {
-      ExponentialHistogram split = eh.split();
+      ExponentialHistogram split = eh.split(0.5f);
       long upperMinimum = (minimum + maximum) / 2;
       long upperMaximum = maximum;
       this.maximum = upperMinimum;
