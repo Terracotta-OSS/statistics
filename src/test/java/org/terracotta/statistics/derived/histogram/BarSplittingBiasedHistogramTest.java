@@ -29,7 +29,7 @@ public class BarSplittingBiasedHistogramTest {
   
   @Test
   public void test() throws IOException {
-    BarSplittingBiasedHistogram bsbh = new BarSplittingBiasedHistogram(0.6f, 20, 1000000);
+    BarSplittingBiasedHistogram bsbh = new BarSplittingBiasedHistogram(0.75f, 20, 1000000);
     long last = 3000L;
     for (int i = 0; i < 2000000; i++) {
       long start = System.nanoTime();
@@ -38,11 +38,11 @@ public class BarSplittingBiasedHistogramTest {
     }
     List<Bucket<Double>> buckets = bsbh.getBuckets();
     System.out.println("BUCKETS");
+    System.out.println(buckets.get(0).minimum() + ",0.0");
     for (Bucket<Double> b : buckets) {
       System.out.println(b.minimum() + "," + b.count() / (b.maximum() - b.minimum()));
     }
-    Bucket<Double> lastBucket = buckets.get(buckets.size() - 1);
-    System.out.println(lastBucket.maximum() + ",0.0");
+    System.out.println(buckets.get(buckets.size() - 1).maximum() + ",0.0");
     
     System.out.println("Minimum " + Arrays.toString(bsbh.getQuantileBounds(0)));
     System.out.println("Median " + Arrays.toString(bsbh.getQuantileBounds(0.5)));
