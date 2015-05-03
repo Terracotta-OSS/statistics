@@ -198,11 +198,11 @@ public class ExponentialHistogram {
   }
   
   private int boxSize(int index) {
-    int size = 1;
-    while (max(size) <= index) {
-      size <<= 1;
+    if (index < max(1)) {
+      return 1;
+    } else {
+      return 1 << ((index - 1) / mergeThreshold);
     }
-    return size;
   }
   
   public boolean isEmpty() {
