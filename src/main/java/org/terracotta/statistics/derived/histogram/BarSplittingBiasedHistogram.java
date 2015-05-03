@@ -17,6 +17,7 @@ package org.terracotta.statistics.derived.histogram;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
+import static java.lang.Math.nextUp;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -25,8 +26,6 @@ import java.util.ListIterator;
 public class BarSplittingBiasedHistogram implements Histogram<Double> {
   
   private final double maxCoefficient;
-  private final float barEpsilon;
-  private final long window;
   private final int barCount;
   private final int bucketCount;
   private final double phi;
@@ -43,8 +42,7 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
     this.barCount = bucketCount * expansionFactor;
     
     this.bars = new ArrayList<Bar>(barCount);
-    this.barEpsilon = barEpsilon;
-    this.window = window;
+    this.bars.add(new Bar(barEpsilon, window));
     this.phi = phi;
     this.alphaPhi = (phi == 1.0f) ? 1.0 / bucketCount : (1 - phi) / (1 - Math.pow(phi, bucketCount));
     this.rho = Math.pow(phi, 1.0 / expansionFactor);
@@ -112,7 +110,7 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
   }
 
   private long maxBarSize(int barIndex) {
-    return max(1L, (long) (maxCoefficient * size() * alphaRho * Math.pow(rho, barIndex)));
+    return (long) (maxCoefficient * size() * alphaRho * Math.pow(rho, barIndex));
   }
 
   private void split(Bar x) {
@@ -168,16 +166,6 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
   }
   
   private int getBarIndex(long value) {
-    if (bars.isEmpty()) {
-      Bar bar = new Bar(barEpsilon, window);
-      bars.add(bar);
-      return 0;
-    } else {
-      return searchForBarIndex(value);
-    }
-  }
-
-  private int searchForBarIndex(long value) {
     int low = 0;
     int high = bars.size() - 1;
 
@@ -219,7 +207,7 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
 
     public void insert(long value, long time) {
       minimum = Math.min(minimum, value);
-      maximum = Math.max(maximum, value + 1);
+      maximum = Math.max(maximum, nextUp(value));
       eh.insert(time);
     }
 
