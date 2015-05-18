@@ -29,11 +29,11 @@ public class ExponentialHistogramTest {
   public void testPerformance() {
     ExponentialHistogram eh = new ExponentialHistogram(0.7f, 7100);
     long start = System.nanoTime();
-    for (int i = 0; i < 142000; i++) {
+    for (int i = 0; i < 1000000; i++) {
       eh.insert(i);
     }
     long last = System.nanoTime() - start;
-    System.out.println(last);
+    System.out.println(((double) last) / 1000000);
   }
   @Test
   public void testMousaviZanioloCounting() {
@@ -80,9 +80,9 @@ public class ExponentialHistogramTest {
     assertThat(ehr.count(), is(13L));
     assertThat(ehr.toString(), is("count = 13 : [1@58], [1@56], [1@50], [2@32], [2@29], [4@25], [4@13]"));
     
-    ExponentialHistogram eh = new ExponentialHistogram(ehl, ehr);
-    assertThat(eh.count(), is(23L));
-    assertThat(eh.toString(), is("count = 23 : [1@58], [1@56], [1@55], [2@53], [2@52], [4@48], [8@39], [8@25]"));
+    ehl.merge(ehr);
+    assertThat(ehl.count(), is(23L));
+    assertThat(ehl.toString(), is("count = 23 : [1@58], [1@56], [1@55], [2@53], [2@52], [4@48], [8@39], [8@25]"));
   }
   
   private static void inject(ExponentialHistogram eh, int count, int before) {
