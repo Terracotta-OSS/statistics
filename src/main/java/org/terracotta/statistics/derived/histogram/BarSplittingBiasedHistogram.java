@@ -63,8 +63,9 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
     long before = bar.count();
     bar.insert(value, time);
     bar.expire(time);
-    size += bar.count() - before;
-    if (bar.count() > maxBarSize(barIndex)) {
+    long after = bar.count();
+    size += (after - before);
+    if (after > maxBarSize(barIndex)) {
       split(bar);
     }
   }

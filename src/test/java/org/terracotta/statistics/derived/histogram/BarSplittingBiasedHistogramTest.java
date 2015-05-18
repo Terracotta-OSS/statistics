@@ -18,6 +18,7 @@ package org.terracotta.statistics.derived.histogram;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import org.junit.Test;
 import org.terracotta.statistics.derived.histogram.Histogram.Bucket;
 
@@ -28,7 +29,7 @@ import org.terracotta.statistics.derived.histogram.Histogram.Bucket;
 public class BarSplittingBiasedHistogramTest {
   
   @Test
-  public void test() throws IOException {
+  public void testSelf() throws IOException {
     BarSplittingBiasedHistogram bsbh = new BarSplittingBiasedHistogram(0.75f, 20, 1000000);
     long last = 3000L;
     for (int i = 0; i < 2000000; i++) {
@@ -53,5 +54,21 @@ public class BarSplittingBiasedHistogramTest {
     System.out.println("99.99%ile " + Arrays.toString(bsbh.getQuantileBounds(0.9999)));
     System.out.println("99.999%ile " + Arrays.toString(bsbh.getQuantileBounds(0.99999)));
     System.out.println("Maximum " + Arrays.toString(bsbh.getQuantileBounds(1.0)));
+  }
+
+  @Test
+  public void testData() throws IOException {
+    BarSplittingBiasedHistogram bsbh = new BarSplittingBiasedHistogram(0.75f, 20, 1000000);
+    Random rndm = new Random();
+    long[] data = new long[2000000];
+    for (int i = 0; i < data.length; i++) {
+      data[i] = (long) (Math.abs(rndm.nextGaussian()) * 3000L);
+    }
+    long start = System.nanoTime();
+    for (int i = 0; i < 2000000; i++) {
+      bsbh.event(data[i], i);
+    }
+    long total = System.nanoTime() - start;
+    System.out.println(((double) total) / data.length);
   }
 }
