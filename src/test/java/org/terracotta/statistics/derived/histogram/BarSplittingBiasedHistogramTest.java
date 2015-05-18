@@ -64,11 +64,17 @@ public class BarSplittingBiasedHistogramTest {
     for (int i = 0; i < data.length; i++) {
       data[i] = (long) (Math.abs(rndm.nextGaussian()) * 3000L);
     }
-    long start = System.nanoTime();
-    for (int i = 0; i < 2000000; i++) {
-      bsbh.event(data[i], i);
+    final int cycles = 10;
+    long fullStart = System.nanoTime();
+    for (int c = 0; c < cycles; c++) {
+      long start = System.nanoTime();
+      for (int i = 0; i < data.length; i++) {
+        bsbh.event(data[i], i);
+      }
+      long total = System.nanoTime() - start;
+      System.out.println("\t" + c + " Mean Time (ns): " + ((double) total) / data.length);
     }
-    long total = System.nanoTime() - start;
-    System.out.println(((double) total) / data.length);
+    long fullEnd = System.nanoTime() - fullStart;
+    System.out.println("Mean Time (ns): " + ((double) fullEnd) / (cycles * data.length));
   }
 }

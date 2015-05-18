@@ -15,29 +15,24 @@
  */
 package org.terracotta.statistics.derived.histogram;
 
-import static java.lang.Math.max;
-import static java.lang.Math.min;
 import static java.lang.Math.nextUp;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 
 public class BarSplittingBiasedHistogram implements Histogram<Double> {
   
-  private final double maxCoefficient;
   private final int barCount;
   private final int bucketCount;
   private final double phi;
   private final double alphaPhi;
   private final double rho;
-  private final double alphaRho;
   private final List<Bar> bars;
+  private final double[] maxSizeTable;
   
   private long size;
   
   public BarSplittingBiasedHistogram(double maxCoefficient, double phi, int expansionFactor, int bucketCount, float barEpsilon, long window) {
-    this.maxCoefficient = maxCoefficient;
     this.bucketCount = bucketCount;
     this.barCount = bucketCount * expansionFactor;
     
@@ -46,7 +41,12 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
     this.phi = phi;
     this.alphaPhi = (phi == 1.0f) ? 1.0 / bucketCount : (1 - phi) / (1 - Math.pow(phi, bucketCount));
     this.rho = Math.pow(phi, 1.0 / expansionFactor);
-    this.alphaRho = (rho == 1.0f) ? 1.0 / barCount : (1 - rho) / (1 - Math.pow(rho, barCount));
+    double alphaRho = (rho == 1.0f) ? 1.0 / barCount : (1 - rho) / (1 - Math.pow(rho, barCount));
+    
+    this.maxSizeTable = new double[barCount];
+    for (int i = 0; i < barCount; i++) {
+      this.maxSizeTable[i] = maxCoefficient * alphaRho * Math.pow(rho, i);
+    }
   }
 
   public BarSplittingBiasedHistogram(int bucketCount, long window) {
@@ -66,7 +66,7 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
     long after = bar.count();
     size += (after - before);
     if (after > maxBarSize(barIndex)) {
-      split(bar);
+      split(bar, barIndex);
     }
   }
 
@@ -111,58 +111,47 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
   }
 
   private long maxBarSize(int barIndex) {
-    return (long) (maxCoefficient * size() * alphaRho * Math.pow(rho, barIndex));
+    return (long) (size() * maxSizeTable[barIndex]);
   }
 
-  private void split(Bar x) {
-    if (bars.size() < barCount || mergeBars()) {
+  private void split(Bar x, int xIndex) {
+    int mergePoint = Integer.MAX_VALUE;
+    if (bars.size() < barCount || (mergePoint = mergeBars()) >= 0) {
       long before = x.count();
       Bar split = x.split(rho);
-      bars.add(bars.indexOf(x) + 1, split);
       size += (x.count() + split.count()) - before;
+
+      if (xIndex < mergePoint) {
+        bars.add(xIndex + 1, split);
+      } else if (xIndex > mergePoint) {
+        bars.add(xIndex, split);
+      }
     }
   }
 
-  private boolean mergeBars() {
+  private int mergeBars() {
     int lowestAggregateIndex = -1;
     double lowestAggregate = Double.POSITIVE_INFINITY;
-    ListIterator<Bar> it = bars.listIterator();
-    if (!it.hasNext()) {
-      return false;
-    }
-    int currentIndex = it.nextIndex();
-    Bar current = it.next();
-    while (it.hasNext()) {
-      int nextIndex = it.nextIndex();
-      Bar next = it.next();
-      if (current.isEmpty() && next.isEmpty()) {
-        //Priority #1: two adjacent empty bars
-        bars.remove(currentIndex);
-        bars.remove(currentIndex);
-        return true;
-      } else {
-        //next != 0, current != 0
-        double aggregate = (((double) current.count()) / Math.pow(rho, currentIndex)) + (((double) next.count()) / Math.pow(rho, nextIndex));
-        if (aggregate < lowestAggregate) {
-          lowestAggregate = aggregate;
-          lowestAggregateIndex = currentIndex;
-        }
+
+    for (int index = 0; index < bars.size() - 1; index++) {
+      Bar current = bars.get(index);
+      Bar next = bars.get(index + 1);
+      double aggregate = (((double) current.count()) / maxSizeTable[index]) + (((double) next.count()) / maxSizeTable[index + 1]);
+      if (aggregate < lowestAggregate) {
+        lowestAggregate = aggregate;
+        lowestAggregateIndex = index;
       }
-      currentIndex = nextIndex;
-      current = next;
     }
     
     if (lowestAggregateIndex >= 0 && (bars.get(lowestAggregateIndex).count() + bars.get(lowestAggregateIndex + 1).count() < maxBarSize(lowestAggregateIndex))) {
-      //Priority #2: two adjacent bars with minimum aggregate size (< maxSize)
-      Bar a = bars.remove(lowestAggregateIndex);
-      Bar b = bars.remove(lowestAggregateIndex);
-      long before = a.count() + b.count();
-      Bar merge = a.merge(b);
-      bars.add(lowestAggregateIndex, a.merge(b));
-      size += merge.count() - before;
-      return true;
+      Bar upper = bars.remove(lowestAggregateIndex + 1);
+      Bar lower = bars.get(lowestAggregateIndex);
+      long before = lower.count() + upper.count();
+      lower.merge(upper);
+      size += lower.count() - before;
+      return lowestAggregateIndex + 1;
     } else {
-      return false;
+      return -1;
     }
   }
   
@@ -170,19 +159,20 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
     int low = 0;
     int high = bars.size() - 1;
 
+    Bar bar;
     int mid = 0;
-    while (low <= high) {
-        mid = (low + high) >>> 1;
-        Bar bar = bars.get(mid);
-        int cmp = bar.compareTo(value);
-
-        if (cmp < 0)
-            low = mid + 1;
-        else if (cmp > 0)
-            high = mid - 1;
-        else
-            return mid;
-    }
+    do {
+      mid = (high + low) >>> 1;
+      bar = bars.get(mid);
+      if (value >= bar.maximum()) {
+        low = mid + 1;
+      } else if (value < bar.minimum()) {
+        high = mid - 1;
+      } else {
+        return mid;
+      }
+    } while (low <= high);
+    
     return mid;
   }
   
@@ -207,8 +197,12 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
     }
 
     public void insert(long value, long time) {
-      minimum = Math.min(minimum, value);
-      maximum = Math.max(maximum, nextUp(value));
+      if (value < minimum) {
+        minimum = value;
+      }
+      if (value >= maximum) {
+        maximum = nextUp((double) value);
+      }
       eh.insert(time);
     }
 
@@ -224,32 +218,24 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
       return eh.count();
     }
 
-    public int compareTo(long value) {
-      if (value >= maximum) {
-        return -1;
-      } if (value < minimum) {
-        return 1;
-      } else {
-        return 0;
-      }
-    }
-
     @Override
     public String toString() {
       return "[" + minimum + " --" + count() + "-> " + maximum + "]";
     }
 
     public Bar split(double rho) {
-      ExponentialHistogram split = eh.split((float) (1.0 / (1.0 + rho)));
-      double upperMinimum = (minimum + (rho * maximum)) / (1.0 + rho);
+      double ratio = (rho / (1.0 + rho));
+      ExponentialHistogram split = eh.split((float) ratio);
+      double upperMinimum = minimum + ((maximum - minimum) * ratio);
       double upperMaximum = maximum;
       this.maximum = upperMinimum;
       
       return new Bar(split, upperMinimum, upperMaximum);
     }
 
-    public Bar merge(Bar b) {
-      return new Bar(new ExponentialHistogram(eh, b.eh), min(minimum, b.minimum), max(maximum, b.maximum));
+    public void merge(Bar higher) {
+      eh.merge(higher.eh);
+      maximum = higher.maximum;
     }
 
     public double minimum() {
