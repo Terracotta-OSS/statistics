@@ -36,8 +36,10 @@ public class ExponentialHistogram {
   private final long window;
   
   private long[] boxes;
-  private int total;
-  private int last;
+  private int[] insert;
+  
+  private long total;
+  private long last;
   
   public ExponentialHistogram(float epsilon, long window) {
     this((int) (Math.ceil(Math.ceil(1 / epsilon) / 2) + 1), window);
@@ -47,34 +49,39 @@ public class ExponentialHistogram {
     this.mergeThreshold = mergeThreshold;
     this.window = window;
     this.boxes = new long[0];
+    this.insert = new int[0];
   }
   
   public ExponentialHistogram(ExponentialHistogram a, ExponentialHistogram b) {
     this.mergeThreshold = a.mergeThreshold;
     this.window = a.window;
     this.boxes = new long[0];
+    this.insert = new int[0];
     this.total = a.total + b.total;
     
     long[] overflow = new long[0];
-    for (int i = 1; ; i <<= 1) {
-      int min = min(i);
-      int max = max(i);
+    for (int i = 0; ; i++) {
+      int min = min_l(i);
+      int max = max_l(i);
       long[] aRange = range(a.boxes, min, max);
       long[] bRange = range(b.boxes, min, max);
       if (aRange.length == 0 && bRange.length == 0 && overflow.length == 0) {
+        last = 1 << (i - 1);
         return;
       } else {
-        last = i;
-        overflow = insert(min, max, aRange, bRange, overflow);
+        overflow = insert(i, min, max, aRange, bRange, overflow);
       }
     }
   }
   
-  private long[] insert(int min, int max, long[] ... arrays) {
+  private long[] insert(int logSize, int min, int max, long[] ... arrays) {
     if (max > boxes.length) {
       long[] newBoxes = copyOf(boxes, max);
+      int[] newInsert = copyOf(insert, insert.length + 1);
       fill(newBoxes, boxes.length, newBoxes.length, MIN_VALUE);
+      newInsert[insert.length] = max - 1;
       this.boxes = newBoxes;
+      this.insert = newInsert;
     }
 
     long[] merged = merge(arrays);
@@ -94,7 +101,11 @@ public class ExponentialHistogram {
     for (int i = 0; i < saved.length; i++) {
       boxes[max - (i + 1)] = saved[i];
     }
-
+    if (saved.length == (max - min)) {
+      insert[logSize] = max - 1;
+    } else {
+      insert[logSize] = max - (saved.length + 1);
+    }
     long[] overflow = new long[overflowed.length / 2];
     for (int i = 0; i < overflow.length; i++) {
       overflow[i] = overflowed[(i * 2) + 1];
@@ -126,36 +137,39 @@ public class ExponentialHistogram {
   }
   
   public void insert(long time) {
-    insert(1, time);
+    insert_l(0, time);
     total++;
   }
 
-  private void insert(int size, long time) {
-    int max = max(size);
+  private void insert_l(int logSize, long time) {
+    int max = max_l(logSize);
     if (max > boxes.length) {
       long[] newBoxes = copyOf(boxes, max);
+      int[] newInsert = copyOf(insert, insert.length + 1);
       fill(newBoxes, boxes.length, newBoxes.length - 1, MIN_VALUE);
+      newInsert[insert.length] = max - 2;
       this.boxes = newBoxes;
+      this.insert = newInsert;
       boxes[max - 1] = time;
     } else {
-      int min = min(size);
-      if (boxes[min] == MIN_VALUE) {
-        for (int i = min; i < max - 1 ; i++) {
-          if (boxes[i + 1] != MIN_VALUE) {
-            boxes[i] = time;
-            last = Math.max(size, last);
-            return;
-          }
+      int insertIndex = insert[logSize];
+      if (boxes[insertIndex] == Long.MIN_VALUE) {
+        boxes[insertIndex] = time;
+        last = Math.max(1 << logSize, last);
+        if (--insertIndex < min_l(logSize)) {
+          insertIndex = max - 1;
         }
-        boxes[max - 1] = time;
-        last = Math.max(size, last);
-      } else {
+        insert[logSize] = insertIndex;
+      } else{
         //no space available - time to merge
-        long boxUp = boxes[max - 2];
-        arraycopy(boxes, min, boxes, min + 2, max - min - 2);
-        boxes[min + 1] = time;
-        boxes[min] = MIN_VALUE;
-        insert(size << 1, boxUp);
+        boxes[insertIndex] = time;
+        if (--insertIndex < min_l(logSize)) {
+          insertIndex = max - 1;
+        }
+        long boxUp = boxes[insertIndex];
+        boxes[insertIndex] = MIN_VALUE;
+        insert[logSize] = insertIndex;
+        insert_l(logSize + 1, boxUp);
       }
     }
   }
@@ -166,42 +180,54 @@ public class ExponentialHistogram {
   }
   
   public void expire(long time) {
-    for (int i = boxes.length - 1; i >= 0; i--) {
-      long end = boxes[i];
-      if (end != MIN_VALUE) {
-        if (end <= time - window) {
-          total -= boxSize(i);
-          boxes[i] = MIN_VALUE;
-        } else {
-          last = boxSize(i);
-          return;
+    long threshold = time - window;
+    for (int logSize = insert.length - 1; logSize >= 0; logSize--) {
+      int insertIndex = insert[logSize];
+      for (int i = insertIndex; i >= min_l(logSize); i--) {
+        long end = boxes[i];
+        if (end != MIN_VALUE) {
+          if (end <= threshold) {
+            total -= 1 << logSize;
+            boxes[i] = MIN_VALUE;
+          } else {
+            last = 1 << logSize;
+            return;
+          }
+        }
+      }
+      for (int i = max_l(logSize) - 1; i > insertIndex; i--) {
+        long end = boxes[i];
+        if (end != MIN_VALUE) {
+          if (end <= threshold) {
+            total -= 1 << logSize;
+            boxes[i] = MIN_VALUE;
+          } else {
+            last = 1 << logSize;
+            return;
+          }
         }
       }
     }
     last = 0;
   }
 
-  private int min(int boxSize) {
-    if (boxSize == 1) {
+  private int start_l(int logSize) {
+    return insert[logSize] + 1;
+  }
+  
+  private int min_l(int logSize) {
+    if (logSize == 0) {
       return 0;
     } else {
-      return (Integer.numberOfTrailingZeros(boxSize) * mergeThreshold) + 1;
+      return (logSize * mergeThreshold) + 1;
     }
   }
   
-  private int max(int boxSize) {
-    if (boxSize == 1) {
+  private int max_l(int logSize) {
+    if (logSize == 0) {
       return mergeThreshold + 1; //1-size boxes have bigger merge thresholds?!
     } else {
-      return min(boxSize) + mergeThreshold;
-    }
-  }
-  
-  private int boxSize(int index) {
-    if (index < max(1)) {
-      return 1;
-    } else {
-      return 1 << ((index - 1) / mergeThreshold);
+      return ((logSize + 1) * mergeThreshold) + 1;
     }
   }
   
@@ -215,33 +241,55 @@ public class ExponentialHistogram {
   
   public ExponentialHistogram split(float fraction) {
     long[] originalBoxes = boxes;
+    int[] originalInsert = insert;
     
     ExponentialHistogram other = new ExponentialHistogram(mergeThreshold, window);
-    this.boxes = new long[max(1)];
+    this.boxes = new long[0];
+    this.insert = new int[0];
     this.total = 0;
 
-    for (int i = 0, size = 1; i < originalBoxes.length; i++) {
-      if (i >= max(size)) {
-        size <<= 1;
-      }
-      
-      long time = originalBoxes[i];
-      if (size == 1) {
-        if (other.total <= fraction * (other.total + this.total)) {
-          other.insert(1, time);
-          other.total += 1;
-        } else {
-          this.insert(1, time);
-          this.total += 1;
-        }
-      } else {
-        for (int split = 0; split < 2; split++) {
+    for (int logSize = 0; logSize < originalInsert.length; logSize++) {
+      for (int i = originalInsert[logSize] + 1; i < max_l(logSize); i++) {
+        long time = originalBoxes[i];
+        if (logSize == 0) {
           if (other.total <= fraction * (other.total + this.total)) {
-            other.insert(size >> 1, time);
-            other.total += size >> 1;
+            other.insert_l(0, time);
+            other.total += 1;
           } else {
-            this.insert(size >> 1, time);
-            this.total += size >> 1;
+            this.insert_l(0, time);
+            this.total += 1;
+          }
+        } else {
+          for (int split = 0; split < 2; split++) {
+            if (other.total <= fraction * (other.total + this.total)) {
+              other.insert_l(logSize - 1, time);
+              other.total += 1 << (logSize - 1);
+            } else {
+              this.insert_l(logSize - 1, time);
+              this.total += 1 << (logSize - 1);
+            }
+          }
+        }
+      }
+      for (int i = min_l(logSize); i < originalInsert[logSize] + 1; i++) {
+        long time = originalBoxes[i];
+        if (logSize == 0) {
+          if (other.total <= fraction * (other.total + this.total)) {
+            other.insert_l(0, time);
+            other.total += 1;
+          } else {
+            this.insert_l(0, time);
+            this.total += 1;
+          }
+        } else {
+          for (int split = 0; split < 2; split++) {
+            if (other.total <= fraction * (other.total + this.total)) {
+              other.insert_l(logSize - 1, time);
+              other.total += 1 << (logSize - 1);
+            } else {
+              this.insert_l(logSize - 1, time);
+              this.total += 1 << (logSize - 1);
+            }
           }
         }
       }
@@ -253,10 +301,18 @@ public class ExponentialHistogram {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("count = ").append(count()).append(" : ");
-    for (int i = 0; i < boxes.length; i++) {
-      long time = boxes[i];
-      if (time != MIN_VALUE) {
-        sb.append("[").append(boxSize(i)).append("@").append(time).append("], ");
+    for (int logSize = 0; logSize < insert.length; logSize++) {
+      for (int i = start_l(logSize); i < max_l(logSize); i++) {
+        long time = boxes[i];
+        if (time != MIN_VALUE) {
+          sb.append("[").append(1 << logSize).append("@").append(time).append("], ");
+        }
+      }
+      for (int i = min_l(logSize); i < start_l(logSize); i++) {
+        long time = boxes[i];
+        if (time != MIN_VALUE) {
+          sb.append("[").append(1 << logSize).append("@").append(time).append("], ");
+        }
       }
     }
     sb.delete(sb.length() - 2, sb.length());
