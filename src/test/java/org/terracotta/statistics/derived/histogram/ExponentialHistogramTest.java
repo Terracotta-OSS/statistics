@@ -49,11 +49,13 @@ public class ExponentialHistogramTest {
     assertThat(eh.count(), is(30L));
     assertThat(eh.toString(), is("count = 30 : [1@55], [1@53], [2@51], [2@48], [4@43], [4@39], [8@34], [16@25]"));
     
-    eh.insertAndExpire(58);
+    eh.insert(58);
+    eh.expire(58);
     assertThat(eh.count(), is(31L));
     assertThat(eh.toString(), is("count = 31 : [1@58], [1@55], [1@53], [2@51], [2@48], [4@43], [4@39], [8@34], [16@25]"));
 
-    eh.insertAndExpire(60);
+    eh.insert(60);
+    eh.expire(60);
     assertThat(eh.count(), is(20L));
     assertThat(eh.toString(), is("count = 20 : [1@60], [1@58], [2@55], [4@51], [8@43], [8@34]"));
   }
@@ -87,7 +89,7 @@ public class ExponentialHistogramTest {
   
   private static void inject(ExponentialHistogram eh, int count, int before) {
     for (int i = 0; i < count; i++) {
-      eh.insertAndExpire(before);
+      eh.insert(before);
     }
   }
 }
