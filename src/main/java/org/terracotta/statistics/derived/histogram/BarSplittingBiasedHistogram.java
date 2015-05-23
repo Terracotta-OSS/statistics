@@ -62,7 +62,6 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
     Bar bar = bars.get(barIndex);
     long before = bar.count();
     bar.insert(value, time);
-    bar.expire(time);
     long after = bar.count();
     size += (after - before);
     if (after > maxBarSize(barIndex)) {
@@ -110,8 +109,8 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
     throw new AssertionError();
   }
 
-  private long maxBarSize(int barIndex) {
-    return (long) (size() * maxSizeTable[barIndex]);
+  private double maxBarSize(int barIndex) {
+    return size() * maxSizeTable[barIndex];
   }
 
   private void split(Bar x, int xIndex) {

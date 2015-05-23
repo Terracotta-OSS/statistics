@@ -131,6 +131,7 @@ public class ExponentialHistogram {
   }
 
   private void insert_l(int initialLogSize, long time) {
+    long threshold = time - window;
     total += (1 << initialLogSize);
     for (int logSize = initialLogSize; ; logSize++) {
       ensureCapacity(logSize);
@@ -143,10 +144,14 @@ public class ExponentialHistogram {
       }
       insert[logSize] = insertIndex;
       
-      if (previous == MIN_VALUE) {
-        long finalSize = 1L << logSize;
-        if (finalSize > last) {
-          last = finalSize;
+      if (previous <= threshold) {
+        if (previous == MIN_VALUE) {
+          long finalSize = 1L << logSize;
+          if (finalSize > last) {
+            last = finalSize;
+          }
+        } else {
+          total -= 1 << logSize;
         }
         return;
       } else {
@@ -155,11 +160,6 @@ public class ExponentialHistogram {
         boxes[insertIndex] = MIN_VALUE;
       }
     }
-  }
-  
-  public void insertAndExpire(long time) {
-    expire(time);
-    insert(time);
   }
   
   public void expire(long time) {
