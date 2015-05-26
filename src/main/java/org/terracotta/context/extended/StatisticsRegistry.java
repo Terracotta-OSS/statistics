@@ -49,7 +49,7 @@ import static org.terracotta.context.query.QueryBuilder.queryBuilder;
 /**
  * @author Ludovic Orban
  */
-public class StatisticsContainer {
+public class StatisticsRegistry {
 
   private final Class<? extends OperationType> operationTypeClazz;
   private final Object contextObject;
@@ -61,12 +61,12 @@ public class StatisticsContainer {
   private final int historySize;
   private final long historyInterval;
   private final TimeUnit historyIntervalUnit;
-  private final List<ExposedStatistic> associations = new CopyOnWriteArrayList<ExposedStatistic>();
+  private final List<ExposedStatistic> registrations = new CopyOnWriteArrayList<ExposedStatistic>();
 
-  public StatisticsContainer(Class<? extends OperationType> operationTypeClazz, Object contextObject, ScheduledExecutorService executor, long averageWindowDuration,
-                             TimeUnit averageWindowUnit, int historySize, long historyInterval, TimeUnit historyIntervalUnit) {
+  public StatisticsRegistry(Class<? extends OperationType> operationTypeClazz, Object contextObject, ScheduledExecutorService executor, long averageWindowDuration,
+                            TimeUnit averageWindowUnit, int historySize, long historyInterval, TimeUnit historyIntervalUnit) {
     if (!operationTypeClazz.isEnum()) {
-      throw new IllegalArgumentException("StatisticsContainer operationTypeClazz must be enum");
+      throw new IllegalArgumentException("StatisticsRegistry operationTypeClazz must be enum");
     }
     this.operationTypeClazz = operationTypeClazz;
     this.contextObject = contextObject;
@@ -80,32 +80,32 @@ public class StatisticsContainer {
     discoverStatistics();
   }
 
-  public void associateCompoundOperation(OperationType operationType, Set<?> e, Map<String, Object> properties) {
+  public void registerCompoundOperation(OperationType operationType, Set<?> e, Map<String, Object> properties) {
     Result result = getCompoundOperation(operationType).compound((Set) e);
     ExposedStatistic exposedStatistic = new ExposedStatistic(operationType.operationName(), operationType.type(), operationType.tags(), properties, result);
     ContextManager.associate(exposedStatistic).withParent(contextObject);
-    associations.add(exposedStatistic);
+    registrations.add(exposedStatistic);
   }
 
-  public void associateCountOperation(OperationType operationType, Map<String, Object> properties) {
+  public void registerCountOperation(OperationType operationType, Map<String, Object> properties) {
     CountOperation<? extends Enum<?>> countOperation = getCompoundOperation(operationType).asCountOperation();
     ExposedStatistic exposedStatistic = new ExposedStatistic(operationType.operationName(), operationType.type(), operationType.tags(), properties, countOperation);
     ContextManager.associate(exposedStatistic).withParent(contextObject);
-    associations.add(exposedStatistic);
+    registrations.add(exposedStatistic);
   }
 
-  public void associateRatio(OperationType operationType, Set<?> numerator, Set<?> denominator, Map<String, Object> properties) {
+  public void registerRatio(OperationType operationType, Set<?> numerator, Set<?> denominator, Map<String, Object> properties) {
     SampledStatistic ratio = getCompoundOperation(operationType).ratioOf((Set) numerator, (Set) denominator);
     ExposedStatistic exposedStatistic = new ExposedStatistic(operationType.operationName(), operationType.type(), operationType.tags(), properties, ratio);
     ContextManager.associate(exposedStatistic).withParent(contextObject);
-    associations.add(exposedStatistic);
+    registrations.add(exposedStatistic);
   }
 
-  public void clearAssociations() {
-    for (ExposedStatistic association : associations) {
-      ContextManager.dissociate(association);
+  public void clearRegistrations() {
+    for (ExposedStatistic registration : registrations) {
+      ContextManager.dissociate(registration);
     }
-    associations.clear();
+    registrations.clear();
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
