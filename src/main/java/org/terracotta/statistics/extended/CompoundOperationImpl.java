@@ -117,6 +117,11 @@ public class CompoundOperationImpl<T extends Enum<T>> implements CompoundOperati
   }
 
   @Override
+  public CountOperation<T> asCountOperation() {
+    return new CountOperationImpl<T>(this);
+  }
+
+  @Override
   public SampledStatistic<Double> ratioOf(Set<T> numerator, Set<T> denominator) {
     @SuppressWarnings("unchecked")
     List<Set<T>> key = Arrays.<Set<T>>asList(EnumSet.copyOf(numerator), EnumSet.copyOf(denominator));

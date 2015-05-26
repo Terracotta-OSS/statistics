@@ -75,6 +75,21 @@ public final class NullCompoundOperation<T extends Enum<T>> implements CompoundO
     return NullOperation.instance();
   }
 
+  @Override
+  public CountOperation<T> asCountOperation() {
+    return new CountOperation<T>() {
+      @Override
+      public long value(T result) {
+        return -1L;
+      }
+
+      @Override
+      public long value(T... results) {
+        return -1L;
+      }
+    };
+  }
+
   /**
    * {@inheritDoc}
    */

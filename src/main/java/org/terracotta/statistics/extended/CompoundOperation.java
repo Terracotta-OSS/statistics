@@ -15,6 +15,7 @@
  */
 package org.terracotta.statistics.extended;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -47,6 +48,13 @@ public interface CompoundOperation<T extends Enum<T>> {
    * @return the result
    */
   Result compound(Set<T> results);
+
+  /**
+   * Count operation.
+   *
+   * @return the count operation
+   */
+  CountOperation<T> asCountOperation();
 
   /**
    * Ratio of.
