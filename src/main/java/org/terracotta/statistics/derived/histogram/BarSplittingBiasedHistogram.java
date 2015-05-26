@@ -26,7 +26,7 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
   private final int bucketCount;
   private final double phi;
   private final double alphaPhi;
-  private final double rho;
+  private final double ratio;
   private final List<Bar> bars;
   private final double[] maxSizeTable;
   
@@ -40,9 +40,10 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
     this.bars.add(new Bar(barEpsilon, window));
     this.phi = phi;
     this.alphaPhi = (phi == 1.0f) ? 1.0 / bucketCount : (1 - phi) / (1 - Math.pow(phi, bucketCount));
-    this.rho = Math.pow(phi, 1.0 / expansionFactor);
+
+    double rho = Math.pow(phi, 1.0 / expansionFactor);
     double alphaRho = (rho == 1.0f) ? 1.0 / barCount : (1 - rho) / (1 - Math.pow(rho, barCount));
-    
+    this.ratio = (rho / (1.0 + rho));
     this.maxSizeTable = new double[barCount];
     for (int i = 0; i < barCount; i++) {
       this.maxSizeTable[i] = maxCoefficient * alphaRho * Math.pow(rho, i);
@@ -117,7 +118,7 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
     int mergePoint = Integer.MAX_VALUE;
     if (bars.size() < barCount || (mergePoint = mergeBars()) >= 0) {
       long before = x.count();
-      Bar split = x.split(rho);
+      Bar split = x.split(ratio);
       size += (x.count() + split.count()) - before;
 
       if (xIndex < mergePoint) {
@@ -222,8 +223,7 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
       return "[" + minimum + " --" + count() + "-> " + maximum + "]";
     }
 
-    public Bar split(double rho) {
-      double ratio = (rho / (1.0 + rho));
+    public Bar split(double ratio) {
       ExponentialHistogram split = eh.split((float) ratio);
       double upperMinimum = minimum + ((maximum - minimum) * ratio);
       double upperMaximum = maximum;
