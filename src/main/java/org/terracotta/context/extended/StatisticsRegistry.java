@@ -21,6 +21,7 @@ import org.terracotta.context.query.Matcher;
 import org.terracotta.context.query.Matchers;
 import org.terracotta.context.query.Query;
 import org.terracotta.statistics.OperationStatistic;
+import org.terracotta.statistics.Time;
 import org.terracotta.statistics.extended.CompoundOperation;
 import org.terracotta.statistics.extended.CompoundOperationImpl;
 import org.terracotta.statistics.extended.CountOperation;
@@ -37,6 +38,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import static org.terracotta.context.query.Matchers.attributes;
@@ -54,7 +56,12 @@ public class StatisticsRegistry {
   private final Class<? extends OperationType> operationTypeClazz;
   private final Object contextObject;
   private final ConcurrentMap<OperationType, CompoundOperation<?>> standardOperations = new ConcurrentHashMap<OperationType, CompoundOperation<?>>();
+
   private final ScheduledExecutorService executor;
+  private final Runnable disableTask;
+  private volatile long timeToDisable;
+  private volatile TimeUnit timeToDisableUnit;
+  private volatile ScheduledFuture<?> disableStatus;
 
   private final long averageWindowDuration;
   private final TimeUnit averageWindowUnit;
@@ -64,20 +71,72 @@ public class StatisticsRegistry {
   private final List<ExposedStatistic> registrations = new CopyOnWriteArrayList<ExposedStatistic>();
 
   public StatisticsRegistry(Class<? extends OperationType> operationTypeClazz, Object contextObject, ScheduledExecutorService executor, long averageWindowDuration,
-                            TimeUnit averageWindowUnit, int historySize, long historyInterval, TimeUnit historyIntervalUnit) {
+                            TimeUnit averageWindowUnit, int historySize, long historyInterval, TimeUnit historyIntervalUnit, long timeToDisable, TimeUnit timeToDisableUnit) {
     if (!operationTypeClazz.isEnum()) {
       throw new IllegalArgumentException("StatisticsRegistry operationTypeClazz must be enum");
     }
     this.operationTypeClazz = operationTypeClazz;
     this.contextObject = contextObject;
-    this.executor = executor;
     this.averageWindowDuration = averageWindowDuration;
     this.averageWindowUnit = averageWindowUnit;
     this.historySize = historySize;
     this.historyInterval = historyInterval;
     this.historyIntervalUnit = historyIntervalUnit;
 
+    this.executor = executor;
+    this.timeToDisable = timeToDisable;
+    this.timeToDisableUnit = timeToDisableUnit;
+    this.disableTask = createDisableTask();
+    this.disableStatus = this.executor.scheduleAtFixedRate(disableTask, timeToDisable,
+        timeToDisable, timeToDisableUnit);
+
     discoverStatistics();
+  }
+
+  private Runnable createDisableTask() {
+    return new Runnable() {
+      @Override
+      public void run() {
+        long expireThreshold = Time.absoluteTime() - timeToDisableUnit.toMillis(timeToDisable);
+        for (CompoundOperation<?> o : standardOperations.values()) {
+          if (o instanceof CompoundOperationImpl<?>) {
+            ((CompoundOperationImpl<?>) o).expire(expireThreshold);
+          }
+        }
+
+      }
+    };
+  }
+
+
+  public synchronized void setTimeToDisable(long time, TimeUnit unit) {
+    timeToDisable = time;
+    timeToDisableUnit = unit;
+    if (disableStatus != null) {
+      disableStatus.cancel(false);
+      disableStatus = executor.scheduleAtFixedRate(disableTask, timeToDisable, timeToDisable,
+          timeToDisableUnit);
+    }
+  }
+
+  public synchronized void setAlwaysOn(boolean enabled) {
+    if (enabled) {
+      if (disableStatus != null) {
+        disableStatus.cancel(false);
+        disableStatus = null;
+      }
+      for (CompoundOperation<?> o : standardOperations.values()) {
+        o.setAlwaysOn(true);
+      }
+    } else {
+      if (disableStatus == null) {
+        disableStatus = executor.scheduleAtFixedRate(disableTask, 0, timeToDisable,
+            timeToDisableUnit);
+      }
+      for (CompoundOperation<?> o : standardOperations.values()) {
+        o.setAlwaysOn(false);
+      }
+    }
   }
 
   public void registerCompoundOperation(OperationType operationType, Set<?> e, Map<String, Object> properties) {
@@ -167,7 +226,7 @@ public class StatisticsRegistry {
 
   @SuppressWarnings("unchecked")
   private Set<OperationStatistic<?>> findStatistic(Query contextQuery, Class<?> type, String name,
-                                                                       final Set<String> tags) {
+                                                   final Set<String> tags) {
     Query q = queryBuilder().chain(contextQuery)
         .children().filter(context(identifier(subclassOf(OperationStatistic.class)))).build();
 

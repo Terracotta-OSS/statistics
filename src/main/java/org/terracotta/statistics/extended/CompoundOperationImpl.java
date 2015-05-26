@@ -223,7 +223,7 @@ public class CompoundOperationImpl<T extends Enum<T>> implements CompoundOperati
    * @param expiryTime the expiry time
    * @return true, if successful
    */
-  boolean expire(long expiryTime) {
+  public boolean expire(long expiryTime) {
     if (alwaysOn) {
       return false;
     } else {
