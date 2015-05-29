@@ -78,12 +78,12 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
   @Override
   public List<Histogram.Bucket<Double>> getBuckets() {
     List<Histogram.Bucket<Double>> buckets = new ArrayList<Histogram.Bucket<Double>>(bucketCount);
-    double targetSize = size() * alphaPhi;
+    double targetSize = size() * alphaPhi; // * phi^0
     Iterator<Bar> it = bars.iterator();
     Bar b = it.next();
     double minimum = b.minimum();
     double count = b.count();
-    for (int i = 0; i < bucketCount; i++) {
+    for (int i = 0; i < bucketCount - 1; i++) {
       while (count < targetSize && it.hasNext()) {
         count += (b = it.next()).count();
       }
@@ -95,6 +95,10 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
       count = surplus;
       targetSize *= phi;
     }
+    while (it.hasNext()) {
+      count += (b = it.next()).count();
+    }
+    buckets.add(new ImmutableDoubleBucket(minimum, b.maximum(), count));
     return buckets;
   }
 
