@@ -29,6 +29,7 @@ import org.terracotta.statistics.extended.NullCompoundOperation;
 import org.terracotta.statistics.extended.Result;
 import org.terracotta.statistics.extended.SampledStatistic;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -90,7 +91,7 @@ public class StatisticsRegistry {
     this.disableStatus = this.executor.scheduleAtFixedRate(disableTask, timeToDisable,
         timeToDisable, timeToDisableUnit);
 
-    discoverStatistics();
+    discoverOperationObservers();
   }
 
   private Runnable createDisableTask() {
@@ -103,11 +104,9 @@ public class StatisticsRegistry {
             ((CompoundOperationImpl<?>) o).expire(expireThreshold);
           }
         }
-
       }
     };
   }
-
 
   public synchronized void setTimeToDisable(long time, TimeUnit unit) {
     timeToDisable = time;
@@ -139,31 +138,29 @@ public class StatisticsRegistry {
     }
   }
 
-  public void registerCompoundOperation(OperationType operationType, Set<?> e, Map<String, Object> properties) {
-    Result result = getCompoundOperation(operationType).compound((Set) e);
-    ExposedStatistic exposedStatistic = new ExposedStatistic(operationType.operationName(), operationType.type(), operationType.tags(), properties, result);
-    ContextManager.associate(exposedStatistic).withParent(contextObject);
+  public void registerCompoundOperation(String name, Set<String> tags, Map<String, Object> properties, OperationType operationType, Set<?> operations) {
+    Result result = getCompoundOperation(operationType).compound((Set) operations);
+    ExposedStatistic exposedStatistic = new ExposedStatistic(name, operationType.type(), tags, properties, result);
     registrations.add(exposedStatistic);
   }
 
-  public void registerCountOperation(OperationType operationType, Map<String, Object> properties) {
+  public void registerCountOperation(String name, Set<String> tags, Map<String, Object> properties, OperationType operationType) {
     CountOperation<? extends Enum<?>> countOperation = getCompoundOperation(operationType).asCountOperation();
-    ExposedStatistic exposedStatistic = new ExposedStatistic(operationType.operationName(), operationType.type(), operationType.tags(), properties, countOperation);
-    ContextManager.associate(exposedStatistic).withParent(contextObject);
+    ExposedStatistic exposedStatistic = new ExposedStatistic(name, operationType.type(), tags, properties, countOperation);
     registrations.add(exposedStatistic);
   }
 
-  public void registerRatio(OperationType operationType, Set<?> numerator, Set<?> denominator, Map<String, Object> properties) {
+  public void registerRatio(String name, Set<String> tags, Map<String, Object> properties, OperationType operationType, Set<?> numerator, Set<?> denominator) {
     SampledStatistic ratio = getCompoundOperation(operationType).ratioOf((Set) numerator, (Set) denominator);
-    ExposedStatistic exposedStatistic = new ExposedStatistic(operationType.operationName(), operationType.type(), operationType.tags(), properties, ratio);
-    ContextManager.associate(exposedStatistic).withParent(contextObject);
+    ExposedStatistic exposedStatistic = new ExposedStatistic(name, operationType.type(), tags, properties, ratio);
     registrations.add(exposedStatistic);
+  }
+
+  public Collection<ExposedStatistic> getRegistrations() {
+    return Collections.unmodifiableCollection(registrations);
   }
 
   public void clearRegistrations() {
-    for (ExposedStatistic registration : registrations) {
-      ContextManager.dissociate(registration);
-    }
     registrations.clear();
   }
 
@@ -171,7 +168,7 @@ public class StatisticsRegistry {
   private CompoundOperation<?> getCompoundOperation(OperationType operationType) {
     CompoundOperation<?> operation = standardOperations.get(operationType);
     if (operation instanceof NullCompoundOperation<?>) {
-      OperationStatistic<?> discovered = findStatistic(operationType);
+      OperationStatistic<?> discovered = findOperationObserver(operationType);
       if (discovered == null) {
         return operation;
       } else {
@@ -191,9 +188,9 @@ public class StatisticsRegistry {
 
 
   @SuppressWarnings({"unchecked", "rawtypes"})
-  private void discoverStatistics() {
+  private void discoverOperationObservers() {
     for (OperationType t : operationTypeClazz.getEnumConstants()) {
-      OperationStatistic statistic = findStatistic(t);
+      OperationStatistic statistic = findOperationObserver(t);
       if (statistic == null) {
         if (t.required()) {
           throw new IllegalStateException("Required statistic " + t + " not found");
@@ -212,8 +209,8 @@ public class StatisticsRegistry {
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
-  private OperationStatistic findStatistic(OperationType statistic) {
-    Set<OperationStatistic<?>> results = findStatistic(statistic.context(), statistic.type(), statistic.operationName(), statistic.tags());
+  private OperationStatistic findOperationObserver(OperationType statistic) {
+    Set<OperationStatistic<?>> results = findOperationObserver(statistic.context(), statistic.type(), statistic.operationName(), statistic.tags());
     switch (results.size()) {
       case 0:
         return null;
@@ -225,8 +222,8 @@ public class StatisticsRegistry {
   }
 
   @SuppressWarnings("unchecked")
-  private Set<OperationStatistic<?>> findStatistic(Query contextQuery, Class<?> type, String name,
-                                                   final Set<String> tags) {
+  private Set<OperationStatistic<?>> findOperationObserver(Query contextQuery, Class<?> type, String name,
+                                                           final Set<String> tags) {
     Query q = queryBuilder().chain(contextQuery)
         .children().filter(context(identifier(subclassOf(OperationStatistic.class)))).build();
 

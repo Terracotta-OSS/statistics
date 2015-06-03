@@ -18,6 +18,7 @@ package org.terracotta.context.extended;
 import org.terracotta.context.annotations.ContextAttribute;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -35,9 +36,15 @@ public class ExposedStatistic {
   public ExposedStatistic(String name, Class<?> type, Set<String> tags, Map<String, Object> properties, Object stat) {
     this.name = name;
     this.type = type;
-    this.tags = tags;
+    this.tags = exposedTags(tags);
     this.properties = (properties == null ? Collections.<String, Object>emptyMap() : properties);
     this.stat = stat;
+  }
+
+  private static Set<String> exposedTags(Set<String> tags) {
+    Set<String> allTags = new HashSet<String>(tags);
+    allTags.add("exposed");
+    return allTags;
   }
 
   public String getName() {
