@@ -15,19 +15,18 @@
  */
 package org.terracotta.statistics;
 
+import org.terracotta.statistics.observer.OperationObserver;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.terracotta.statistics.StatisticsManager;
-import org.terracotta.statistics.observer.OperationObserver;
-
-public final class StatisticsBuilder {
+public final class StatisticBuilder {
 
   /**
    * Instantiates a new statistic builder.
    */
-  private StatisticsBuilder() {
+  private StatisticBuilder() {
 
   }
 
