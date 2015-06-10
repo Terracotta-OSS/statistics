@@ -67,6 +67,15 @@ public class QueryBuilder {
   }
   
   /**
+   * Selects the parent of the current node.
+   *
+   * @return this query builder
+   */
+  public QueryBuilder parent() {
+    return chain(Parent.INSTANCE);
+  }
+
+  /**
    * Selects the merged descendant set of the current node set.
    * <p>
    * More precisely this recursively merges the children of each member of the
