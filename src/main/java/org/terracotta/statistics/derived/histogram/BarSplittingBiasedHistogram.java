@@ -147,7 +147,7 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
       }
     }
     
-    if (lowestAggregateIndex >= 0 && (bars.get(lowestAggregateIndex).count() + bars.get(lowestAggregateIndex + 1).count() < maxBarSize(lowestAggregateIndex))) {
+    if (bars.get(lowestAggregateIndex).count() + bars.get(lowestAggregateIndex + 1).count() < maxBarSize(lowestAggregateIndex)) {
       Bar upper = bars.remove(lowestAggregateIndex + 1);
       Bar lower = bars.get(lowestAggregateIndex);
       long before = lower.count() + upper.count();
@@ -163,11 +163,10 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
     int low = 0;
     int high = bars.size() - 1;
 
-    Bar bar;
     int mid = 0;
     do {
       mid = (high + low) >>> 1;
-      bar = bars.get(mid);
+      Bar bar = bars.get(mid);
       if (value >= bar.maximum()) {
         low = mid + 1;
       } else if (value < bar.minimum()) {
