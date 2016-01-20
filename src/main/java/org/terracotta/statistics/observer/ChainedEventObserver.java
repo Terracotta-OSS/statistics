@@ -32,7 +32,8 @@ public interface ChainedEventObserver extends ChainedObserver {
   /**
    * Called to indicate an event happened.
    * 
-   * @param parameter the event parameter
+   * @param time the time of the event
+   * @param parameters the event parameters
    */
   void event(long time, long ... parameters);
 }

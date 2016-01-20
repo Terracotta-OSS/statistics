@@ -35,6 +35,7 @@ public class ExponentialHistogramTest {
     long last = System.nanoTime() - start;
     System.out.println(((double) last) / 1000000);
   }
+
   @Test
   public void testMousaviZanioloCounting() {
     ExponentialHistogram eh = new ExponentialHistogram(0.5f, 35);

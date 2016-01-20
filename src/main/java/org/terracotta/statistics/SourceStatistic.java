@@ -35,7 +35,7 @@ public interface SourceStatistic<T extends ChainedObserver> {
   void addDerivedStatistic(T derived);
   
   /**
-   * Remove the given registered {@Observer} from this {@code SourceStatistic}.
+   * Remove the given registered {@code Observer} from this {@code SourceStatistic}.
    * 
    * @param derived statistic to be removed
    */

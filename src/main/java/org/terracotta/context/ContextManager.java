@@ -212,7 +212,7 @@ public class ContextManager {
    * form the root set of this {@code ContextManager}.  That is, the following
    * code will select the root set of this instance.<br>
    * <pre>
-   * public static Set<TreeNode> roots(ContextManager manager) {
+   * public static Set&lt;TreeNode&gt; roots(ContextManager manager) {
    *   return manager.query(QueryBuilder.queryBuilder().children().build());
    * }
    * </pre>
