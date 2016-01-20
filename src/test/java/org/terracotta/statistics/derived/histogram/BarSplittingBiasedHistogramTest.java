@@ -17,10 +17,8 @@ package org.terracotta.statistics.derived.histogram;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Random;
 import org.junit.Test;
-import org.terracotta.statistics.derived.histogram.Histogram.Bucket;
 
 /**
  *
@@ -28,6 +26,16 @@ import org.terracotta.statistics.derived.histogram.Histogram.Bucket;
  */
 public class BarSplittingBiasedHistogramTest {
   
+  @Test
+  public void testNanoTime() throws IOException {
+    long total = 0L;
+    for (int i = 0; i < 2000000; i++) {
+      long start = System.nanoTime();
+      total += System.nanoTime() - start;
+    }
+    System.out.println("System.nanoTime() mean time (ns): " + (((double) total) / 2000000));
+  }
+
   @Test
   public void testSelf() throws IOException {
     BarSplittingBiasedHistogram bsbh = new BarSplittingBiasedHistogram(0.75f, 20, 1000000);
@@ -37,14 +45,6 @@ public class BarSplittingBiasedHistogramTest {
       bsbh.event(last, i);
       last = System.nanoTime() - start;
     }
-    List<Bucket<Double>> buckets = bsbh.getBuckets();
-    System.out.println("BUCKETS");
-    System.out.println(buckets.get(0).minimum() + ",0.0");
-    for (Bucket<Double> b : buckets) {
-      System.out.println(b.minimum() + "," + b.count() / (b.maximum() - b.minimum()));
-    }
-    System.out.println(buckets.get(buckets.size() - 1).maximum() + ",0.0");
-    
     System.out.println("Minimum " + Arrays.toString(bsbh.getQuantileBounds(0)));
     System.out.println("Median " + Arrays.toString(bsbh.getQuantileBounds(0.5)));
     System.out.println("90%ile " + Arrays.toString(bsbh.getQuantileBounds(0.9)));
