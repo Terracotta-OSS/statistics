@@ -15,7 +15,7 @@
   <parent>
     <artifactId>forge-parent</artifactId>
     <groupId>org.terracotta.forge</groupId>
-    <version>3.7</version>
+    <version>3.20</version>
     <relativePath/>
   </parent>
 
