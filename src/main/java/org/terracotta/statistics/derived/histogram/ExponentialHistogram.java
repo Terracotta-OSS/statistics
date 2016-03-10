@@ -57,7 +57,7 @@ public class ExponentialHistogram {
     long[] aBoxes = this.boxes;
     long[] bBoxes = b.boxes;
 
-    int logLast = (Long.SIZE - 1) - numberOfLeadingZeros(max(last, b.last));
+    int logLast = (Long.SIZE - 1) - numberOfLeadingZeros(last | b.last);
     
     this.boxes = new long[0];
     this.insert = new int[0];
