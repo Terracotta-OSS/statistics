@@ -20,7 +20,6 @@ import static java.lang.Long.numberOfLeadingZeros;
 import static java.lang.Math.max;
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOf;
-import static java.util.Arrays.copyOfRange;
 import static java.util.Arrays.fill;
 
 public class ExponentialHistogram {
@@ -61,36 +60,50 @@ public class ExponentialHistogram {
     this.total += b.total;
     
     long[] overflow = EMPTY_LONG_ARRAY;
-    int logSize;
-    for (logSize = 0; logSize <= logLast || overflow.length > 0; logSize++) {
+    for (int logSize = 0; logSize <= logLast; logSize++) {
       overflow = insert(logSize, aBoxes, bBoxes, overflow);
+    }
+    int logSize = logLast + 1;
+    while (overflow.length > 0) {
+      ensureCapacity(logSize);
+      overflow = insert(logSize, overflow);
+      logSize++;
     }
     last = 1L << (logSize - 1);
   }
-  
-  private long[] insert(int logSize, long[] a, long[] b, long[] carry) {
-    ensureCapacity(logSize);
 
+  private long[] insert(int logSize, long[] values) {
+    int min = min_l(logSize);
+    int max = max_l(logSize);
+    int width = max - min;
+    int overflowSize = max(0, ((values.length - width) + 1) & -2);
+    int savedSize = values.length - overflowSize;
+
+    arraycopy(values, 0, boxes, max - savedSize, savedSize);
+    insert[logSize] = max - ((savedSize % width) + 1);
+
+    if (overflowSize == 0) {
+      return EMPTY_LONG_ARRAY;
+    } else {
+      long[] overflow = new long[overflowSize >>> 1];
+      for (int j = 0; j < overflow.length; j++) {
+        overflow[j] = values[savedSize + (2 * j)];
+      }
+      return overflow;
+    }
+  }
+
+  private long[] insert(int logSize, long[] a, long[] b, long[] carry) {
     int min = min_l(logSize);
     int max = max_l(logSize);
     long[] merged = reverseSort(merge(a, b, min, max, carry));
-    int mergedEnd = 0;
-    for (int i = merged.length - 1; i >= 0; i--) {
-      if (merged[i] != MIN_VALUE) {
-        mergedEnd = i + 1;
-        break;
-      }
-    }
+    int mergedEnd = usedLength(merged);
     int width = max - min;
     int overflowSize = max(0, ((mergedEnd - width) + 1) & -2);
     int savedSize = mergedEnd - overflowSize;
     
     arraycopy(merged, 0, boxes, max - savedSize, savedSize);
-    if (savedSize == width) {
-      insert[logSize] = max - 1;
-    } else {
-      insert[logSize] = max - (savedSize + 1);
-    }
+    insert[logSize] = max - ((savedSize % width) + 1);
 
     if (overflowSize == 0) {
       return EMPTY_LONG_ARRAY;
@@ -103,23 +116,28 @@ public class ExponentialHistogram {
       return overflow;
     }
   }
-  
-  private static long[] merge(long[] aFull, long[] bFull, int min, int max, long[] c) {
-    long[] a = range(aFull, min, max);
-    long[] b = range(bFull, min, max);
-    long[] merged = new long[a.length + b.length + c.length];
-    arraycopy(c, 0, merged, 0, c.length);
-    arraycopy(a, 0, merged, c.length, a.length);
-    arraycopy(b, 0, merged, c.length + a.length, b.length);
-    return merged;
+
+  private static long[] merge(long[] a, long[] b, int min, int max, long[] c) {
+    if (max <= a.length) {
+      if (max <= b.length) {
+    	int width = max - min;
+        long[] merged = copyOf(c, c.length + 2 * width);
+        arraycopy(a, min, merged, c.length, width);
+        arraycopy(b, min, merged, c.length + width, width);
+        return merged;
+      } else {
+        return merge(a, min, max, c);
+      }
+    } else {
+      return merge(b, min, max, c);
+    }
   }
 
-  private static long[] range(long[] array, int min, int max) {
-    if (min < array.length) {
-      return copyOfRange(array, min, max);
-    } else {
-      return EMPTY_LONG_ARRAY;
-    }
+  private static long[] merge(long[] a, int min, int max, long[] c) {
+    int width = max - min;
+    long[] merged = copyOf(c, c.length + width);
+    arraycopy(a, min, merged, c.length, width);
+    return merged;
   }
   
   public void insert(long time) {
@@ -324,5 +342,14 @@ public class ExponentialHistogram {
     for (int i = 0; i < logMax + 1; i++) {
       this.insert[i] = max_l(i) - 1;
     }
+  }
+
+  private static int usedLength(long[] merged) {
+    for (int i = merged.length - 1; i >= 0; i--) {
+      if (merged[i] != MIN_VALUE) {
+        return i + 1;
+      }
+    }
+    return 0;
   }
 }
