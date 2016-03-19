@@ -43,14 +43,13 @@ public class ExponentialHistogram {
   private long last;
 
   public ExponentialHistogram(float epsilon, long window) {
-    this((int) (Math.ceil(Math.ceil(1 / epsilon) / 2) + 1), window);
+    this((int) (Math.ceil(Math.ceil(1 / epsilon) / 2) + 1), window, 0);
   }
   
-  private ExponentialHistogram(int mergeThreshold, long window) {
+  private ExponentialHistogram(int mergeThreshold, long window, int initialSize) {
     this.mergeThreshold = mergeThreshold;
     this.window = window;
-    this.boxes = new long[0];
-    this.insert = new int[0];
+    initializeArrays(initialSize);
   }
   
   public void merge(ExponentialHistogram b) {
@@ -58,13 +57,10 @@ public class ExponentialHistogram {
     long[] bBoxes = b.boxes;
 
     int logLast = (Long.SIZE - 1) - numberOfLeadingZeros(last | b.last);
-    
-    this.boxes = new long[0];
-    this.insert = new int[0];
+    initializeArrays(logLast);
     this.total += b.total;
-    this.last = 0L;
     
-    long[] overflow = new long[0];
+    long[] overflow = EMPTY_LONG_ARRAY;
     int logSize;
     for (logSize = 0; logSize <= logLast || overflow.length > 0; logSize++) {
       overflow = insert(logSize, aBoxes, bBoxes, overflow);
@@ -208,10 +204,10 @@ public class ExponentialHistogram {
   public ExponentialHistogram split(float fraction) {
     long[] originalBoxes = boxes;
     int[] originalInsert = insert;
-    
-    ExponentialHistogram other = new ExponentialHistogram(mergeThreshold, window);
-    this.boxes = new long[0];
-    this.insert = new int[0];
+
+    int logLast = (Long.SIZE - 1) - numberOfLeadingZeros(last);
+    ExponentialHistogram other = new ExponentialHistogram(mergeThreshold, window, logLast - 1);
+    initializeArrays(logLast - 1);
     this.total = 0;
     this.last = 0;
     
@@ -318,6 +314,15 @@ public class ExponentialHistogram {
       this.boxes = newBoxes;
       this.insert = newInsert;
       insert[logSize] = max - 1;
+    }
+  }
+
+  private void initializeArrays(int logMax) {
+    this.boxes = new long[max_l(logMax)];
+    fill(boxes, Long.MIN_VALUE);
+    this.insert = new int[logMax + 1];
+    for (int i = 0; i < logMax + 1; i++) {
+      this.insert[i] = max_l(i) - 1;
     }
   }
 }
