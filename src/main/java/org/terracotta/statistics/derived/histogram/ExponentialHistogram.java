@@ -158,20 +158,21 @@ public class ExponentialHistogram {
       }
       insert[logSize] = insertIndex;
       
-      if (previous <= threshold) {
-        if (previous == MIN_VALUE) {
-          long finalSize = 1L << logSize;
-          if (finalSize > last) {
-            last = finalSize;
-          }
-        } else {
-          total -= 1 << logSize;
-        }
-        return;
-      } else {
+      if (previous > threshold) {
         //no space available - time to merge
         time = boxes[insertIndex];
         boxes[insertIndex] = MIN_VALUE;
+      } else if (previous == MIN_VALUE) {
+        //previous unoccupied
+        long finalSize = 1L << logSize;
+        if (finalSize > last) {
+          last = finalSize;
+        }
+        return;
+      } else {
+        //previous aged out - decrement size
+        total -= 1 << logSize;
+        return;
       }
     }
   }
