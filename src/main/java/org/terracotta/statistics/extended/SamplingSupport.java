@@ -13,24 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terracotta.context.extended;
-
-import org.terracotta.statistics.extended.CompoundOperation;
-
-import java.util.EnumSet;
+package org.terracotta.statistics.extended;
 
 /**
  * @author Ludovic Orban
  */
-public class RegisteredCompoundStatistic extends RegisteredCompoundOperationStatistic {
-  private final EnumSet<?> compound;
+public interface SamplingSupport {
 
-  public RegisteredCompoundStatistic(CompoundOperation<?> compoundOperation, EnumSet<?> compound) {
-    super(compoundOperation);
-    this.compound = compound;
-  }
+  boolean expire(long expiry);
 
-  public EnumSet<?> getCompound() {
-    return compound;
-  }
+  void setAlwaysOn(boolean enable);
+
 }

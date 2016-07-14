@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @param <T> the generic type
  */
-public interface CompoundOperation<T extends Enum<T>> {
+public interface CompoundOperation<T extends Enum<T>> extends SamplingSupport {
 
   /**
    * Type.

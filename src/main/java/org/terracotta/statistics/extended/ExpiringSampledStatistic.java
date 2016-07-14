@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
  * @param <T> statistic type
  * @author Chris Dennis
  */
-class ExpiringSampledStatistic<T extends Number> extends SemiExpiringSampledStatistic<T> {
+public class ExpiringSampledStatistic<T extends Number> extends SemiExpiringSampledStatistic<T> {
 
   /**
    * Creates an expiring statistic.

@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
  * @param <T> statistic type
  * @author Chris Dennis
  */
-public class SemiExpiringSampledStatistic<T extends Number> extends AbstractSampledStatistic<T> {
+public class SemiExpiringSampledStatistic<T extends Number> extends AbstractSampledStatistic<T> implements SamplingSupport {
 
   /**
    * The active.
@@ -41,6 +41,8 @@ public class SemiExpiringSampledStatistic<T extends Number> extends AbstractSamp
    * The touch timestamp.
    */
   private long touchTimestamp = -1;
+
+  private volatile boolean alwaysOn = false;
 
   /**
    * Creates a new semi-expiring statistic.
@@ -91,7 +93,10 @@ public class SemiExpiringSampledStatistic<T extends Number> extends AbstractSamp
    * @param expiry the expiry
    * @return true, if successful
    */
-  protected final synchronized boolean expire(long expiry) {
+  public final synchronized boolean expire(long expiry) {
+    if (alwaysOn) {
+      return false;
+    }
     if (touchTimestamp < expiry) {
       if (active) {
         stopSampling();
@@ -101,6 +106,14 @@ public class SemiExpiringSampledStatistic<T extends Number> extends AbstractSamp
       return true;
     } else {
       return false;
+    }
+  }
+
+  @Override
+  public void setAlwaysOn(boolean enable) {
+    this.alwaysOn = enable;
+    if (enable) {
+      start();
     }
   }
 
