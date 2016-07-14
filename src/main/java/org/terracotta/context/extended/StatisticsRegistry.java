@@ -21,18 +21,19 @@ import org.terracotta.context.query.Matcher;
 import org.terracotta.context.query.Matchers;
 import org.terracotta.statistics.OperationStatistic;
 import org.terracotta.statistics.Time;
+import org.terracotta.statistics.ValueStatistic;
 import org.terracotta.statistics.extended.CompoundOperation;
 import org.terracotta.statistics.extended.CompoundOperationImpl;
+import org.terracotta.statistics.extended.ExpiringSampledStatistic;
+import org.terracotta.statistics.extended.SemiExpiringSampledStatistic;
 
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -86,10 +87,7 @@ public class StatisticsRegistry {
       public void run() {
         long expireThreshold = Time.absoluteTime() - timeToDisableUnit.toMillis(timeToDisable);
         for (RegisteredStatistic registeredStatistic : registrations.values()) {
-          CompoundOperation<?> o = registeredStatistic.getCompoundOperation();
-          if (o instanceof CompoundOperationImpl<?>) {
-            ((CompoundOperationImpl<?>) o).expire(expireThreshold);
-          }
+          registeredStatistic.getSupport().expire(expireThreshold);
         }
       }
     };
@@ -112,8 +110,7 @@ public class StatisticsRegistry {
         disableStatus = null;
       }
       for (RegisteredStatistic registeredStatistic : registrations.values()) {
-        CompoundOperation<?> o = registeredStatistic.getCompoundOperation();
-        o.setAlwaysOn(true);
+        registeredStatistic.getSupport().setAlwaysOn(true);
       }
     } else {
       if (disableStatus == null) {
@@ -121,16 +118,36 @@ public class StatisticsRegistry {
             timeToDisableUnit);
       }
       for (RegisteredStatistic registeredStatistic : registrations.values()) {
-        CompoundOperation<?> o = registeredStatistic.getCompoundOperation();
-        o.setAlwaysOn(false);
+        registeredStatistic.getSupport().setAlwaysOn(false);
       }
     }
+  }
+
+  public void registerValue(String name, ValueStatisticDescriptor descriptor) {
+    Map<String, RegisteredValueStatistic> registeredStatistics = new HashMap<String, RegisteredValueStatistic>();
+
+    Map<String, ValueStatistic<?>> valueStatistics = findValueStatistics(contextObject, name, descriptor.getObserverName(), descriptor.getTags());
+    Set<String> duplicates = new HashSet<String>();
+    for (Map.Entry<String, ValueStatistic<?>> entry : valueStatistics.entrySet()) {
+      String key = entry.getKey();
+      ValueStatistic<?> value = entry.getValue();
+      if (registrations.containsKey(key)) {
+        duplicates.add(key);
+      }
+      ExpiringSampledStatistic expiringSampledStatistic = new ExpiringSampledStatistic(value, executor, historySize, historyInterval, historyIntervalUnit);
+      registeredStatistics.put(key, new RegisteredValueStatistic(expiringSampledStatistic));
+    }
+    if (!duplicates.isEmpty()) {
+      throw new IllegalArgumentException("Found duplicate value statistic(s) " + duplicates);
+    }
+
+    registrations.putAll(registeredStatistics);
   }
 
   public void registerCompoundOperations(String name, OperationStatisticDescriptor descriptor, EnumSet<?> compound) {
     Map<String, CompoundOperation<?>> compoundOperations = createCompoundOperations(name, descriptor.getObserverName(), descriptor.getTags(), descriptor.getType());
 
-    Map<String, RegisteredStatistic> registeredStatistics = new HashMap<String, RegisteredStatistic>();
+    Map<String, RegisteredCompoundOperationStatistic> registeredStatistics = new HashMap<String, RegisteredCompoundOperationStatistic>();
     Set<String> duplicates = new HashSet<String>();
     for (Map.Entry<String, CompoundOperation<?>> entry : compoundOperations.entrySet()) {
       String key = entry.getKey();
@@ -152,7 +169,7 @@ public class StatisticsRegistry {
   public void registerRatios(String name, OperationStatisticDescriptor descriptor, EnumSet<?> ratioNumerator, EnumSet<?> ratioDenominator) {
     Map<String, CompoundOperation<?>> compoundOperations = createCompoundOperations(name, descriptor.getObserverName(), descriptor.getTags(), descriptor.getType());
 
-    Map<String, RegisteredStatistic> registeredStatistics = new HashMap<String, RegisteredStatistic>();
+    Map<String, RegisteredCompoundOperationStatistic> registeredStatistics = new HashMap<String, RegisteredCompoundOperationStatistic>();
     Set<String> duplicates = new HashSet<String>();
     for (Map.Entry<String, CompoundOperation<?>> entry : compoundOperations.entrySet()) {
       String key = entry.getKey();
@@ -220,17 +237,54 @@ public class StatisticsRegistry {
     } else {
       Map<String, OperationStatistic<?>> observers = new HashMap<String, OperationStatistic<?>>();
       for (TreeNode node : result) {
-        String alias = null;
+        String discriminator = null;
 
         Map<String, Object> properties = (Map<String, Object>) node.getContext().attributes().get("properties");
-        if (properties != null && properties.containsKey("alias")) {
-          alias = properties.get("alias").toString();
+        if (properties != null && properties.containsKey("discriminator")) {
+          discriminator = properties.get("discriminator").toString();
         }
 
-        String completeName = (alias == null ? "" : (alias + "_")) + name;
+        String completeName = (discriminator == null ? "" : (discriminator + ":")) + name;
         OperationStatistic<?> existing = observers.put(completeName, (OperationStatistic<?>) node.getContext().attributes().get("this"));
         if (existing != null) {
           throw new IllegalStateException("Duplicate OperationStatistic found for '" + completeName + "'");
+        }
+      }
+      return observers;
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  private static Map<String, ValueStatistic<?>> findValueStatistics(Object contextObject, String name, String observerName, final Set<String> tags) {
+    Set<TreeNode> result = queryBuilder()
+        .descendants()
+        .filter(context(attributes(Matchers.<Map<String, Object>>allOf(
+            hasAttribute("name", observerName),
+            hasAttribute("tags", new Matcher<Set<String>>() {
+              @Override
+              protected boolean matchesSafely(Set<String> object) {
+                return object.containsAll(tags);
+              }
+            })))))
+        .filter(context(identifier(subclassOf(ValueStatistic.class))))
+        .build().execute(Collections.singleton(ContextManager.nodeFor(contextObject)));
+
+    if (result.isEmpty()) {
+      return Collections.emptyMap();
+    } else {
+      Map<String, ValueStatistic<?>> observers = new HashMap<String, ValueStatistic<?>>();
+      for (TreeNode node : result) {
+        String discriminator = null;
+
+        Map<String, Object> properties = (Map<String, Object>) node.getContext().attributes().get("properties");
+        if (properties != null && properties.containsKey("discriminator")) {
+          discriminator = properties.get("discriminator").toString();
+        }
+
+        String completeName = (discriminator == null ? "" : (discriminator + ":")) + name;
+        ValueStatistic<?> existing = observers.put(completeName, (ValueStatistic<?>) node.getContext().attributes().get("this"));
+        if (existing != null) {
+          throw new IllegalStateException("Duplicate ValueStatistic found for '" + completeName + "'");
         }
       }
       return observers;

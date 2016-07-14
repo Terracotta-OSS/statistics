@@ -15,20 +15,13 @@
  */
 package org.terracotta.context.extended;
 
-import org.terracotta.statistics.extended.CompoundOperation;
+import org.terracotta.statistics.extended.SamplingSupport;
 
 /**
  * @author Ludovic Orban
  */
 public abstract class RegisteredStatistic {
 
-  private final CompoundOperation<?> compoundOperation;
+  public abstract SamplingSupport getSupport();
 
-  public RegisteredStatistic(CompoundOperation<?> compoundOperation) {
-    this.compoundOperation = compoundOperation;
-  }
-
-  public CompoundOperation<?> getCompoundOperation() {
-    return compoundOperation;
-  }
 }

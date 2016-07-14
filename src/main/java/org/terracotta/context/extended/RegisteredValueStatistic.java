@@ -15,22 +15,26 @@
  */
 package org.terracotta.context.extended;
 
-import org.terracotta.statistics.extended.CompoundOperation;
-
-import java.util.EnumSet;
+import org.terracotta.statistics.extended.ExpiringSampledStatistic;
+import org.terracotta.statistics.extended.SamplingSupport;
 
 /**
  * @author Ludovic Orban
  */
-public class RegisteredCompoundStatistic extends RegisteredCompoundOperationStatistic {
-  private final EnumSet<?> compound;
+public class RegisteredValueStatistic extends RegisteredStatistic {
 
-  public RegisteredCompoundStatistic(CompoundOperation<?> compoundOperation, EnumSet<?> compound) {
-    super(compoundOperation);
-    this.compound = compound;
+  private final ExpiringSampledStatistic<?> sampledStatistic;
+
+  public RegisteredValueStatistic(ExpiringSampledStatistic<?> sampledStatistic) {
+    this.sampledStatistic = sampledStatistic;
   }
 
-  public EnumSet<?> getCompound() {
-    return compound;
+  public ExpiringSampledStatistic<?> getSampledStatistic() {
+    return sampledStatistic;
+  }
+
+  @Override
+  public SamplingSupport getSupport() {
+    return sampledStatistic;
   }
 }

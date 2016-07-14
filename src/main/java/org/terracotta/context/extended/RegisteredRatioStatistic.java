@@ -22,7 +22,7 @@ import java.util.EnumSet;
 /**
  * @author Ludovic Orban
  */
-public class RegisteredRatioStatistic extends RegisteredStatistic {
+public class RegisteredRatioStatistic extends RegisteredCompoundOperationStatistic {
   private final EnumSet<?> numerator;
   private final EnumSet<?> denominator;
 

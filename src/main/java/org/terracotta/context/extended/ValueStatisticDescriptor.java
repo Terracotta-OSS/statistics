@@ -15,22 +15,31 @@
  */
 package org.terracotta.context.extended;
 
-import org.terracotta.statistics.extended.CompoundOperation;
-
-import java.util.EnumSet;
+import java.util.Set;
 
 /**
  * @author Ludovic Orban
  */
-public class RegisteredCompoundStatistic extends RegisteredCompoundOperationStatistic {
-  private final EnumSet<?> compound;
+public final class ValueStatisticDescriptor {
 
-  public RegisteredCompoundStatistic(CompoundOperation<?> compoundOperation, EnumSet<?> compound) {
-    super(compoundOperation);
-    this.compound = compound;
+  private final String observerName;
+  private final Set<String> tags;
+
+  private ValueStatisticDescriptor(String observerName, Set<String> tags) {
+    this.observerName = observerName;
+    this.tags = tags;
   }
 
-  public EnumSet<?> getCompound() {
-    return compound;
+  public String getObserverName() {
+    return observerName;
   }
+
+  public Set<String> getTags() {
+    return tags;
+  }
+
+  public static ValueStatisticDescriptor descriptor(String observerName, Set<String> tags) {
+    return new ValueStatisticDescriptor(observerName, tags);
+  }
+
 }
