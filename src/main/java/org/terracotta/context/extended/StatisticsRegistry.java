@@ -19,25 +19,21 @@ import org.terracotta.context.ContextManager;
 import org.terracotta.context.TreeNode;
 import org.terracotta.context.query.Matcher;
 import org.terracotta.context.query.Matchers;
-import org.terracotta.context.query.Query;
 import org.terracotta.statistics.OperationStatistic;
 import org.terracotta.statistics.Time;
+import org.terracotta.statistics.ValueStatistic;
 import org.terracotta.statistics.extended.CompoundOperation;
 import org.terracotta.statistics.extended.CompoundOperationImpl;
-import org.terracotta.statistics.extended.CountOperation;
-import org.terracotta.statistics.extended.NullCompoundOperation;
-import org.terracotta.statistics.extended.Result;
-import org.terracotta.statistics.extended.SampledStatistic;
+import org.terracotta.statistics.extended.ExpiringSampledStatistic;
+import org.terracotta.statistics.extended.SemiExpiringSampledStatistic;
 
-import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -54,9 +50,8 @@ import static org.terracotta.context.query.QueryBuilder.queryBuilder;
  */
 public class StatisticsRegistry {
 
-  private final Class<? extends OperationType> operationTypeClazz;
   private final Object contextObject;
-  private final ConcurrentMap<OperationType, CompoundOperation<?>> standardOperations = new ConcurrentHashMap<OperationType, CompoundOperation<?>>();
+  private final Map<String, RegisteredStatistic> registrations = new ConcurrentHashMap<String, RegisteredStatistic>();
 
   private final ScheduledExecutorService executor;
   private final Runnable disableTask;
@@ -69,14 +64,9 @@ public class StatisticsRegistry {
   private final int historySize;
   private final long historyInterval;
   private final TimeUnit historyIntervalUnit;
-  private final List<ExposedStatistic> registrations = new CopyOnWriteArrayList<ExposedStatistic>();
 
-  public StatisticsRegistry(Class<? extends OperationType> operationTypeClazz, Object contextObject, ScheduledExecutorService executor, long averageWindowDuration,
+  public StatisticsRegistry(Object contextObject, ScheduledExecutorService executor, long averageWindowDuration,
                             TimeUnit averageWindowUnit, int historySize, long historyInterval, TimeUnit historyIntervalUnit, long timeToDisable, TimeUnit timeToDisableUnit) {
-    if (!operationTypeClazz.isEnum()) {
-      throw new IllegalArgumentException("StatisticsRegistry operationTypeClazz must be enum");
-    }
-    this.operationTypeClazz = operationTypeClazz;
     this.contextObject = contextObject;
     this.averageWindowDuration = averageWindowDuration;
     this.averageWindowUnit = averageWindowUnit;
@@ -88,10 +78,7 @@ public class StatisticsRegistry {
     this.timeToDisable = timeToDisable;
     this.timeToDisableUnit = timeToDisableUnit;
     this.disableTask = createDisableTask();
-    this.disableStatus = this.executor.scheduleAtFixedRate(disableTask, timeToDisable,
-        timeToDisable, timeToDisableUnit);
-
-    discoverOperationObservers();
+    this.disableStatus = this.executor.scheduleAtFixedRate(disableTask, timeToDisable, timeToDisable, timeToDisableUnit);
   }
 
   private Runnable createDisableTask() {
@@ -99,10 +86,8 @@ public class StatisticsRegistry {
       @Override
       public void run() {
         long expireThreshold = Time.absoluteTime() - timeToDisableUnit.toMillis(timeToDisable);
-        for (CompoundOperation<?> o : standardOperations.values()) {
-          if (o instanceof CompoundOperationImpl<?>) {
-            ((CompoundOperationImpl<?>) o).expire(expireThreshold);
-          }
+        for (RegisteredStatistic registeredStatistic : registrations.values()) {
+          registeredStatistic.getSupport().expire(expireThreshold);
         }
       }
     };
@@ -124,128 +109,185 @@ public class StatisticsRegistry {
         disableStatus.cancel(false);
         disableStatus = null;
       }
-      for (CompoundOperation<?> o : standardOperations.values()) {
-        o.setAlwaysOn(true);
+      for (RegisteredStatistic registeredStatistic : registrations.values()) {
+        registeredStatistic.getSupport().setAlwaysOn(true);
       }
     } else {
       if (disableStatus == null) {
         disableStatus = executor.scheduleAtFixedRate(disableTask, 0, timeToDisable,
             timeToDisableUnit);
       }
-      for (CompoundOperation<?> o : standardOperations.values()) {
-        o.setAlwaysOn(false);
+      for (RegisteredStatistic registeredStatistic : registrations.values()) {
+        registeredStatistic.getSupport().setAlwaysOn(false);
       }
     }
   }
 
-  public void registerCompoundOperation(String name, Set<String> tags, Map<String, Object> properties, OperationType operationType, Set<?> operations) {
-    Result result = getCompoundOperation(operationType).compound((Set) operations);
-    ExposedStatistic exposedStatistic = new ExposedStatistic(name, operationType.type(), tags, properties, result);
-    registrations.add(exposedStatistic);
+  public void registerValue(String name, ValueStatisticDescriptor descriptor) {
+    Map<String, RegisteredValueStatistic> registeredStatistics = new HashMap<String, RegisteredValueStatistic>();
+
+    Map<String, ValueStatistic<?>> valueStatistics = findValueStatistics(contextObject, name, descriptor.getObserverName(), descriptor.getTags());
+    Set<String> duplicates = new HashSet<String>();
+    for (Map.Entry<String, ValueStatistic<?>> entry : valueStatistics.entrySet()) {
+      String key = entry.getKey();
+      ValueStatistic<?> value = entry.getValue();
+      if (registrations.containsKey(key)) {
+        duplicates.add(key);
+      }
+      ExpiringSampledStatistic expiringSampledStatistic = new ExpiringSampledStatistic(value, executor, historySize, historyInterval, historyIntervalUnit);
+      registeredStatistics.put(key, new RegisteredValueStatistic(expiringSampledStatistic));
+    }
+    if (!duplicates.isEmpty()) {
+      throw new IllegalArgumentException("Found duplicate value statistic(s) " + duplicates);
+    }
+
+    registrations.putAll(registeredStatistics);
   }
 
-  public void registerCountOperation(String name, Set<String> tags, Map<String, Object> properties, OperationType operationType) {
-    CountOperation<? extends Enum<?>> countOperation = getCompoundOperation(operationType).asCountOperation();
-    ExposedStatistic exposedStatistic = new ExposedStatistic(name, operationType.type(), tags, properties, countOperation);
-    registrations.add(exposedStatistic);
+  public void registerCompoundOperations(String name, OperationStatisticDescriptor descriptor, EnumSet<?> compound) {
+    Map<String, CompoundOperation<?>> compoundOperations = createCompoundOperations(name, descriptor.getObserverName(), descriptor.getTags(), descriptor.getType());
+
+    Map<String, RegisteredCompoundOperationStatistic> registeredStatistics = new HashMap<String, RegisteredCompoundOperationStatistic>();
+    Set<String> duplicates = new HashSet<String>();
+    for (Map.Entry<String, CompoundOperation<?>> entry : compoundOperations.entrySet()) {
+      String key = entry.getKey();
+      if (registrations.containsKey(key)) {
+        duplicates.add(key);
+      }
+      registeredStatistics.put(key, new RegisteredCompoundStatistic(entry.getValue(), compound));
+    }
+    if (!duplicates.isEmpty()) {
+      throw new IllegalArgumentException("Found duplicate operation statistic(s) " + duplicates);
+    }
+
+    for (CompoundOperation<?> compoundOperation : compoundOperations.values()) {
+      compoundOperation.compound((Set) compound);
+    }
+    registrations.putAll(registeredStatistics);
   }
 
-  public void registerRatio(String name, Set<String> tags, Map<String, Object> properties, OperationType operationType, Set<?> numerator, Set<?> denominator) {
-    SampledStatistic ratio = getCompoundOperation(operationType).ratioOf((Set) numerator, (Set) denominator);
-    ExposedStatistic exposedStatistic = new ExposedStatistic(name, operationType.type(), tags, properties, ratio);
-    registrations.add(exposedStatistic);
+  public void registerRatios(String name, OperationStatisticDescriptor descriptor, EnumSet<?> ratioNumerator, EnumSet<?> ratioDenominator) {
+    Map<String, CompoundOperation<?>> compoundOperations = createCompoundOperations(name, descriptor.getObserverName(), descriptor.getTags(), descriptor.getType());
+
+    Map<String, RegisteredCompoundOperationStatistic> registeredStatistics = new HashMap<String, RegisteredCompoundOperationStatistic>();
+    Set<String> duplicates = new HashSet<String>();
+    for (Map.Entry<String, CompoundOperation<?>> entry : compoundOperations.entrySet()) {
+      String key = entry.getKey();
+      if (registrations.containsKey(key)) {
+        duplicates.add(key);
+      }
+      registeredStatistics.put(key, new RegisteredRatioStatistic(entry.getValue(), ratioNumerator, ratioDenominator));
+    }
+    if (!duplicates.isEmpty()) {
+      throw new IllegalArgumentException("Found duplicate operation statistic(s) " + duplicates);
+    }
+
+    for (CompoundOperation<?> compoundOperation : compoundOperations.values()) {
+      compoundOperation.ratioOf((Set) ratioNumerator, (Set) ratioDenominator);
+    }
+    registrations.putAll(registeredStatistics);
   }
 
-  public Collection<ExposedStatistic> getRegistrations() {
-    return Collections.unmodifiableCollection(registrations);
+  public Map<String, RegisteredStatistic> getRegistrations() {
+    return Collections.unmodifiableMap(registrations);
   }
 
   public void clearRegistrations() {
     registrations.clear();
   }
 
+
   @SuppressWarnings({"unchecked", "rawtypes"})
-  private CompoundOperation<?> getCompoundOperation(OperationType operationType) {
-    CompoundOperation<?> operation = standardOperations.get(operationType);
-    if (operation instanceof NullCompoundOperation<?>) {
-      OperationStatistic<?> discovered = findOperationObserver(operationType);
-      if (discovered == null) {
-        return operation;
-      } else {
-        CompoundOperation<?> newOperation = new CompoundOperationImpl(discovered, operationType.type(),
-            averageWindowDuration, averageWindowUnit, executor, historySize,
-            historyInterval, historyIntervalUnit);
-        if (standardOperations.replace(operationType, operation, newOperation)) {
-          return newOperation;
-        } else {
-          return standardOperations.get(operationType);
-        }
-      }
+  private Map<String, CompoundOperation<?>> createCompoundOperations(String name, String observerName, Set<String> tags, Class<? extends Enum<?>> type) {
+    Map<String, CompoundOperation<?>> result = new HashMap<String, CompoundOperation<?>>();
+
+    Map<String, OperationStatistic<?>> operationObservers = findOperationStatistics(contextObject, name, type, observerName, tags);
+    if (operationObservers.isEmpty()) {
+      throw new IllegalArgumentException("Required statistic observer '" + observerName + "' with tags " + tags + " and type '" + type + "' not found under '" + contextObject + "'");
+    }
+
+    for (Map.Entry<String, OperationStatistic<?>> entry : operationObservers.entrySet()) {
+      CompoundOperation<?> newOperation = new CompoundOperationImpl(entry.getValue(), type,
+          averageWindowDuration, averageWindowUnit, executor, historySize,
+          historyInterval, historyIntervalUnit);
+      result.put(entry.getKey(), newOperation);
+    }
+
+    return result;
+  }
+
+  @SuppressWarnings("unchecked")
+  private static Map<String, OperationStatistic<?>> findOperationStatistics(Object contextObject, String name, Class<? extends Enum<?>> type, String observerName, final Set<String> tags) {
+    Set<TreeNode> result = queryBuilder()
+        .descendants()
+        .filter(context(attributes(Matchers.<Map<String, Object>>allOf(
+            hasAttribute("type", type),
+            hasAttribute("name", observerName),
+            hasAttribute("tags", new Matcher<Set<String>>() {
+              @Override
+              protected boolean matchesSafely(Set<String> object) {
+                return object.containsAll(tags);
+              }
+            })))))
+        .filter(context(identifier(subclassOf(OperationStatistic.class))))
+        .build().execute(Collections.singleton(ContextManager.nodeFor(contextObject)));
+
+    if (result.isEmpty()) {
+      return Collections.emptyMap();
     } else {
-      return operation;
-    }
-  }
+      Map<String, OperationStatistic<?>> observers = new HashMap<String, OperationStatistic<?>>();
+      for (TreeNode node : result) {
+        String discriminator = null;
 
-
-  @SuppressWarnings({"unchecked", "rawtypes"})
-  private void discoverOperationObservers() {
-    for (OperationType t : operationTypeClazz.getEnumConstants()) {
-      OperationStatistic statistic = findOperationObserver(t);
-      if (statistic == null) {
-        if (t.required()) {
-          throw new IllegalStateException("Required statistic " + t + " not found");
-        } else {
-          Class type = t.type();
-          CompoundOperation compoundOperation = NullCompoundOperation.instance(type);
-          standardOperations.put(t, compoundOperation);
+        Map<String, Object> properties = (Map<String, Object>) node.getContext().attributes().get("properties");
+        if (properties != null && properties.containsKey("discriminator")) {
+          discriminator = properties.get("discriminator").toString();
         }
-      } else {
-        CompoundOperationImpl compoundOperation = new CompoundOperationImpl(statistic, t.type(),
-            averageWindowDuration, averageWindowUnit, executor, historySize,
-            historyInterval, historyIntervalUnit);
-        standardOperations.put(t, compoundOperation);
-      }
-    }
-  }
 
-  @SuppressWarnings({"unchecked", "rawtypes"})
-  private OperationStatistic findOperationObserver(OperationType statistic) {
-    Set<OperationStatistic<?>> results = findOperationObserver(statistic.context(), statistic.type(), statistic.operationName(), statistic.tags());
-    switch (results.size()) {
-      case 0:
-        return null;
-      case 1:
-        return (OperationStatistic) results.iterator().next();
-      default:
-        throw new IllegalStateException("Duplicate statistics found for " + statistic);
+        String completeName = (discriminator == null ? "" : (discriminator + ":")) + name;
+        OperationStatistic<?> existing = observers.put(completeName, (OperationStatistic<?>) node.getContext().attributes().get("this"));
+        if (existing != null) {
+          throw new IllegalStateException("Duplicate OperationStatistic found for '" + completeName + "'");
+        }
+      }
+      return observers;
     }
   }
 
   @SuppressWarnings("unchecked")
-  private Set<OperationStatistic<?>> findOperationObserver(Query contextQuery, Class<?> type, String name,
-                                                           final Set<String> tags) {
-    Query q = queryBuilder().chain(contextQuery)
-        .children().filter(context(identifier(subclassOf(OperationStatistic.class)))).build();
-
-    Set<TreeNode> operationStatisticNodes = q.execute(Collections.singleton(ContextManager.nodeFor(contextObject)));
+  private static Map<String, ValueStatistic<?>> findValueStatistics(Object contextObject, String name, String observerName, final Set<String> tags) {
     Set<TreeNode> result = queryBuilder()
-        .filter(
-            context(attributes(Matchers.<Map<String, Object>>allOf(hasAttribute("type", type),
-                hasAttribute("name", name), hasAttribute("tags", new Matcher<Set<String>>() {
-                  @Override
-                  protected boolean matchesSafely(Set<String> object) {
-                    return object.containsAll(tags);
-                  }
-                }))))).build().execute(operationStatisticNodes);
+        .descendants()
+        .filter(context(attributes(Matchers.<Map<String, Object>>allOf(
+            hasAttribute("name", observerName),
+            hasAttribute("tags", new Matcher<Set<String>>() {
+              @Override
+              protected boolean matchesSafely(Set<String> object) {
+                return object.containsAll(tags);
+              }
+            })))))
+        .filter(context(identifier(subclassOf(ValueStatistic.class))))
+        .build().execute(Collections.singleton(ContextManager.nodeFor(contextObject)));
 
     if (result.isEmpty()) {
-      return Collections.emptySet();
+      return Collections.emptyMap();
     } else {
-      Set<OperationStatistic<?>> statistics = new HashSet<OperationStatistic<?>>();
+      Map<String, ValueStatistic<?>> observers = new HashMap<String, ValueStatistic<?>>();
       for (TreeNode node : result) {
-        statistics.add((OperationStatistic<?>) node.getContext().attributes().get("this"));
+        String discriminator = null;
+
+        Map<String, Object> properties = (Map<String, Object>) node.getContext().attributes().get("properties");
+        if (properties != null && properties.containsKey("discriminator")) {
+          discriminator = properties.get("discriminator").toString();
+        }
+
+        String completeName = (discriminator == null ? "" : (discriminator + ":")) + name;
+        ValueStatistic<?> existing = observers.put(completeName, (ValueStatistic<?>) node.getContext().attributes().get("this"));
+        if (existing != null) {
+          throw new IllegalStateException("Duplicate ValueStatistic found for '" + completeName + "'");
+        }
       }
-      return statistics;
+      return observers;
     }
   }
 

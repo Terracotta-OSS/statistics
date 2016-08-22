@@ -98,6 +98,11 @@ public final class NullCompoundOperation<T extends Enum<T>> implements CompoundO
     return NullSampledStatistic.instance(Double.NaN);
   }
 
+  @Override
+  public boolean expire(long expiry) {
+    return false;
+  }
+
   /**
    * {@inheritDoc}
    */
