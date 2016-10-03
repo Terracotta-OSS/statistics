@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Maven exclusions
 target/
 
@@ -12,3 +13,26 @@ target/
 # NetBeans exclusions
 nb-configurations.xml
 nbactions.xml
+=======
+*/target/
+
+build/
+*/src/generated/
+.gradle/
+
+.project
+.classpath
+.settings/org.eclipse.m2e.core.prefs
+*/.classpath
+*.prefs
+
+*.iml
+.idea
+
+.nb-gradle
+.nb-gradle-properties
+
+/classes
+
+**/*.*~
+>>>>>>> 080be1433862d32fcaf485436a04f61f17417546
