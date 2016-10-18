@@ -19,13 +19,13 @@ import org.terracotta.statistics.extended.ExpiringSampledStatistic;
 import org.terracotta.statistics.extended.SamplingSupport;
 
 /**
- * @author Ludovic Orban
+ * Class used to register size statistics (BytesSize, etc.)
  */
-public class RegisteredValueStatistic extends RegisteredStatistic {
+public class RegisteredSizeStatistic extends RegisteredStatistic {
 
   private final ExpiringSampledStatistic<?> sampledStatistic;
 
-  public RegisteredValueStatistic(ExpiringSampledStatistic<?> sampledStatistic) {
+  public RegisteredSizeStatistic(ExpiringSampledStatistic<?> sampledStatistic) {
     this.sampledStatistic = sampledStatistic;
   }
 
