@@ -25,7 +25,6 @@ import org.terracotta.statistics.ValueStatistic;
 import org.terracotta.statistics.extended.CompoundOperation;
 import org.terracotta.statistics.extended.CompoundOperationImpl;
 import org.terracotta.statistics.extended.ExpiringSampledStatistic;
-import org.terracotta.statistics.extended.SemiExpiringSampledStatistic;
 
 import java.util.Collections;
 import java.util.EnumSet;
@@ -123,8 +122,26 @@ public class StatisticsRegistry {
     }
   }
 
-  public void registerValue(String name, ValueStatisticDescriptor descriptor) {
-    Map<String, RegisteredValueStatistic> registeredStatistics = new HashMap<String, RegisteredValueStatistic>();
+  public void registerSize(String name, ValueStatisticDescriptor descriptor) {
+    registerStatistic(name, descriptor, new Function<ExpiringSampledStatistic, RegisteredStatistic>() {
+      @Override
+      public RegisteredStatistic apply(ExpiringSampledStatistic expiringSampledStatistic) {
+        return new RegisteredSizeStatistic(expiringSampledStatistic);
+      }
+    });
+  }
+
+  public void registerCounter(String name, ValueStatisticDescriptor descriptor) {
+    registerStatistic(name, descriptor, new Function<ExpiringSampledStatistic, RegisteredStatistic>() {
+      @Override
+      public RegisteredCounterStatistic apply(ExpiringSampledStatistic expiringSampledStatistic) {
+        return new RegisteredCounterStatistic(expiringSampledStatistic);
+      }
+    });
+  }
+
+  private <R extends RegisteredStatistic> void registerStatistic(String name, ValueStatisticDescriptor descriptor, Function<ExpiringSampledStatistic, R> registeredStatisticFunction) {
+    Map<String, R> registeredStatistics = new HashMap<String, R>();
 
     Map<String, ValueStatistic<?>> valueStatistics = findValueStatistics(contextObject, name, descriptor.getObserverName(), descriptor.getTags());
     Set<String> duplicates = new HashSet<String>();
@@ -135,7 +152,8 @@ public class StatisticsRegistry {
         duplicates.add(key);
       }
       ExpiringSampledStatistic expiringSampledStatistic = new ExpiringSampledStatistic(value, executor, historySize, historyInterval, historyIntervalUnit);
-      registeredStatistics.put(key, new RegisteredValueStatistic(expiringSampledStatistic));
+      R registeredStatistic = registeredStatisticFunction.apply(expiringSampledStatistic);
+      registeredStatistics.put(key, registeredStatistic);
     }
     if (!duplicates.isEmpty()) {
       throw new IllegalArgumentException("Found duplicate value statistic(s) " + duplicates);
@@ -289,6 +307,10 @@ public class StatisticsRegistry {
       }
       return observers;
     }
+  }
+
+  private interface Function<T, R> {
+    R apply(T t);
   }
 
 }
