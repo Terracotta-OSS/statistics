@@ -58,7 +58,7 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
     this(1.7f, phi, 7, bucketCount, 0.1f, window);
   }
   
-  public void event(long value, long time) {
+  public void event(double value, long time) {
     int barIndex = getBarIndex(value);
     Bar bar = bars.get(barIndex);
     long before = bar.count();
@@ -159,11 +159,11 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
     }
   }
   
-  private int getBarIndex(long value) {
+  private int getBarIndex(double value) {
     int low = 0;
     int high = bars.size() - 1;
 
-    int mid = 0;
+    int mid;
     do {
       mid = (high + low) >>> 1;
       Bar bar = bars.get(mid);
@@ -199,12 +199,12 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
       this.maximum = maximum;
     }
 
-    public void insert(long value, long time) {
+    public void insert(double value, long time) {
       if (value < minimum) {
         minimum = value;
       }
       if (value >= maximum) {
-        maximum = nextUp((double) value);
+        maximum = nextUp(value);
       }
       eh.insert(time);
     }
