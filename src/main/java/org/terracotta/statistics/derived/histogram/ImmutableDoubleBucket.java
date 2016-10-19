@@ -16,11 +16,11 @@
 package org.terracotta.statistics.derived.histogram;
 
 class ImmutableDoubleBucket implements Histogram.Bucket<Double> {
-  private final Double minimum;
-  private final Double maximum;
+  private final double minimum;
+  private final double maximum;
   private final double count;
 
-  public ImmutableDoubleBucket(Double minimum, Double maximum, double count) {
+  public ImmutableDoubleBucket(double minimum, double maximum, double count) {
     this.minimum = minimum;
     this.maximum = maximum;
     this.count = count;
