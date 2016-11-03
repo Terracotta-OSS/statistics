@@ -27,7 +27,7 @@ import org.terracotta.context.annotations.ContextAttribute;
 
 /**
  * Extracts context information from object instances and creates appropriate 
- * enclosing {@links ContextElement} instances.
+ * enclosing {@link ContextElement} instances.
  */
 public final class ObjectContextExtractor {
 

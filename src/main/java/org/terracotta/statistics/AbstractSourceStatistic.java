@@ -25,8 +25,8 @@ import org.terracotta.statistics.observer.ChainedObserver;
  * (de)registration.
  * <p>
  * This implementation exposes the currently registered statistics via the
- * {@link #derived()} method.  Concrete implementations of this class should
- * fire on the contents of this {@code Iterable} to update the derived statistics.
+ * {@link #derivedStatistics} collection.  Concrete implementations of this class should
+ * fire on the contents of this to update the derived statistics.
  */
 public class AbstractSourceStatistic<T extends ChainedObserver> implements SourceStatistic<T> {
 

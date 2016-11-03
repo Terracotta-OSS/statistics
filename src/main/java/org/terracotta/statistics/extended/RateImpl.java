@@ -44,11 +44,14 @@ public class RateImpl<T extends Enum<T>> implements SampledStatistic<Double> {
   /**
    * Instantiates a new rate statistic.
    *
+   * @param source        the source event to monitor
    * @param targets       the targets
    * @param averagePeriod the average period
+   * @param averageTimeUnit average period unit
    * @param executor      the executor
    * @param historySize   the history size
    * @param historyPeriod the history period
+   * @param historyTimeUnit history period unit
    */
   public RateImpl(final OperationStatistic<T> source, final Set<T> targets, long averagePeriod, TimeUnit averageTimeUnit,
                   ScheduledExecutorService executor, int historySize, long historyPeriod, TimeUnit historyTimeUnit) {

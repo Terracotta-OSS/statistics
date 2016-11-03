@@ -29,7 +29,7 @@ public interface OperationStatistic<T extends Enum<T>> extends OperationObserver
   public Class<T> type();
   
   /**
-   * Return a {@ValueStatistic<Long>} returning the count for the given result.
+   * Return a {@link ValueStatistic} returning the count for the given result.
    * 
    * @param result the result of interest 
    * @return a {@code ValueStatistic} instance

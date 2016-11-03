@@ -44,6 +44,7 @@ public final class NullCompoundOperation<T extends Enum<T>> implements CompoundO
    * Instance.
    *
    * @param <T> the generic type
+   * @param klazz concrete class of {@code <T>}
    * @return the operation
    */
   @SuppressWarnings("unchecked")
