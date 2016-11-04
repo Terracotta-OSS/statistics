@@ -20,13 +20,13 @@ import java.util.Set;
 /**
  * @author Ludovic Orban
  */
-public final class OperationStatisticDescriptor {
+public final class OperationStatisticDescriptor<T extends Enum<T>> {
 
   private final String observerName;
   private final Set<String> tags;
-  private final Class<? extends Enum<?>> type;
+  private final Class<T> type;
 
-  private OperationStatisticDescriptor(String observerName, Set<String> tags, Class<? extends Enum<?>> type) {
+  private OperationStatisticDescriptor(String observerName, Set<String> tags, Class<T> type) {
     this.observerName = observerName;
     this.tags = tags;
     this.type = type;
@@ -40,12 +40,12 @@ public final class OperationStatisticDescriptor {
     return tags;
   }
 
-  public Class<? extends Enum<?>> getType() {
+  public Class<T> getType() {
     return type;
   }
 
-  public static OperationStatisticDescriptor descriptor(String observerName, Set<String> tags, Class<? extends Enum<?>> type) {
-    return new OperationStatisticDescriptor(observerName, tags, type);
+  public static <T extends Enum<T>> OperationStatisticDescriptor<T> descriptor(String observerName, Set<String> tags, Class<T> type) {
+    return new OperationStatisticDescriptor<T>(observerName, tags, type);
   }
 
 }

@@ -17,6 +17,7 @@ package org.terracotta.statistics.archive;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -24,21 +25,28 @@ import java.util.List;
  * @author cdennis
  */
 public class StatisticArchive<T> implements SampleSink<Timestamped<T>> {
-  
+
+  private static final Comparator<Timestamped<?>> TIMESTAMPED_COMPARATOR = new Comparator<Timestamped<?>>() {
+    @Override
+    public int compare(Timestamped<?> o1, Timestamped<?> o2) {
+      return (int) (o1.getTimestamp() - o2.getTimestamp());
+    }
+  };
+
   private final SampleSink<? super Timestamped<T>> overspill;
 
   private volatile int size;
   private volatile CircularBuffer<Timestamped<T>> buffer;
-  
+
   public StatisticArchive(int size) {
     this(size, DevNull.DEV_NULL);
   }
-  
+
   public StatisticArchive(int size, SampleSink<? super Timestamped<T>> overspill) {
     this.size = size;
     this.overspill = overspill;
   }
-  
+
   public synchronized void setCapacity(int samples) {
     if (samples != size) {
       size = samples;
@@ -51,7 +59,7 @@ public class StatisticArchive<T> implements SampleSink<Timestamped<T>> {
       }
     }
   }
-  
+
   @Override
   public synchronized void accept(Timestamped<T> object) {
     if (buffer == null) {
@@ -63,7 +71,7 @@ public class StatisticArchive<T> implements SampleSink<Timestamped<T>> {
   public synchronized void clear() {
     buffer = null;
   }
-  
+
   public List<Timestamped<T>> getArchive() {
     CircularBuffer<Timestamped<T>> read = buffer;
     if (read == null) {
@@ -72,4 +80,24 @@ public class StatisticArchive<T> implements SampleSink<Timestamped<T>> {
       return Collections.unmodifiableList(Arrays.asList((Timestamped<T>[]) read.toArray(Timestamped[].class)));
     }
   }
+
+  public List<Timestamped<T>> getArchive(long since) {
+    CircularBuffer<Timestamped<T>> read = buffer;
+    if (read == null) {
+      return Collections.emptyList();
+    } else {
+      Timestamped<T> e = new StatisticSampler.Sample<T>(since, null);
+      Timestamped<T>[] array = (Timestamped<T>[]) read.toArray(Timestamped[].class);
+      int pos = Arrays.binarySearch(array, e, TIMESTAMPED_COMPARATOR);
+      if(pos < 0) {
+        pos = -pos - 1;
+      }
+      if(pos >= array.length) {
+        return Collections.emptyList();
+      } else {
+        return Collections.unmodifiableList(Arrays.asList(Arrays.copyOfRange(array, pos, array.length)));
+      }
+    }
+  }
+
 }

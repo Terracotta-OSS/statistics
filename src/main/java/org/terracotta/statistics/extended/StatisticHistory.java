@@ -81,6 +81,15 @@ class StatisticHistory<T extends Number> {
   }
 
   /**
+   * History since given time in ms
+   *
+   * @return the list
+   */
+  public List<Timestamped<T>> history(long since) {
+    return history.getArchive(since);
+  }
+
+  /**
    * Adjust.
    *
    * @param historySize     the history size
@@ -91,4 +100,5 @@ class StatisticHistory<T extends Number> {
     history.setCapacity(historySize);
     sampler.setPeriod(historyPeriod, historyTimeUnit);
   }
+
 }

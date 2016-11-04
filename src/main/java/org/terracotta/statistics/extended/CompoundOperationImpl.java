@@ -96,7 +96,7 @@ public class CompoundOperationImpl<T extends Enum<T>> implements CompoundOperati
   }
 
   @Override
-  public Result compound(Set<T> results) {
+  public Result compound(EnumSet<T> results) {
     if (results.size() == 1) {
       return component(results.iterator().next());
     } else {
@@ -122,7 +122,7 @@ public class CompoundOperationImpl<T extends Enum<T>> implements CompoundOperati
   }
 
   @Override
-  public SampledStatistic<Double> ratioOf(Set<T> numerator, Set<T> denominator) {
+  public SampledStatistic<Double> ratioOf(EnumSet<T> numerator, EnumSet<T> denominator) {
     @SuppressWarnings("unchecked")
     List<Set<T>> key = Arrays.<Set<T>>asList(EnumSet.copyOf(numerator), EnumSet.copyOf(denominator));
 
@@ -135,7 +135,7 @@ public class CompoundOperationImpl<T extends Enum<T>> implements CompoundOperati
         public Double value() {
           return numeratorRate.value() / denominatorRate.value();
         }
-      }, executor, historySize, historyPeriod, historyTimeUnit);
+      }, executor, historySize, historyPeriod, historyTimeUnit, SampleType.RATIO);
       ExpiringSampledStatistic<Double> racer = ratios.putIfAbsent(key, created);
       if (racer == null) {
         return created;

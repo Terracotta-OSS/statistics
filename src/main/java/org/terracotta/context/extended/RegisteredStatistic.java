@@ -20,8 +20,10 @@ import org.terracotta.statistics.extended.SamplingSupport;
 /**
  * @author Ludovic Orban
  */
-public abstract class RegisteredStatistic {
+public interface RegisteredStatistic {
 
-  public abstract SamplingSupport getSupport();
+  SamplingSupport getSupport();
+
+  RegistrationType getType();
 
 }

@@ -16,20 +16,26 @@
 package org.terracotta.context.extended;
 
 import org.terracotta.statistics.extended.ExpiringSampledStatistic;
+import org.terracotta.statistics.extended.SampledStatistic;
 import org.terracotta.statistics.extended.SamplingSupport;
 
 /**
  * Class used to register counter statistics (MappingCount, etc.)
  */
-public class RegisteredCounterStatistic extends RegisteredStatistic {
+public class RegisteredCounterStatistic implements RegisteredStatistic {
 
-  private final ExpiringSampledStatistic<?> sampledStatistic;
+  private final ExpiringSampledStatistic<Long> sampledStatistic;
 
-  public RegisteredCounterStatistic(ExpiringSampledStatistic<?> sampledStatistic) {
+  public RegisteredCounterStatistic(ExpiringSampledStatistic<Long> sampledStatistic) {
     this.sampledStatistic = sampledStatistic;
   }
 
-  public ExpiringSampledStatistic<?> getSampledStatistic() {
+  @Override
+  public RegistrationType getType() {
+    return RegistrationType.COUNTER;
+  }
+
+  public SampledStatistic<Long> getSampledStatistic() {
     return sampledStatistic;
   }
 

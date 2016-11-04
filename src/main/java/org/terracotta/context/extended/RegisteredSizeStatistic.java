@@ -16,20 +16,26 @@
 package org.terracotta.context.extended;
 
 import org.terracotta.statistics.extended.ExpiringSampledStatistic;
+import org.terracotta.statistics.extended.SampledStatistic;
 import org.terracotta.statistics.extended.SamplingSupport;
 
 /**
  * Class used to register size statistics (BytesSize, etc.)
  */
-public class RegisteredSizeStatistic extends RegisteredStatistic {
+public class RegisteredSizeStatistic implements RegisteredStatistic {
 
-  private final ExpiringSampledStatistic<?> sampledStatistic;
+  private final ExpiringSampledStatistic<Long> sampledStatistic;
 
-  public RegisteredSizeStatistic(ExpiringSampledStatistic<?> sampledStatistic) {
+  public RegisteredSizeStatistic(ExpiringSampledStatistic<Long> sampledStatistic) {
     this.sampledStatistic = sampledStatistic;
   }
 
-  public ExpiringSampledStatistic<?> getSampledStatistic() {
+  @Override
+  public RegistrationType getType() {
+    return RegistrationType.SIZE;
+  }
+
+  public SampledStatistic<Long> getSampledStatistic() {
     return sampledStatistic;
   }
 

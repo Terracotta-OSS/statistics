@@ -58,9 +58,9 @@ class LatencyImpl<T extends Enum<T>> implements Latency {
   public LatencyImpl(OperationStatistic<T> statistic, Set<T> targets, long averagePeriod, TimeUnit averageTimeUnit,
                      ScheduledExecutorService executor, int historySize, long historyPeriod, TimeUnit historyTimeUnit) {
     this.average = new EventParameterSimpleMovingAverage(averagePeriod, averageTimeUnit);
-    this.minimumStatistic = new SampledStatisticImpl<Long>(this, average.minimumStatistic(), executor, historySize, historyPeriod, historyTimeUnit);
-    this.maximumStatistic = new SampledStatisticImpl<Long>(this, average.maximumStatistic(), executor, historySize, historyPeriod, historyTimeUnit);
-    this.averageStatistic = new SampledStatisticImpl<Double>(this, average.averageStatistic(), executor, historySize, historyPeriod, historyTimeUnit);
+    this.minimumStatistic = new SampledStatisticImpl<Long>(this, average.minimumStatistic(), executor, historySize, historyPeriod, historyTimeUnit, SampleType.LATENCY_MIN);
+    this.maximumStatistic = new SampledStatisticImpl<Long>(this, average.maximumStatistic(), executor, historySize, historyPeriod, historyTimeUnit, SampleType.LATENCY_MAX);
+    this.averageStatistic = new SampledStatisticImpl<Double>(this, average.averageStatistic(), executor, historySize, historyPeriod, historyTimeUnit, SampleType.LATENCY_AVG);
     this.latencySampler = new LatencySampling<T>(targets, 1.0);
     this.latencySampler.addDerivedStatistic(average);
     this.source = statistic;

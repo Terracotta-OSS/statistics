@@ -16,21 +16,31 @@
 package org.terracotta.context.extended;
 
 import org.terracotta.statistics.extended.CompoundOperation;
+import org.terracotta.statistics.extended.Result;
 
 import java.util.EnumSet;
 
 /**
  * @author Ludovic Orban
  */
-public class RegisteredCompoundStatistic extends RegisteredCompoundOperationStatistic {
-  private final EnumSet<?> compound;
+public class RegisteredCompoundStatistic<T extends Enum<T>> extends RegisteredCompoundOperationStatistic<T> {
+  private final EnumSet<T> compound;
 
-  public RegisteredCompoundStatistic(CompoundOperation<?> compoundOperation, EnumSet<?> compound) {
+  public RegisteredCompoundStatistic(CompoundOperation<T> compoundOperation, EnumSet<T> compound) {
     super(compoundOperation);
     this.compound = compound;
   }
 
-  public EnumSet<?> getCompound() {
+  @Override
+  public RegistrationType getType() {
+    return RegistrationType.COMPOUND;
+  }
+
+  public EnumSet<T> getCompound() {
     return compound;
+  }
+
+  public Result getResult() {
+    return getCompoundOperation().compound(getCompound());
   }
 }
