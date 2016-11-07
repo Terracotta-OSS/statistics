@@ -13,44 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terracotta.statistics.extended;
-
-import org.terracotta.statistics.archive.Timestamped;
-
-import java.util.List;
+package org.terracotta.context.extended;
 
 /**
- * @author Ludovic Orban
+ * @author Mathieu Carbou
  */
-public interface SampledStatistic<T extends Number> {
-
-  /**
-   * Active.
-   *
-   * @return true, if successful
-   */
-  boolean active();
-
-  /**
-   * Value.
-   *
-   * @return the t
-   */
-  T value();
-
-  /**
-   * History.
-   *
-   * @return the list
-   */
-  List<Timestamped<T>> history();
-
-  /**
-   * History, from a given time in ms
-   *
-   * @return the list
-   */
-  List<Timestamped<T>> history(long since);
-
-  SampleType type();
+public enum RegistrationType {
+  COMPOUND,
+  RATIO,
+  SIZE,
+  COUNTER
 }

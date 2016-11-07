@@ -15,8 +15,7 @@
  */
 package org.terracotta.statistics.extended;
 
-import java.util.Map;
-import java.util.Set;
+import java.util.EnumSet;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -47,7 +46,7 @@ public interface CompoundOperation<T extends Enum<T>> extends SamplingSupport {
    * @param results the results
    * @return the result
    */
-  Result compound(Set<T> results);
+  Result compound(EnumSet<T> results);
 
   /**
    * Count operation.
@@ -60,10 +59,10 @@ public interface CompoundOperation<T extends Enum<T>> extends SamplingSupport {
    * Ratio of.
    *
    * @param numerator  the numerator
-   * @param denomiator the denomiator
+   * @param denominator the denomiator
    * @return the statistic
    */
-  SampledStatistic<Double> ratioOf(Set<T> numerator, Set<T> denomiator);
+  SampledStatistic<Double> ratioOf(EnumSet<T> numerator, EnumSet<T> denominator);
 
   /**
    * Sets the always on.

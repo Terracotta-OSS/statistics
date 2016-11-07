@@ -42,7 +42,7 @@ public class StatisticsManager extends ContextManager {
       }
     });
   }
-  
+
   public static <T extends Enum<T>> OperationObserver<T> createOperationStatistic(Object context, String name, Set<String> tags, Class<T> eventTypes) {
     return createOperationStatistic(context, name, tags, Collections.<String, Object>emptyMap(), eventTypes);
   }

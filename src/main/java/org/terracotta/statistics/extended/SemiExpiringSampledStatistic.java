@@ -53,14 +53,20 @@ public class SemiExpiringSampledStatistic<T extends Number> extends AbstractSamp
    * @param historyTime     period between samples
    * @param historyTimeUnit unit of period between samples
    */
-  public SemiExpiringSampledStatistic(ValueStatistic<T> source, ScheduledExecutorService executor, int historySize, long historyTime, TimeUnit historyTimeUnit) {
-    super(source, executor, historySize, historyTime, historyTimeUnit);
+  public SemiExpiringSampledStatistic(ValueStatistic<T> source, ScheduledExecutorService executor, int historySize, long historyTime, TimeUnit historyTimeUnit, SampleType type) {
+    super(source, executor, historySize, historyTime, historyTimeUnit, type);
   }
 
   @Override
   public List<Timestamped<T>> history() {
     touch();
     return super.history();
+  }
+
+  @Override
+  public List<Timestamped<T>> history(long since) {
+    touch();
+    return super.history(since);
   }
 
   @Override

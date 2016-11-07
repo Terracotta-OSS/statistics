@@ -21,15 +21,15 @@ import org.terracotta.statistics.extended.SamplingSupport;
 /**
  * @author Ludovic Orban
  */
-public abstract class RegisteredCompoundOperationStatistic extends RegisteredStatistic {
+public abstract class RegisteredCompoundOperationStatistic<T extends Enum<T>> implements RegisteredStatistic {
 
-  private final CompoundOperation<?> compoundOperation;
+  private final CompoundOperation<T> compoundOperation;
 
-  public RegisteredCompoundOperationStatistic(CompoundOperation<?> compoundOperation) {
+  public RegisteredCompoundOperationStatistic(CompoundOperation<T> compoundOperation) {
     this.compoundOperation = compoundOperation;
   }
 
-  public CompoundOperation<?> getCompoundOperation() {
+  public CompoundOperation<T> getCompoundOperation() {
     return compoundOperation;
   }
 

@@ -38,8 +38,8 @@ class SampledStatisticImpl<T extends Number> extends AbstractSampledStatistic<T>
    * @param historyPeriod   the history period
    * @param historyTimeUnit the history time unit
    */
-  public SampledStatisticImpl(LatencyImpl latency, ValueStatistic<T> value, ScheduledExecutorService executor, int historySize, long historyPeriod, TimeUnit historyTimeUnit) {
-    super(value, executor, historySize, historyPeriod, historyTimeUnit);
+  public SampledStatisticImpl(LatencyImpl latency, ValueStatistic<T> value, ScheduledExecutorService executor, int historySize, long historyPeriod, TimeUnit historyTimeUnit, SampleType type) {
+    super(value, executor, historySize, historyPeriod, historyTimeUnit, type);
     this.latency = latency;
   }
 
@@ -58,5 +58,11 @@ class SampledStatisticImpl<T extends Number> extends AbstractSampledStatistic<T>
   public List<Timestamped<T>> history() {
     latency.touch();
     return super.history();
+  }
+
+  @Override
+  public List<Timestamped<T>> history(long since) {
+    latency.touch();
+    return super.history(since);
   }
 }

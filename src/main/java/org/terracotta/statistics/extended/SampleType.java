@@ -15,42 +15,17 @@
  */
 package org.terracotta.statistics.extended;
 
-import org.terracotta.statistics.archive.Timestamped;
-
-import java.util.List;
-
 /**
- * @author Ludovic Orban
+ * @author Mathieu Carbou
  */
-public interface SampledStatistic<T extends Number> {
+public enum SampleType {
 
-  /**
-   * Active.
-   *
-   * @return true, if successful
-   */
-  boolean active();
+  COUNTER,
+  RATE,
+  LATENCY_MIN,
+  LATENCY_MAX,
+  LATENCY_AVG,
+  RATIO,
+  SIZE
 
-  /**
-   * Value.
-   *
-   * @return the t
-   */
-  T value();
-
-  /**
-   * History.
-   *
-   * @return the list
-   */
-  List<Timestamped<T>> history();
-
-  /**
-   * History, from a given time in ms
-   *
-   * @return the list
-   */
-  List<Timestamped<T>> history(long since);
-
-  SampleType type();
 }

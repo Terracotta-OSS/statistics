@@ -18,10 +18,10 @@ package org.terracotta.statistics.extended;
 import org.terracotta.statistics.archive.Timestamped;
 
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 
@@ -72,7 +72,7 @@ public final class NullCompoundOperation<T extends Enum<T>> implements CompoundO
    * {@inheritDoc}
    */
   @Override
-  public Result compound(Set<T> results) {
+  public Result compound(EnumSet<T> results) {
     return NullOperation.instance();
   }
 
@@ -95,8 +95,8 @@ public final class NullCompoundOperation<T extends Enum<T>> implements CompoundO
    * {@inheritDoc}
    */
   @Override
-  public SampledStatistic<Double> ratioOf(Set<T> numerator, Set<T> denomiator) {
-    return NullSampledStatistic.instance(Double.NaN);
+  public SampledStatistic<Double> ratioOf(EnumSet<T> numerator, EnumSet<T> denominator) {
+    return NullSampledStatistic.instance(SampleType.RATIO);
   }
 
   @Override
@@ -191,7 +191,7 @@ public final class NullCompoundOperation<T extends Enum<T>> implements CompoundO
      */
     @Override
     public SampledStatistic<Long> count() {
-      return NullSampledStatistic.instance(0L);
+      return NullSampledStatistic.instance(SampleType.COUNTER);
     }
 
     /**
@@ -199,7 +199,7 @@ public final class NullCompoundOperation<T extends Enum<T>> implements CompoundO
      */
     @Override
     public SampledStatistic<Double> rate() {
-      return NullSampledStatistic.instance(Double.NaN);
+      return NullSampledStatistic.instance(SampleType.RATE);
     }
 
     /**
@@ -240,7 +240,7 @@ public final class NullCompoundOperation<T extends Enum<T>> implements CompoundO
      */
     @Override
     public SampledStatistic<Long> minimum() {
-      return NullSampledStatistic.instance(null);
+      return NullSampledStatistic.instance(SampleType.LATENCY_MIN);
     }
 
     /**
@@ -248,7 +248,7 @@ public final class NullCompoundOperation<T extends Enum<T>> implements CompoundO
      */
     @Override
     public SampledStatistic<Long> maximum() {
-      return NullSampledStatistic.instance(null);
+      return NullSampledStatistic.instance(SampleType.LATENCY_MAX);
     }
 
     /**
@@ -256,7 +256,7 @@ public final class NullCompoundOperation<T extends Enum<T>> implements CompoundO
      */
     @Override
     public SampledStatistic<Double> average() {
-      return NullSampledStatistic.instance(Double.NaN);
+      return NullSampledStatistic.instance(SampleType.LATENCY_AVG);
     }
   }
 
@@ -268,24 +268,30 @@ public final class NullCompoundOperation<T extends Enum<T>> implements CompoundO
    */
   final static class NullSampledStatistic<T extends Number> implements SampledStatistic<T> {
 
-    private static final Map<Object, SampledStatistic<?>> COMMON = new HashMap<Object, SampledStatistic<?>>();
+    private static final Map<SampleType, SampledStatistic<?>> COMMON = new HashMap<SampleType, SampledStatistic<?>>();
 
     static {
-      COMMON.put(Double.NaN, new NullSampledStatistic<Double>(Double.NaN));
-      COMMON.put(Float.NaN, new NullSampledStatistic<Float>(Float.NaN));
-      COMMON.put(Long.valueOf(0L), new NullSampledStatistic<Long>(0L));
-      COMMON.put(null, new NullSampledStatistic<Long>(null));
+      COMMON.put(SampleType.COUNTER, new NullSampledStatistic<Long>(0L, SampleType.COUNTER));
+      COMMON.put(SampleType.RATE, new NullSampledStatistic<Double>(Double.NaN, SampleType.RATE));
+      COMMON.put(SampleType.LATENCY_MIN, new NullSampledStatistic<Long>(null, SampleType.LATENCY_MIN));
+      COMMON.put(SampleType.LATENCY_MAX, new NullSampledStatistic<Long>(null, SampleType.LATENCY_MAX));
+      COMMON.put(SampleType.LATENCY_AVG, new NullSampledStatistic<Double>(Double.NaN, SampleType.LATENCY_AVG));
+      COMMON.put(SampleType.RATIO, new NullSampledStatistic<Double>(Double.NaN, SampleType.RATIO));
+      COMMON.put(SampleType.SIZE, new NullSampledStatistic<Long>(0L, SampleType.SIZE));
     }
 
     private final T value;
+    private final SampleType type;
 
     /**
      * Constructor
      *
      * @param value initial value
+     * @param type
      */
-    private NullSampledStatistic(T value) {
+    private NullSampledStatistic(T value, SampleType type) {
       this.value = value;
+      this.type = type;
     }
 
     /**
@@ -304,6 +310,11 @@ public final class NullCompoundOperation<T extends Enum<T>> implements CompoundO
       return value;
     }
 
+    @Override
+    public SampleType type() {
+      return type;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -312,20 +323,16 @@ public final class NullCompoundOperation<T extends Enum<T>> implements CompoundO
       return Collections.emptyList();
     }
 
-    /**
-     * instance
-     *
-     * @param value
-     * @return
-     */
-    static <T extends Number> SampledStatistic<T> instance(T value) {
-      @SuppressWarnings("unchecked")
-      SampledStatistic<T> cached = (SampledStatistic<T>) COMMON.get(value);
-      if (cached == null) {
-        return new NullSampledStatistic<T>(value);
-      } else {
-        return cached;
+    @Override
+    public List<Timestamped<T>> history(long since) {
+      return Collections.emptyList();
+    }
+
+    static <T extends Number> SampledStatistic<T> instance(SampleType type) {
+      if(type == null) {
+        throw new NullPointerException();
       }
+      return (SampledStatistic<T>) COMMON.get(type);
     }
 
   }

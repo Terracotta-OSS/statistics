@@ -16,27 +16,38 @@
 package org.terracotta.context.extended;
 
 import org.terracotta.statistics.extended.CompoundOperation;
+import org.terracotta.statistics.extended.SampledStatistic;
 
 import java.util.EnumSet;
 
 /**
  * @author Ludovic Orban
  */
-public class RegisteredRatioStatistic extends RegisteredCompoundOperationStatistic {
-  private final EnumSet<?> numerator;
-  private final EnumSet<?> denominator;
+public class RegisteredRatioStatistic<T extends Enum<T>> extends RegisteredCompoundOperationStatistic<T> {
+  private final EnumSet<T> numerator;
+  private final EnumSet<T> denominator;
 
-  public RegisteredRatioStatistic(CompoundOperation<?> compoundOperation, EnumSet<?> numerator, EnumSet<?> denominator) {
+  public RegisteredRatioStatistic(CompoundOperation<T> compoundOperation, EnumSet<T> numerator, EnumSet<T> denominator) {
     super(compoundOperation);
     this.numerator = numerator;
     this.denominator = denominator;
   }
 
-  public EnumSet<?> getNumerator() {
+  @Override
+  public RegistrationType getType() {
+    return RegistrationType.RATIO;
+  }
+
+  public EnumSet<T> getNumerator() {
     return numerator;
   }
 
-  public EnumSet<?> getDenominator() {
+  public EnumSet<T> getDenominator() {
     return denominator;
+  }
+
+  public SampledStatistic<Double> getSampledStatistic() {
+    CompoundOperation<T> operation = getCompoundOperation();
+    return operation.ratioOf(getNumerator(), getDenominator());
   }
 }
