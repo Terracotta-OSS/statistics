@@ -18,8 +18,10 @@ package org.terracotta.statistics.archive;
 import org.hamcrest.collection.IsEmptyCollection;
 import static org.hamcrest.collection.IsIterableContainingInOrder.*;
 import org.hamcrest.core.IsCollectionContaining;
+import org.hamcrest.core.IsEqual;
 import org.junit.Test;
 
+import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -27,7 +29,17 @@ import static org.junit.Assert.assertThat;
  * @author cdennis
  */
 public class StatisticArchiveTest {
-  
+
+  @Test
+  public void test_since() {
+    StatisticArchive<String> archive = new StatisticArchive<String>(2);
+    Timestamped<String> sample1 = new Sample("foo", 1479819723336L);
+    Timestamped<String> sample2 = new Sample("bar", 1479819721336L);
+    archive.accept(sample1);
+    archive.accept(sample2);
+    assertThat(archive.getArchive(0).size(), equalTo(2));
+  }
+
   @Test
   public void testEmptyArchive() {
     StatisticArchive<String> archive = new StatisticArchive<String>(2);

@@ -29,7 +29,10 @@ public class StatisticArchive<T> implements SampleSink<Timestamped<T>> {
   private static final Comparator<Timestamped<?>> TIMESTAMPED_COMPARATOR = new Comparator<Timestamped<?>>() {
     @Override
     public int compare(Timestamped<?> o1, Timestamped<?> o2) {
-      return (int) (o1.getTimestamp() - o2.getTimestamp());
+      // o1 - o2
+      if(o1.getTimestamp() == o2.getTimestamp()) return 0;
+      if(o1.getTimestamp() < o2.getTimestamp()) return -1;
+      return 1;
     }
   };
 
