@@ -48,6 +48,7 @@ public interface SampledStatistic<T extends Number> {
   /**
    * History, from a given time in ms
    *
+   * @param since starting point of history in ms
    * @return the list
    */
   List<Timestamped<T>> history(long since);

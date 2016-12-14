@@ -52,6 +52,7 @@ public class SemiExpiringSampledStatistic<T extends Number> extends AbstractSamp
    * @param historySize     size of sample history
    * @param historyTime     period between samples
    * @param historyTimeUnit unit of period between samples
+   * @param type            sampling type
    */
   public SemiExpiringSampledStatistic(ValueStatistic<T> source, ScheduledExecutorService executor, int historySize, long historyTime, TimeUnit historyTimeUnit, SampleType type) {
     super(source, executor, historySize, historyTime, historyTimeUnit, type);
