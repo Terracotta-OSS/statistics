@@ -185,6 +185,9 @@
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <excludePackageNames>org.terracotta.statistics.jsr166e</excludePackageNames>
+        </configuration>
       </plugin>
     </plugins>
   </build>
