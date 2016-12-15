@@ -56,12 +56,13 @@ public class StatisticsManager extends ContextManager {
     }
   }
   
-  public static <T extends Number> void createPassThroughStatistic(Object context, String name, Set<String> tags, Callable<T> source) {
-    createPassThroughStatistic(context, name, tags, Collections.<String, Object>emptyMap(), source);
+  public static <T extends Number> ValueStatistic<T> createPassThroughStatistic(Object context, String name, Set<String> tags, Callable<T> source) {
+    return createPassThroughStatistic(context, name, tags, Collections.<String, Object>emptyMap(), source);
   }
   
-  public static <T extends Number> void createPassThroughStatistic(Object context, String name, Set<String> tags, Map<String, ? extends Object> properties, Callable<T> source) {
+  public static <T extends Number> ValueStatistic<T> createPassThroughStatistic(Object context, String name, Set<String> tags, Map<String, ? extends Object> properties, Callable<T> source) {
     PassThroughStatistic<T> stat = new PassThroughStatistic<T>(context, name, tags, properties, source);
     associate(context).withChild(stat);
+    return stat;
   }
 }
