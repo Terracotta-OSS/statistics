@@ -40,6 +40,12 @@ public class WeakIdentityHashMap<K, V> {
     return backing.putIfAbsent(createReference(key, referenceQueue), value);
   }
 
+  public V remove(K key) {
+    V v = backing.remove(createReference(key, null));
+    clean();
+    return v;
+  }
+
   private void clean() {
     Reference<? extends K> ref;
     while ((ref = referenceQueue.poll()) != null) {

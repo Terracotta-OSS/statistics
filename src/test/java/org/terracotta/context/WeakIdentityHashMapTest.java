@@ -59,6 +59,17 @@ public class WeakIdentityHashMapTest {
     assertThat(value.isClean(), is(true));
   }
 
+  @Test
+  public void testRemoveActiveRef() {
+    Queue<Reference<String>> references = new LinkedList<Reference<String>>();
+    WeakIdentityHashMap<String, String> map = createRefTrackingWeakIdentityHashMap(references);
+
+    map.putIfAbsent("key", "value");
+
+    assertThat(map.remove("key"), is("value"));
+    assertThat(map.get("key"), nullValue());
+  }
+
   private <T> WeakIdentityHashMap<String, T> createRefTrackingWeakIdentityHashMap(final Queue<Reference<String>> references) {
     return new WeakIdentityHashMap<String, T>() {
       @Override
