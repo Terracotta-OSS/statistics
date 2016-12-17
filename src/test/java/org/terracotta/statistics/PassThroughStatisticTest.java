@@ -16,75 +16,37 @@
 package org.terracotta.statistics;
 
 import org.junit.Test;
-import org.terracotta.context.TreeNode;
+
+import java.util.Collections;
+import java.util.concurrent.Callable;
 
 import static org.hamcrest.core.IsEqual.*;
 import static org.junit.Assert.assertThat;
-import static org.terracotta.context.query.Matchers.*;
-import static org.terracotta.context.query.QueryBuilder.queryBuilder;
 
 /**
  *
- * @author cdennis
+ * @author henri-tremblay
  */
 public class PassThroughStatisticTest {
 
+  private PassThroughStatistic<Integer> stat =
+      new PassThroughStatistic<Integer>(this, "name", Collections.singleton("tag"), Collections.singletonMap("key", "value"),
+          new Callable<Integer>() {
+            @Override
+            public Integer call() throws Exception {
+              return 42;
+            }
+          });
+
   @Test
-  public void testAnnotationBasedStatDetection() {
-    StatisticsManager manager = new StatisticsManager();
-    manager.root(new Foo());
-
-    TreeNode foo = manager.queryForSingleton(queryBuilder().descendants().filter(context(attributes(hasAttribute("name", "foostat")))).build());
-    TreeNode bar = manager.queryForSingleton(queryBuilder().descendants().filter(context(attributes(hasAttribute("name", "barstat")))).build());
-
-    ValueStatistic<Number> fooStat = (ValueStatistic<Number>) foo.getContext().attributes().get("this");
-    ValueStatistic<Number> barStat = (ValueStatistic<Number>) bar.getContext().attributes().get("this");
-
-    assertThat(fooStat.value(), equalTo((Number) Integer.valueOf(42)));
-    assertThat(barStat.value(), equalTo((Number) Long.valueOf(42L)));
+  public void testAttributes() {
+    assertThat(stat.name, equalTo("name"));
+    assertThat(stat.properties.get("key"), equalTo((Object) "value"));
+    assertThat(stat.tags.iterator().next(), equalTo("tag"));
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void testAnnotationBasedStatFailsWithParameter() {
-    new StatisticsManager().root(new Object() {
-      @Statistic(name = "foo")
-      public Integer foo(String haha) {
-        return 42;
-      }
-    });
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void testAnnotationBasedStatFailsIfStatic() {
-    new StatisticsManager().root(new FooStatic());
-  }
-  
-  @Test(expected = IllegalArgumentException.class)
-  public void testAnnotationBasedStatFailsWithIncorrectReturn() {
-    new StatisticsManager().root(new Object() {
-      @Statistic(name = "foo")
-      public String foo() {
-        return "42";
-      }
-    });
-  }
-  static class Foo {
-
-    @Statistic(name = "foostat")
-    public Integer foo() {
-      return 42;
-    }
-
-    @Statistic(name = "barstat")
-    public long bar() {
-      return 42L;
-    }
-  }
-  
-  static class FooStatic {
-    @Statistic(name = "foo")
-    public static Integer foo() {
-      return 42;
-    }
+  @Test
+  public void testSource() {
+    assertThat(stat.value(), equalTo(42));
   }
 }
