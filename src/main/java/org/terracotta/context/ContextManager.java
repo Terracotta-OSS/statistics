@@ -16,7 +16,6 @@
 package org.terracotta.context;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
@@ -99,7 +98,8 @@ public class ContextManager {
    * @return {@code TreeNode} associated with this object
    */
   public static TreeNode nodeFor(Object object) {
-    return getTreeNode(object);
+    TreeNode node = getTreeNode(object);
+    return node == null ? null : new ContextAwareTreeNode(node, object);
   }
 
   public static void registerContextCreationListener(ContextCreationListener listener) {

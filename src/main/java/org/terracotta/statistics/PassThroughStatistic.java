@@ -43,7 +43,15 @@ class PassThroughStatistic<T extends Number> implements ValueStatistic<T> {
     }
     collection.add(stat);
   }
-  
+
+  public static void removeStatistics(Object to) {
+    BINDING.remove(to);
+  }
+
+  static boolean hasStatisticsFor(Object to) {
+    return BINDING.get(to) != null;
+  }
+
   @ContextAttribute("name") public final String name;
   @ContextAttribute("tags") public final Set<String> tags;
   @ContextAttribute("properties") public final Map<String, Object> properties;

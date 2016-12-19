@@ -33,20 +33,8 @@ public class WeakIdentityHashMapTest {
   
   @Test
   public void testEnqueuedReferenceIsRemoved() {
-    
-    final Queue<Reference<String>> references = new LinkedList<Reference<String>>();
-    WeakIdentityHashMap<String, String> map = new WeakIdentityHashMap<String, String>() {
-      @Override
-      protected Reference<String> createReference(String key, ReferenceQueue<? super String> queue) {
-        if (queue == null) {
-          return super.createReference(key, queue);
-        } else {
-          Reference<String> ref = super.createReference(key, queue);
-          references.add(ref);
-          return ref;
-        }
-      }
-    };
+    Queue<Reference<String>> references = new LinkedList<Reference<String>>();
+    WeakIdentityHashMap<String, String> map = createRefTrackingWeakIdentityHashMap(references);
     
     assertThat(map.putIfAbsent("test", "test"), nullValue());
     assertThat(map.get("test"), is("test"));
@@ -58,8 +46,32 @@ public class WeakIdentityHashMapTest {
 
   @Test
   public void testEnqueuedCleanableReferenceIsRemovedAndCleaned() {
-    final Queue<Reference<String>> references = new LinkedList<Reference<String>>();
-    WeakIdentityHashMap<String, DummyCleanable> map = new WeakIdentityHashMap<String, DummyCleanable>() {
+    Queue<Reference<String>> references = new LinkedList<Reference<String>>();
+    WeakIdentityHashMap<String, DummyCleanable> map = createRefTrackingWeakIdentityHashMap(references);
+    
+    DummyCleanable value = new DummyCleanable();
+    assertThat(map.putIfAbsent("test", value), nullValue());
+    assertThat(map.get("test"), is(value));
+    
+    references.remove().enqueue();
+    
+    assertThat(map.get("test"), nullValue());
+    assertThat(value.isClean(), is(true));
+  }
+
+  @Test
+  public void testRemoveActiveRef() {
+    Queue<Reference<String>> references = new LinkedList<Reference<String>>();
+    WeakIdentityHashMap<String, String> map = createRefTrackingWeakIdentityHashMap(references);
+
+    map.putIfAbsent("key", "value");
+
+    assertThat(map.remove("key"), is("value"));
+    assertThat(map.get("key"), nullValue());
+  }
+
+  private <T> WeakIdentityHashMap<String, T> createRefTrackingWeakIdentityHashMap(final Queue<Reference<String>> references) {
+    return new WeakIdentityHashMap<String, T>() {
       @Override
       protected Reference<String> createReference(String key, ReferenceQueue<? super String> queue) {
         if (queue == null) {
@@ -71,17 +83,8 @@ public class WeakIdentityHashMapTest {
         }
       }
     };
-    
-    DummyCleanable value = new DummyCleanable();
-    assertThat(map.putIfAbsent("test", value), nullValue());
-    assertThat(map.get("test"), is(value));
-    
-    references.remove().enqueue();
-    
-    assertThat(map.get("test"), nullValue());
-    assertThat(value.isClean(), is(true));
   }
-  
+
   static class DummyCleanable implements WeakIdentityHashMap.Cleanable {
 
     private boolean cleaned = false;

@@ -80,6 +80,10 @@ public class StatisticsManager extends ContextManager {
     associate(context).withChild(stat);
   }
 
+  public static void removePassThroughStatistics(Object context) {
+    PassThroughStatistic.removeStatistics(context);
+  }
+  
   private static void parseStatisticAnnotations(final Object object) {
     for (final Method m : object.getClass().getMethods()) {
       Statistic anno = m.getAnnotation(Statistic.class);
@@ -97,7 +101,7 @@ public class StatisticsManager extends ContextManager {
       } 
     }
   }
-  
+
   static class MethodCallable<T> implements Callable<T> {
 
     private final WeakReference<Object> targetRef;

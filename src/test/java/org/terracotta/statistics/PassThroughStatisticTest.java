@@ -15,11 +15,20 @@
  */
 package org.terracotta.statistics;
 
+import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.Test;
 import org.terracotta.context.TreeNode;
+import org.terracotta.context.query.Query;
 
+import java.util.Collections;
+import java.util.Set;
+import java.util.concurrent.Callable;
+
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.IsEqual.*;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.terracotta.context.query.Matchers.*;
 import static org.terracotta.context.query.QueryBuilder.queryBuilder;
 
@@ -28,6 +37,32 @@ import static org.terracotta.context.query.QueryBuilder.queryBuilder;
  * @author cdennis
  */
 public class PassThroughStatisticTest {
+
+  private Callable<Number> callable = new Callable<Number>() {
+    @Override
+    public Number call() {
+      return 12;
+    }
+  };
+
+  @Test
+  public void testClean() {
+    StatisticsManager.createPassThroughStatistic(this, "mystat",
+        Collections.<String>emptySet(), callable);
+
+    assertTrue(PassThroughStatistic.hasStatisticsFor(this));
+
+    StatisticsManager.nodeFor(this).clean();
+
+    assertFalse(PassThroughStatistic.hasStatisticsFor(this));
+
+    StatisticsManager manager = new StatisticsManager();
+    manager.root(this);
+
+    Query query = queryBuilder().descendants().filter(context(attributes(hasAttribute("name", "mystat")))).build();
+    Set<TreeNode> nodes = manager.query(query);
+    assertThat(nodes, IsEmptyCollection.<TreeNode>empty());
+  }
 
   @Test
   public void testAnnotationBasedStatDetection() {
@@ -68,6 +103,7 @@ public class PassThroughStatisticTest {
       }
     });
   }
+
   static class Foo {
 
     @Statistic(name = "foostat")
@@ -87,4 +123,5 @@ public class PassThroughStatisticTest {
       return 42;
     }
   }
+
 }
