@@ -38,7 +38,7 @@ public class ExpiringSampledStatistic<T extends Number> extends SemiExpiringSamp
    * @param historyTimeUnit unit of period between samples
    * @param type            sampling type
    */
-  public ExpiringSampledStatistic(ValueStatistic<T> source, ScheduledExecutorService executor, int historySize, long historyPeriod, TimeUnit historyTimeUnit, SampleType type) {
+  public ExpiringSampledStatistic(ValueStatistic<T> source, ScheduledExecutorService executor, int historySize, long historyPeriod, TimeUnit historyTimeUnit, StatisticType type) {
     super(source, executor, historySize, historyPeriod, historyTimeUnit, type);
   }
 

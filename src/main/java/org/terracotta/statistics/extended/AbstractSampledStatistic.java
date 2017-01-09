@@ -39,7 +39,7 @@ abstract class AbstractSampledStatistic<T extends Number> implements SampledStat
    * The history.
    */
   private final StatisticHistory<T> history;
-  private final SampleType type;
+  private final StatisticType type;
 
   /**
    * Instantiates a new abstract statistic.
@@ -49,7 +49,7 @@ abstract class AbstractSampledStatistic<T extends Number> implements SampledStat
    * @param historyTimeUnit the history time unit
    * @param type
    */
-  AbstractSampledStatistic(ValueStatistic<T> source, ScheduledExecutorService executor, int historySize, long historyPeriod, TimeUnit historyTimeUnit, SampleType type) {
+  AbstractSampledStatistic(ValueStatistic<T> source, ScheduledExecutorService executor, int historySize, long historyPeriod, TimeUnit historyTimeUnit, StatisticType type) {
     this.source = source;
     this.type = type;
     this.history = new StatisticHistory<T>(source, executor, historySize, historyPeriod, historyTimeUnit);
@@ -77,7 +77,7 @@ abstract class AbstractSampledStatistic<T extends Number> implements SampledStat
   }
 
   @Override
-  public SampleType type() {
+  public StatisticType type() {
     return type;
   }
 

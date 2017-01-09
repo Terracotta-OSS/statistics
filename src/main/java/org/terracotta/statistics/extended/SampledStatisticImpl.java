@@ -38,7 +38,7 @@ class SampledStatisticImpl<T extends Number> extends AbstractSampledStatistic<T>
    * @param historyPeriod   the history period
    * @param historyTimeUnit the history time unit
    */
-  public SampledStatisticImpl(LatencyImpl latency, ValueStatistic<T> value, ScheduledExecutorService executor, int historySize, long historyPeriod, TimeUnit historyTimeUnit, SampleType type) {
+  public SampledStatisticImpl(LatencyImpl latency, ValueStatistic<T> value, ScheduledExecutorService executor, int historySize, long historyPeriod, TimeUnit historyTimeUnit, StatisticType type) {
     super(value, executor, historySize, historyPeriod, historyTimeUnit, type);
     this.latency = latency;
   }

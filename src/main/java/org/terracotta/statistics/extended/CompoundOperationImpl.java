@@ -135,7 +135,7 @@ public class CompoundOperationImpl<T extends Enum<T>> implements CompoundOperati
         public Double value() {
           return numeratorRate.value() / denominatorRate.value();
         }
-      }, executor, historySize, historyPeriod, historyTimeUnit, SampleType.RATIO);
+      }, executor, historySize, historyPeriod, historyTimeUnit, StatisticType.RATIO);
       ExpiringSampledStatistic<Double> racer = ratios.putIfAbsent(key, created);
       if (racer == null) {
         return created;

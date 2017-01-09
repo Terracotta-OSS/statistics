@@ -26,7 +26,7 @@ import org.terracotta.statistics.extended.CompoundOperation;
 import org.terracotta.statistics.extended.CompoundOperationImpl;
 import org.terracotta.statistics.extended.ExpiringSampledStatistic;
 import org.terracotta.statistics.extended.Result;
-import org.terracotta.statistics.extended.SampleType;
+import org.terracotta.statistics.extended.StatisticType;
 import org.terracotta.statistics.extended.SampledStatistic;
 
 import java.util.Collections;
@@ -126,7 +126,7 @@ public class StatisticsRegistry {
   }
 
   public void registerSize(String name, ValueStatisticDescriptor descriptor) {
-    registerStatistic(name, descriptor, SampleType.SIZE, new Function<ExpiringSampledStatistic<Long>, RegisteredStatistic>() {
+    registerStatistic(name, descriptor, StatisticType.SIZE, new Function<ExpiringSampledStatistic<Long>, RegisteredStatistic>() {
       @Override
       public RegisteredStatistic apply(ExpiringSampledStatistic<Long> expiringSampledStatistic) {
         return new RegisteredSizeStatistic(expiringSampledStatistic);
@@ -135,7 +135,7 @@ public class StatisticsRegistry {
   }
 
   public void registerCounter(String name, ValueStatisticDescriptor descriptor) {
-    registerStatistic(name, descriptor, SampleType.COUNTER, new Function<ExpiringSampledStatistic<Long>, RegisteredStatistic>() {
+    registerStatistic(name, descriptor, StatisticType.COUNTER, new Function<ExpiringSampledStatistic<Long>, RegisteredStatistic>() {
       @Override
       public RegisteredStatistic apply(ExpiringSampledStatistic<Long> expiringSampledStatistic) {
         return new RegisteredCounterStatistic(expiringSampledStatistic);
@@ -143,7 +143,7 @@ public class StatisticsRegistry {
     });
   }
 
-  private <N extends Number> void registerStatistic(String name, ValueStatisticDescriptor descriptor, SampleType type, Function<ExpiringSampledStatistic<N>, RegisteredStatistic> registeredStatisticFunction) {
+  private <N extends Number> void registerStatistic(String name, ValueStatisticDescriptor descriptor, StatisticType type, Function<ExpiringSampledStatistic<N>, RegisteredStatistic> registeredStatisticFunction) {
     Map<String, RegisteredStatistic> registeredStatistics = new HashMap<String, RegisteredStatistic>();
 
     Map<String, ValueStatistic<N>> valueStatistics = findValueStatistics(contextObject, name, descriptor.getObserverName(), descriptor.getTags());
@@ -231,12 +231,12 @@ public class StatisticsRegistry {
     return null;
   }
 
-  public SampledStatistic<? extends Number> findSampledCompoundStatistic(String statisticName, SampleType sampleType) {
+  public SampledStatistic<? extends Number> findSampledCompoundStatistic(String statisticName, StatisticType statisticType) {
     RegisteredStatistic registeredStatistic = registrations.get(statisticName);
 
     if (registeredStatistic != null && registeredStatistic.getType() == RegistrationType.COMPOUND) {
       Result result = ((RegisteredCompoundStatistic<?>) registeredStatistic).getResult();
-      switch (sampleType) {
+      switch (statisticType) {
         case COUNTER: return result.count();
         case RATE: return result.rate();
         case LATENCY_MIN: return result.latency().minimum();
