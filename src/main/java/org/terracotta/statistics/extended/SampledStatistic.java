@@ -53,5 +53,5 @@ public interface SampledStatistic<T extends Number> {
    */
   List<Timestamped<T>> history(long since);
 
-  SampleType type();
+  StatisticType type();
 }

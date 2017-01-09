@@ -18,7 +18,7 @@ package org.terracotta.statistics.extended;
 /**
  * @author Mathieu Carbou
  */
-public enum SampleType {
+public enum StatisticType {
 
   COUNTER,
   RATE,
