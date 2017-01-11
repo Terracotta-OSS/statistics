@@ -15,9 +15,6 @@
  */
 package org.terracotta.statistics.strawman;
 
-import java.util.Arrays;
-
-import org.terracotta.context.ContextElement;
 import org.terracotta.context.TreeNode;
 import org.terracotta.context.query.Matchers;
 import org.terracotta.context.query.Query;
@@ -26,28 +23,36 @@ import org.terracotta.statistics.StatisticsManager;
 import org.terracotta.statistics.derived.LatencySampling;
 import org.terracotta.statistics.derived.MinMaxAverage;
 import org.terracotta.statistics.observer.ChainedEventObserver;
-import org.terracotta.statistics.strawman.Cache.GetResult;
 
-import static java.util.EnumSet.*;
-import static org.terracotta.context.query.Matchers.*;
-import static org.terracotta.context.query.QueryBuilder.*;
+import java.util.Arrays;
+
+import static java.util.EnumSet.of;
+import static org.terracotta.context.query.Matchers.attributes;
+import static org.terracotta.context.query.Matchers.context;
+import static org.terracotta.context.query.Matchers.hasAttribute;
+import static org.terracotta.context.query.Matchers.identifier;
+import static org.terracotta.context.query.Matchers.subclassOf;
+import static org.terracotta.context.query.QueryBuilder.queryBuilder;
 
 public final class Strawman {
   
   public static void main(String[] args) {
     CacheManager manager = new CacheManager("manager-one");
-    Cache<String, String> cache = new Cache("cache-one");
+    Cache<String, String> cache = new Cache<String, String>("cache-one");
     
     manager.addCache(cache);
 
     StatisticsManager stats = new StatisticsManager();
     stats.root(manager);
 
-    Query query = queryBuilder().descendants().filter(context(Matchers.<ContextElement>allOf(identifier(subclassOf(OperationStatistic.class)), attributes(hasAttribute("name", "get"))))).build();
+    @SuppressWarnings("unchecked")
+    Query query = queryBuilder().descendants().filter(context(Matchers.allOf(identifier(subclassOf(OperationStatistic.class)), attributes(hasAttribute("name", "get"))))).build();
     System.out.println(query);
     TreeNode getStatisticNode = stats.queryForSingleton(query);
+
+    @SuppressWarnings("unchecked")
     OperationStatistic<GetResult> getStatistic = (OperationStatistic<GetResult>) getStatisticNode.getContext().attributes().get("this");
-    LatencySampling<Cache.GetResult> hitLatency = new LatencySampling(of(Cache.GetResult.HIT), 1.0f);
+    LatencySampling<GetResult> hitLatency = new LatencySampling<GetResult>(of(GetResult.HIT), 1.0f);
     MinMaxAverage hitLatencyStats = new MinMaxAverage();
     hitLatency.addDerivedStatistic(hitLatencyStats);
     getStatistic.addDerivedStatistic(hitLatency);

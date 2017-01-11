@@ -69,15 +69,4 @@ public class Cache<K, V> {
     return result;
   }
 
-  enum GetResult {
-    HIT, MISS;
-  }
-  
-  enum PutResult {
-    INSERT, UPDATE;
-  }
-  
-  enum RemoveResult {
-    SUCCESS, FAIL;
-  }
 }
