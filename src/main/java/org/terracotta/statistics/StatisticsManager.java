@@ -16,6 +16,12 @@
 package org.terracotta.statistics;
 
 
+import org.terracotta.context.ContextCreationListener;
+import org.terracotta.context.ContextElement;
+import org.terracotta.context.ContextManager;
+import org.terracotta.context.TreeNode;
+import org.terracotta.statistics.observer.OperationObserver;
+
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -25,12 +31,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
-
-import org.terracotta.context.ContextCreationListener;
-import org.terracotta.context.ContextElement;
-import org.terracotta.context.ContextManager;
-import org.terracotta.context.TreeNode;
-import org.terracotta.statistics.observer.OperationObserver;
 
 public class StatisticsManager extends ContextManager {
   
@@ -64,7 +64,9 @@ public class StatisticsManager extends ContextManager {
     } else {
       ContextElement context = node.getContext();
       if (OperationStatistic.class.isAssignableFrom(context.identifier())) {
-        return (OperationStatistic<T>) context.attributes().get("this");
+        @SuppressWarnings("unchecked")
+        OperationStatistic<T> stat = (OperationStatistic<T>) context.attributes().get("this");
+        return stat;
       } else {
         throw new AssertionError();
       }
@@ -113,6 +115,7 @@ public class StatisticsManager extends ContextManager {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public T call() throws Exception {
       return (T) method.invoke(targetRef.get());
     }
