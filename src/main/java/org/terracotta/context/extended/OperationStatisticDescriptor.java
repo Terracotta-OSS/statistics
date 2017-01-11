@@ -15,6 +15,9 @@
  */
 package org.terracotta.context.extended;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -28,7 +31,7 @@ public final class OperationStatisticDescriptor<T extends Enum<T>> {
 
   private OperationStatisticDescriptor(String observerName, Set<String> tags, Class<T> type) {
     this.observerName = observerName;
-    this.tags = tags;
+    this.tags = Collections.unmodifiableSet(tags);
     this.type = type;
   }
 
@@ -46,6 +49,10 @@ public final class OperationStatisticDescriptor<T extends Enum<T>> {
 
   public static <T extends Enum<T>> OperationStatisticDescriptor<T> descriptor(String observerName, Set<String> tags, Class<T> type) {
     return new OperationStatisticDescriptor<T>(observerName, tags, type);
+  }
+
+  public static <T extends Enum<T>> OperationStatisticDescriptor<T> descriptor(String observerName, Class<T> type, String... tags) {
+    return new OperationStatisticDescriptor<T>(observerName, new HashSet<String>(Arrays.asList(tags)), type);
   }
 
 }

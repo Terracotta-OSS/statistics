@@ -15,6 +15,9 @@
  */
 package org.terracotta.context.extended;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -27,7 +30,7 @@ public final class ValueStatisticDescriptor {
 
   private ValueStatisticDescriptor(String observerName, Set<String> tags) {
     this.observerName = observerName;
-    this.tags = tags;
+    this.tags = Collections.unmodifiableSet(tags);
   }
 
   public String getObserverName() {
@@ -42,4 +45,7 @@ public final class ValueStatisticDescriptor {
     return new ValueStatisticDescriptor(observerName, tags);
   }
 
+  public static ValueStatisticDescriptor descriptor(String observerName, String... tags) {
+    return new ValueStatisticDescriptor(observerName, new HashSet<String>(Arrays.asList(tags)));
+  }
 }
