@@ -24,9 +24,10 @@ import java.lang.reflect.Method;
  * @param <T> the enclosing type of the objects that match
  */
 public abstract class Matcher<T> {
-  
-  private Class<? extends T> boundType = (Class<? extends T>) getSafeType(getClass());
-   
+
+  @SuppressWarnings("unchecked")
+  private Class<T> boundType = (Class<T>) getSafeType(getClass());
+
   private static <T extends Matcher<?>> Class<?> getSafeType(Class<T> fromClass) {
     for (Class<? super T> c = fromClass; c != Object.class; c = c.getSuperclass()) {
         for (Method method : c.getDeclaredMethods()) {
@@ -37,7 +38,7 @@ public abstract class Matcher<T> {
             }
         }
     }
-    throw new AssertionError();
+    throw new AssertionError("No matchesSafely(arg) method found on " + fromClass);
   }
 
   /**

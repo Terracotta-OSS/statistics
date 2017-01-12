@@ -18,7 +18,9 @@ package org.terracotta.statistics;
 import org.terracotta.statistics.observer.OperationObserver;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public final class StatisticBuilder {
@@ -74,7 +76,7 @@ public final class StatisticBuilder {
       if (context == null || name == null) {
         throw new IllegalStateException();
       } else {
-        return StatisticsManager.createOperationStatistic(context, name, tags, type);
+        return StatisticsManager.createOperationStatistic(context, name, tags, properties, type);
       }
     }
   }
@@ -90,6 +92,9 @@ public final class StatisticBuilder {
     /** The tags. */
     protected final Set<String> tags = new HashSet<String>();
 
+    /** The properties. */
+    protected final Map<String, Object> properties = new HashMap<String, Object>();
+
     /** The context. */
     protected Object            context;
 
@@ -101,7 +106,7 @@ public final class StatisticBuilder {
      *
      * @param of
      *          the of
-     * @return the t
+     * @return the builder
      */
     public T of(Object of) {
       if (context == null) {
@@ -117,7 +122,7 @@ public final class StatisticBuilder {
      *
      * @param name
      *          the name
-     * @return the t
+     * @return the builder
      */
     public T named(String name) {
       if (this.name == null) {
@@ -133,10 +138,24 @@ public final class StatisticBuilder {
      *
      * @param tags
      *          the tags
-     * @return the t
+     * @return the builder
      */
     public T tag(String... tags) {
       Collections.addAll(this.tags, tags);
+      return (T) this;
+    }
+
+    /**
+     * Tag.
+     *
+     * @param key
+     *          the property key
+     * @param value
+     *          the property value
+     * @return the builder
+     */
+    public T property(String key, Object value) {
+      this.properties.put(key, value);
       return (T) this;
     }
   }

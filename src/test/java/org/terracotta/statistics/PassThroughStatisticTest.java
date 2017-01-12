@@ -24,12 +24,13 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.core.IsEqual.*;
+import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.terracotta.context.query.Matchers.*;
+import static org.terracotta.context.query.Matchers.attributes;
+import static org.terracotta.context.query.Matchers.context;
+import static org.terracotta.context.query.Matchers.hasAttribute;
 import static org.terracotta.context.query.QueryBuilder.queryBuilder;
 
 /**
@@ -72,11 +73,16 @@ public class PassThroughStatisticTest {
     TreeNode foo = manager.queryForSingleton(queryBuilder().descendants().filter(context(attributes(hasAttribute("name", "foostat")))).build());
     TreeNode bar = manager.queryForSingleton(queryBuilder().descendants().filter(context(attributes(hasAttribute("name", "barstat")))).build());
 
-    ValueStatistic<Number> fooStat = (ValueStatistic<Number>) foo.getContext().attributes().get("this");
-    ValueStatistic<Number> barStat = (ValueStatistic<Number>) bar.getContext().attributes().get("this");
+    ValueStatistic<Number> fooStat = extractThis(foo);
+    ValueStatistic<Number> barStat = extractThis(bar);
 
     assertThat(fooStat.value(), equalTo((Number) Integer.valueOf(42)));
     assertThat(barStat.value(), equalTo((Number) Long.valueOf(42L)));
+  }
+
+  @SuppressWarnings("unchecked")
+  private ValueStatistic<Number> extractThis(TreeNode foo) {
+    return (ValueStatistic<Number>)foo.getContext().attributes().get("this");
   }
 
   @Test(expected = IllegalArgumentException.class)

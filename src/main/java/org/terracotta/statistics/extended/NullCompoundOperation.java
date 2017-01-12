@@ -328,6 +328,7 @@ public final class NullCompoundOperation<T extends Enum<T>> implements CompoundO
       return Collections.emptyList();
     }
 
+    @SuppressWarnings("unchecked")
     static <T extends Number> SampledStatistic<T> instance(StatisticType type) {
       if(type == null) {
         throw new NullPointerException();
