@@ -15,6 +15,8 @@
  */
 package org.terracotta.statistics.util;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
@@ -24,16 +26,17 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
  * when thread-local values reference the {@code ThreadLocal} object.
  * The code is optimised to cope with frequently changing values.
  * <p>
- * In comparison to plain {@code ThreadLocal}, this implementation:<ul>
- * <li>from the point of view of a single thread,
- * each thread-local
- * {code #get} requires access to four objects instead of two
- * <li>is fractionally slower in terms of CPU cycles for {code #get}
- * <li>uses around twice the memory for each thead-local value
- * <li>uses around four times the memory for each {@code ThreadLocal}
- * <li>may release thread-local values for garbage collection more promptly
+ * In comparison to plain {@code ThreadLocal}, this implementation:
+ * <ul>
+ *  <li>from the point of view of a single thread, each thread-local {code #get} requires access to four objects instead of two
+ *  <li>is fractionally slower in terms of CPU cycles for {code #get}
+ *  <li>uses around twice the memory for each thead-local value
+ *  <li>uses around four times the memory for each {@code ThreadLocal}
+ *  <li>may release thread-local values for garbage collection more promptly
  * </ul>
+ * See <a href="http://www.jroller.com/tackline/?page=2#working_around_the_threadlocal_leak">this link</a> explaining the design.
  */
+@SuppressFBWarnings(value="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE", justification = "Accesses to weak references on threads are done from the concerned thread. So they can't be null since we know they are hard referenced de facto")
 public class VicariousThreadLocal<T> extends ThreadLocal<T> {
     /**
      * Maps a unique WeakReference onto each Thread.
