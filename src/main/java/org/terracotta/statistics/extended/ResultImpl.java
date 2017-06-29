@@ -92,7 +92,7 @@ class ResultImpl<T extends Enum<T>> implements Result {
    * @return true, if successful
    */
   boolean expire(long expiryTime) {
-    return (count.expire(expiryTime) & rate.expire(expiryTime) & latency.expire(expiryTime));
+    return count.expire(expiryTime) && rate.expire(expiryTime) && latency.expire(expiryTime);
   }
 
   /**
