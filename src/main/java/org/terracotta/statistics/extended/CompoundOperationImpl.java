@@ -15,6 +15,7 @@
  */
 package org.terracotta.statistics.extended;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.terracotta.statistics.OperationStatistic;
 import org.terracotta.statistics.ValueStatistic;
 
@@ -224,13 +225,15 @@ public class CompoundOperationImpl<T extends Enum<T>> implements CompoundOperati
    * @return true, if successful
    */
   @Override
+  @SuppressFBWarnings("NS_DANGEROUS_NON_SHORT_CIRCUIT")
   public boolean expire(long expiryTime) {
     if (alwaysOn) {
       return false;
     } else {
       boolean expired = true;
       for (ResultImpl<?> o : operations.values()) {
-        expired = expired && o.expire(expiryTime);
+        // Not using && on purpose here. expire() has a side-effect. We want to make sure it's called (no short-circuit evaluation)
+        expired &= o.expire(expiryTime);
       }
       for (Iterator<ResultImpl<T>> it = compounds.values().iterator(); it.hasNext(); ) {
         if (it.next().expire(expiryTime)) {
