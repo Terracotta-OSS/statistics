@@ -15,6 +15,7 @@
  */
 package org.terracotta.statistics.extended;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.terracotta.statistics.OperationStatistic;
 
 import java.util.Set;
@@ -91,8 +92,10 @@ class ResultImpl<T extends Enum<T>> implements Result {
    * @param expiryTime the expiry time
    * @return true, if successful
    */
+  @SuppressFBWarnings("NS_DANGEROUS_NON_SHORT_CIRCUIT")
   boolean expire(long expiryTime) {
-    return count.expire(expiryTime) && rate.expire(expiryTime) && latency.expire(expiryTime);
+    // Not using && on purpose here. expire() has a side-effect. We want to make sure all of them are called (no short-circuit evaluation)
+    return count.expire(expiryTime) & rate.expire(expiryTime) & latency.expire(expiryTime);
   }
 
   /**
