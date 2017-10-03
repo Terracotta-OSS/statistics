@@ -221,7 +221,7 @@ public class ContextManager {
    * @return the set of nodes selected by the query
    */
   public Set<TreeNode> query(Query query) {
-    return query.execute(Collections.<TreeNode>singleton(root));
+    return query.execute(Collections.singleton(root));
   }
 
   /**

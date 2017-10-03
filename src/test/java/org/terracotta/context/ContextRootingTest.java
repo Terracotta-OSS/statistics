@@ -55,7 +55,7 @@ public class ContextRootingTest {
     
     Collection<TreeNode> roots = manager.query(queryBuilder().children().build());
 
-    assertThat(roots, IsEmptyCollection.<TreeNode>empty());
+    assertThat(roots, IsEmptyCollection.empty());
   }
   
   @Test
@@ -83,6 +83,6 @@ public class ContextRootingTest {
     
     Collection<TreeNode> roots = manager.query(queryBuilder().children().build());
 
-    assertThat(roots, IsEmptyCollection.<TreeNode>empty());
+    assertThat(roots, IsEmptyCollection.empty());
   }
 }

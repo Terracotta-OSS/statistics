@@ -49,7 +49,7 @@ public class NullQueryTest {
   
   @Test
   public void testEmptySetUnmodified() {
-    assertThat(query.execute(Collections.<TreeNode>emptySet()), IsEmptyCollection.<TreeNode>empty());
+    assertThat(query.execute(Collections.emptySet()), IsEmptyCollection.empty());
   }
   
   @Test

@@ -44,7 +44,7 @@ public class StatisticMapperTest {
   @Test
   public void testInvalidSourceStatisticSet() {
     try {
-      new StatisticMapper<Source, Target>(Collections.<Target, Set<Source>>singletonMap(A, of(C, D)), null);
+      new StatisticMapper<Source, Target>(Collections.singletonMap(A, of(C, D)), null);
       fail("should throw");
     } catch (IllegalArgumentException e) {
       assertThat(e.getMessage(), containsString("target outcomes [B]"));

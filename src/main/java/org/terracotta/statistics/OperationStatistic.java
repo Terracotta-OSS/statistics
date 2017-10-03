@@ -26,7 +26,7 @@ import org.terracotta.statistics.observer.OperationObserver;
  */
 public interface OperationStatistic<T extends Enum<T>> extends OperationObserver<T>, SourceStatistic<ChainedOperationObserver<? super T>> {
 
-  public Class<T> type();
+  Class<T> type();
   
   /**
    * Return a {@link ValueStatistic} returning the count for the given result.
@@ -34,9 +34,9 @@ public interface OperationStatistic<T extends Enum<T>> extends OperationObserver
    * @param result the result of interest 
    * @return a {@code ValueStatistic} instance
    */
-  public ValueStatistic<Long> statistic(T result);
+  ValueStatistic<Long> statistic(T result);
 
-  public ValueStatistic<Long> statistic(Set<T> results);
+  ValueStatistic<Long> statistic(Set<T> results);
   
   /**
    * Return the count of operations with the given type.
@@ -44,9 +44,9 @@ public interface OperationStatistic<T extends Enum<T>> extends OperationObserver
    * @param type the result type
    * @return the operation count
    */
-  public long count(T type);
+  long count(T type);
 
-  public long sum(Set<T> types);
+  long sum(Set<T> types);
   
-  public long sum();
+  long sum();
 }

@@ -111,7 +111,7 @@ public class LatencySamplingTest {
     }
   }
   
-  static enum FooBar {
-    FOO, BAR;
+  enum FooBar {
+    FOO, BAR
   }
 }

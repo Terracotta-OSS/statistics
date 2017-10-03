@@ -43,7 +43,7 @@ public class StatisticArchiveTest {
   @Test
   public void testEmptyArchive() {
     StatisticArchive<String> archive = new StatisticArchive<String>(2);
-    assertThat(archive.getArchive(), IsEmptyCollection.<Timestamped<String>>empty());
+    assertThat(archive.getArchive(), IsEmptyCollection.empty());
   }
   
   @Test

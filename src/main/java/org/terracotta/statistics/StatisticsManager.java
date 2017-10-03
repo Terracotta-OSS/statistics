@@ -44,7 +44,7 @@ public class StatisticsManager extends ContextManager {
   }
 
   public static <T extends Enum<T>> OperationObserver<T> createOperationStatistic(Object context, String name, Set<String> tags, Class<T> eventTypes) {
-    return createOperationStatistic(context, name, tags, Collections.<String, Object>emptyMap(), eventTypes);
+    return createOperationStatistic(context, name, tags, Collections.emptyMap(), eventTypes);
   }
   
   public static <T extends Enum<T>> OperationObserver<T> createOperationStatistic(Object context, String name, Set<String> tags, Map<String, ? extends Object> properties, Class<T> resultType) {
@@ -74,7 +74,7 @@ public class StatisticsManager extends ContextManager {
   }
   
   public static <T extends Number> void createPassThroughStatistic(Object context, String name, Set<String> tags, Callable<T> source) {
-    createPassThroughStatistic(context, name, tags, Collections.<String, Object>emptyMap(), source);
+    createPassThroughStatistic(context, name, tags, Collections.emptyMap(), source);
   }
   
   public static <T extends Number> void createPassThroughStatistic(Object context, String name, Set<String> tags, Map<String, ? extends Object> properties, Callable<T> source) {

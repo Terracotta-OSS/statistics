@@ -125,7 +125,7 @@ public class CompoundOperationImpl<T extends Enum<T>> implements CompoundOperati
   @Override
   public SampledStatistic<Double> ratioOf(EnumSet<T> numerator, EnumSet<T> denominator) {
     @SuppressWarnings("unchecked")
-    List<Set<T>> key = Arrays.<Set<T>>asList(EnumSet.copyOf(numerator), EnumSet.copyOf(denominator));
+    List<Set<T>> key = Arrays.asList(EnumSet.copyOf(numerator), EnumSet.copyOf(denominator));
 
     ExpiringSampledStatistic<Double> existing = ratios.get(key);
     if (existing == null) {

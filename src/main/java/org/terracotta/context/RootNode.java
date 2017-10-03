@@ -60,6 +60,6 @@ class RootNode extends AbstractTreeNode {
 
   @Override
   public Collection<List<? extends TreeNode>> getPaths() {
-    return Collections.<List<? extends TreeNode>>singleton(Collections.<TreeNode>emptyList());
+    return Collections.singleton(Collections.emptyList());
   }
 }

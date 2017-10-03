@@ -78,7 +78,7 @@ public class StatisticSamplerTest {
     try {
       sampler.start();
       TimeUnit.SECONDS.sleep(1);
-      assertThat(archive.getArchive(), IsEmptyCollection.<Timestamped<Integer>>empty());
+      assertThat(archive.getArchive(), IsEmptyCollection.empty());
     } finally {
       sampler.shutdown();
     }
@@ -91,7 +91,7 @@ public class StatisticSamplerTest {
     try {
       sampler.start();
       TimeUnit.SECONDS.sleep(1);
-      assertBy(1, TimeUnit.SECONDS, contentsOf(archive), hasSize(CombinableMatcher.<Integer>both(greaterThan(10)).and(lessThan(20))));
+      assertBy(1, TimeUnit.SECONDS, contentsOf(archive), hasSize(CombinableMatcher.both(greaterThan(10)).and(lessThan(20))));
     } finally {
       sampler.shutdown();
     }

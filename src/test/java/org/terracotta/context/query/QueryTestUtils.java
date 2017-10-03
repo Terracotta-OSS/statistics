@@ -31,15 +31,15 @@ import org.terracotta.context.TreeNode;
 public class QueryTestUtils {
   
   public static  TreeNode createTreeNode(Class identifier) {
-    return createTreeNode(identifier, Collections.<String, Object>emptyMap());
+    return createTreeNode(identifier, Collections.emptyMap());
   }
   
   public static  TreeNode createTreeNode(Class identifier, Map<String, Object> attributes) {
-    return createTreeNode(identifier, attributes, Collections.<TreeNode>emptySet());
+    return createTreeNode(identifier, attributes, Collections.emptySet());
   }
   
   public static  TreeNode createTreeNode(Class identifier, Set<TreeNode> children) {
-    return createTreeNode(identifier, Collections.<String, Object>emptyMap(), children);
+    return createTreeNode(identifier, Collections.emptyMap(), children);
   }
   
   public static  TreeNode createTreeNode(Class identifier, Map<String, Object> attributes, Set<TreeNode> children) {

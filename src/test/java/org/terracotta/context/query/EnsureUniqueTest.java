@@ -64,6 +64,6 @@ public class EnsureUniqueTest {
   
   @Test(expected = IllegalStateException.class)
   public void testEmptyInput() {
-    query.execute(Collections.<TreeNode>emptySet());
+    query.execute(Collections.emptySet());
   }
 }

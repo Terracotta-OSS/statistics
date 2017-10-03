@@ -42,13 +42,13 @@ public class MutableTreeNodeTest {
     
     test.clean();
     
-    assertThat((Collection<AbstractTreeNode>) test.getChildren(), IsEmptyCollection.<AbstractTreeNode>empty());
-    assertThat((Collection<AbstractTreeNode>) test.getAncestors(), IsEmptyCollection.<AbstractTreeNode>empty());
+    assertThat(test.getChildren(), IsEmptyCollection.empty());
+    assertThat(test.getAncestors(), IsEmptyCollection.empty());
     
     assertThat(parent.getChildren(), hasSize(1));
-    assertThat((Collection<AbstractTreeNode>) parent.getChildren(), IsIterableContainingInOrder.<AbstractTreeNode>contains(child));
+    assertThat(parent.getChildren(), IsIterableContainingInOrder.contains(child));
     
     assertThat(child.getAncestors(), hasSize(1));
-    assertThat((Collection<AbstractTreeNode>) child.getAncestors(), IsIterableContainingInOrder.<AbstractTreeNode>contains(parent));
+    assertThat(child.getAncestors(), IsIterableContainingInOrder.contains(parent));
   }
 }

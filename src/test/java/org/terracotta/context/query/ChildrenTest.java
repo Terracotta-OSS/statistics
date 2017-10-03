@@ -53,7 +53,7 @@ public class ChildrenTest {
   
   @Test
   public void testSingleNodeWithNoChildren() {
-    assertThat(query.execute(Collections.singleton(createTreeNode(A.class))), IsEmptyCollection.<TreeNode>empty());
+    assertThat(query.execute(Collections.singleton(createTreeNode(A.class))), IsEmptyCollection.empty());
   }
 
   @Test
@@ -61,7 +61,7 @@ public class ChildrenTest {
     Set<TreeNode> nodes = new HashSet<TreeNode>();
     nodes.add(createTreeNode(A.class));
     nodes.add(createTreeNode(B.class));
-    assertThat(query.execute(nodes), IsEmptyCollection.<TreeNode>empty());
+    assertThat(query.execute(nodes), IsEmptyCollection.empty());
   }
 
   @Test

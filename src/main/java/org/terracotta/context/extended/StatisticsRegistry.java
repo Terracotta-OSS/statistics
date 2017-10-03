@@ -271,7 +271,7 @@ public class StatisticsRegistry {
   private static <T extends Enum<T>> Map<String, OperationStatistic<T>> findOperationStatistics(Object contextObject, String name, Class<T> type, String observerName, final Set<String> tags) {
     Set<TreeNode> result = queryBuilder()
         .descendants()
-        .filter(context(attributes(Matchers.<Map<String, Object>>allOf(
+        .filter(context(attributes(Matchers.allOf(
             hasAttribute("type", type),
             hasAttribute("name", observerName),
             hasAttribute("tags", new Matcher<Set<String>>() {
@@ -309,7 +309,7 @@ public class StatisticsRegistry {
   private static <N extends Number> Map<String, ValueStatistic<N>> findValueStatistics(Object contextObject, String name, String observerName, final Set<String> tags) {
     Set<TreeNode> result = queryBuilder()
         .descendants()
-        .filter(context(attributes(Matchers.<Map<String, Object>>allOf(
+        .filter(context(attributes(Matchers.allOf(
             hasAttribute("name", observerName),
             hasAttribute("tags", new Matcher<Set<String>>() {
               @Override

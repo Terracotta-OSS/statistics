@@ -79,7 +79,7 @@ public class FilterTest {
       protected boolean matchesSafely(Object object) {
         return false;
       }
-    }).execute(input), IsEmptyCollection.<TreeNode>empty());
+    }).execute(input), IsEmptyCollection.empty());
   }
   
   @Test

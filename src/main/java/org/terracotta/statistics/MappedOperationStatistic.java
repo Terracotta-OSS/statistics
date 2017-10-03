@@ -120,7 +120,7 @@ public class MappedOperationStatistic<S extends Enum<S>, D extends Enum<D>> impl
   private static <S extends Enum<S>> OperationStatistic<S> findOperationStat(Object rootNode, final Class<S> statisticType, final String statName) {
     Query q = queryBuilder().descendants()
             .filter(context(identifier(subclassOf(OperationStatistic.class))))
-            .filter(context(attributes(Matchers.<Map<String, Object>>allOf(
+            .filter(context(attributes(Matchers.allOf(
                     hasAttribute("name", statName),
                     hasAttribute("this", new Matcher<OperationStatistic>() {
                       @Override

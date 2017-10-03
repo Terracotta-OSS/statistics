@@ -78,6 +78,6 @@ public class CircularBufferTest {
     assertThat(buffer.toArray(String[].class), instanceOf(String[].class));
     assertThat(buffer.toArray(String[].class), arrayContaining(string2, string3));
     assertThat(buffer.toArray(Object[].class), instanceOf(Object[].class));
-    assertThat(buffer.toArray(Object[].class), arrayContaining((Object) string2, (Object) string3));
+    assertThat(buffer.toArray(Object[].class), arrayContaining(string2, string3));
   }
 }
