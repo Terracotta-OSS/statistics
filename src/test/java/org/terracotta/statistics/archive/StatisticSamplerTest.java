@@ -21,14 +21,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeMatcher;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.hamcrest.core.CombinableMatcher;
 import org.junit.Test;
 import org.terracotta.statistics.ConstantValueStatistic;
-import org.terracotta.statistics.ValueStatistic;
 
 import static org.hamcrest.collection.IsCollectionWithSize.*;
 import static org.hamcrest.number.OrderingComparison.*;
@@ -43,12 +39,8 @@ public class StatisticSamplerTest {
   
   @Test
   public void testUnstartedSampler() throws InterruptedException {
-    StatisticSampler<Integer> sampler = new StatisticSampler<Integer>(1L, TimeUnit.NANOSECONDS, new ValueStatistic<Integer>() {
-
-      @Override
-      public Integer value() {
-        throw new AssertionError();
-      }
+    StatisticSampler<Integer> sampler = new StatisticSampler<>(1L, TimeUnit.NANOSECONDS, () -> {
+      throw new AssertionError();
     }, DevNull.DEV_NULL);
     
     sampler.shutdown();
@@ -58,7 +50,8 @@ public class StatisticSamplerTest {
   public void testShutdownOfSharedExecutor() throws InterruptedException {
     ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     try {
-      StatisticSampler<Integer> sampler = new StatisticSampler<Integer>(executor, 1L, TimeUnit.NANOSECONDS, ConstantValueStatistic.instance(42), DevNull.DEV_NULL);
+      StatisticSampler<Integer> sampler = new StatisticSampler<>(executor, 1L, TimeUnit.NANOSECONDS, ConstantValueStatistic
+          .instance(42), DevNull.DEV_NULL);
       sampler.shutdown();
     } finally {
       executor.shutdown();
@@ -67,13 +60,9 @@ public class StatisticSamplerTest {
   
   @Test
   public void testLongPeriodSampler() throws InterruptedException {
-    StatisticArchive<Integer> archive = new StatisticArchive<Integer>(1);
-    StatisticSampler<Integer> sampler = new StatisticSampler<Integer>(1L, TimeUnit.HOURS, new ValueStatistic<Integer>() {
-
-      @Override
-      public Integer value() {
-        throw new AssertionError();
-      }
+    StatisticArchive<Integer> archive = new StatisticArchive<>(1);
+    StatisticSampler<Integer> sampler = new StatisticSampler<>(1L, TimeUnit.HOURS, () -> {
+      throw new AssertionError();
     }, archive);
     try {
       sampler.start();
@@ -86,8 +75,8 @@ public class StatisticSamplerTest {
   
   @Test
   public void testShortPeriodSampler() throws InterruptedException {
-    StatisticArchive<Integer> archive = new StatisticArchive<Integer>(20);
-    StatisticSampler<Integer> sampler = new StatisticSampler<Integer>(100L, TimeUnit.MILLISECONDS, ConstantValueStatistic.instance(42), archive);
+    StatisticArchive<Integer> archive = new StatisticArchive<>(20);
+    StatisticSampler<Integer> sampler = new StatisticSampler<>(100L, TimeUnit.MILLISECONDS, ConstantValueStatistic.instance(42), archive);
     try {
       sampler.start();
       TimeUnit.SECONDS.sleep(1);
@@ -99,8 +88,8 @@ public class StatisticSamplerTest {
 
   @Test
   public void testStoppingAndStartingSampler() throws InterruptedException {
-    StatisticArchive<Integer> archive = new StatisticArchive<Integer>(20);
-    StatisticSampler<Integer> sampler = new StatisticSampler<Integer>(200L, TimeUnit.MILLISECONDS, ConstantValueStatistic.instance(42), archive);
+    StatisticArchive<Integer> archive = new StatisticArchive<>(20);
+    StatisticSampler<Integer> sampler = new StatisticSampler<>(200L, TimeUnit.MILLISECONDS, ConstantValueStatistic.instance(42), archive);
     try {
       sampler.start();
       assertBy(1, TimeUnit.SECONDS, contentsOf(archive), hasSize(1));
@@ -116,27 +105,7 @@ public class StatisticSamplerTest {
   }
   
   static <T> Callable<List<Timestamped<T>>> contentsOf(final StatisticArchive<T> archive) {
-    return new Callable<List<Timestamped<T>>>() {
-
-      @Override
-      public List<Timestamped<T>> call() throws Exception {
-        return archive.getArchive();
-      }
-    };
+    return archive::getArchive;
   }
   
-  static <T> Matcher<Timestamped<T>> value(final Matcher<? super T> value) {
-    return new TypeSafeMatcher<Timestamped<T>>() {
-
-      @Override
-      protected boolean matchesSafely(Timestamped<T> item) {
-        return value.matches(item.getSample());
-      }
-
-      @Override
-      public void describeTo(Description description) {
-        description.appendText("sample value ").appendDescriptionOf(value);
-      }
-    };
-  }
 }

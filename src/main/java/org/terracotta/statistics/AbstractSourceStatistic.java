@@ -30,7 +30,7 @@ import org.terracotta.statistics.observer.ChainedObserver;
  */
 public class AbstractSourceStatistic<T extends ChainedObserver> implements SourceStatistic<T> {
 
-  protected final Collection<T> derivedStatistics = new CopyOnWriteArrayList<T>();
+  protected final Collection<T> derivedStatistics = new CopyOnWriteArrayList<>();
 
   @Override
   public void addDerivedStatistic(T derived) {

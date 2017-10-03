@@ -30,7 +30,7 @@ class TierOperationOutcomes {
   static final Map<GetOutcome, Set<StoreOperationOutcomes.GetOutcome>> GET_TRANSLATION;
 
   static {
-    Map<GetOutcome, Set<StoreOperationOutcomes.GetOutcome>> translation = new EnumMap<GetOutcome, Set<StoreOperationOutcomes.GetOutcome>>(GetOutcome.class);
+    Map<GetOutcome, Set<StoreOperationOutcomes.GetOutcome>> translation = new EnumMap<>(GetOutcome.class);
     translation.put(GetOutcome.HIT, of(StoreOperationOutcomes.GetOutcome.HIT));
     translation.put(GetOutcome.MISS, of(StoreOperationOutcomes.GetOutcome.MISS));
     GET_TRANSLATION = unmodifiableMap(translation);

@@ -30,12 +30,12 @@ import org.terracotta.context.annotations.ContextAttribute;
 @ContextAttribute(value="this")
 class PassThroughStatistic<T extends Number> implements ValueStatistic<T> {
 
-  private static final WeakIdentityHashMap<Object, Collection<PassThroughStatistic<?>>> BINDING = new WeakIdentityHashMap<Object, Collection<PassThroughStatistic<?>>>();
+  private static final WeakIdentityHashMap<Object, Collection<PassThroughStatistic<?>>> BINDING = new WeakIdentityHashMap<>();
   
   private static void bindStatistic(PassThroughStatistic<?> stat, Object to) {
     Collection<PassThroughStatistic<?>> collection = BINDING.get(to);
     if (collection == null) {
-      collection = new CopyOnWriteArrayList<PassThroughStatistic<?>>();
+      collection = new CopyOnWriteArrayList<>();
       Collection<PassThroughStatistic<?>> racer = BINDING.putIfAbsent(to, collection);
       if (racer != null) {
         collection = racer;
@@ -59,7 +59,7 @@ class PassThroughStatistic<T extends Number> implements ValueStatistic<T> {
   
   public PassThroughStatistic(Object context, String name, Set<String> tags, Map<String, ? extends Object> properties, Callable<T> source) {
     this.name = name;
-    this.tags = Collections.unmodifiableSet(new HashSet<String>(tags));
+    this.tags = Collections.unmodifiableSet(new HashSet<>(tags));
     this.properties = Collections.unmodifiableMap(new HashMap<String, Object>(properties));
     this.source = source;
     bindStatistic(this, context);

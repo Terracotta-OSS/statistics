@@ -25,7 +25,7 @@ import org.terracotta.statistics.observer.OperationObserver;
 
 public class Cache<K, V> {
   
-  private final Map<K, V> data = new ConcurrentHashMap<K, V>();
+  private final Map<K, V> data = new ConcurrentHashMap<>();
   @ContextAttribute("name") private final String name;
 
   private final OperationObserver<PutResult> putObserver = StatisticsManager.createOperationStatistic(this, "put", Collections.emptySet(), PutResult.class);

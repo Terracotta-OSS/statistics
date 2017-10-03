@@ -16,12 +16,10 @@
 package org.terracotta.statistics.derived;
 
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.Test;
-import org.terracotta.statistics.Time;
 import org.terracotta.statistics.observer.ChainedEventObserver;
 
 import static java.util.EnumSet.*;
@@ -38,14 +36,8 @@ public class LatencySamplingTest {
   
   @Test
   public void testRateOfZeroNeverSamples() {
-    LatencySampling<FooBar> latency = new LatencySampling<FooBar>(of(FooBar.FOO), 0.0f);
-    latency.addDerivedStatistic(new ChainedEventObserver() {
-
-      @Override
-      public void event(long time, long ... parameters) {
-        fail();
-      }
-    });
+    LatencySampling<FooBar> latency = new LatencySampling<>(of(FooBar.FOO), 0.0f);
+    latency.addDerivedStatistic((time, parameters) -> fail());
     
     for (int i = 0; i < 100; i++) {
       latency.begin(0);
@@ -55,15 +47,9 @@ public class LatencySamplingTest {
 
   @Test
   public void testRateOfOneAlwaysSamples() {
-    LatencySampling<FooBar> latency = new LatencySampling<FooBar>(of(FooBar.FOO), 1.0f);
+    LatencySampling<FooBar> latency = new LatencySampling<>(of(FooBar.FOO), 1.0f);
     final AtomicInteger eventCount = new AtomicInteger();
-    latency.addDerivedStatistic(new ChainedEventObserver() {
-
-      @Override
-      public void event(long time, long ... parameters) {
-        eventCount.incrementAndGet();
-      }
-    });
+    latency.addDerivedStatistic((time, parameters) -> eventCount.incrementAndGet());
     
     for (int i = 0; i < 100; i++) {
       latency.begin(0);
@@ -75,14 +61,8 @@ public class LatencySamplingTest {
 
   @Test
   public void testMismatchedResultNeverSamples() {
-    LatencySampling<FooBar> latency = new LatencySampling<FooBar>(of(FooBar.FOO), 1.0f);
-    latency.addDerivedStatistic(new ChainedEventObserver() {
-
-      @Override
-      public void event(long time, long ... parameters) {
-        fail();
-      }
-   });
+    LatencySampling<FooBar> latency = new LatencySampling<>(of(FooBar.FOO), 1.0f);
+    latency.addDerivedStatistic((time, parameters) -> fail());
     
     for (int i = 0; i < 100; i++) {
       latency.begin(0);
@@ -93,15 +73,9 @@ public class LatencySamplingTest {
   @Test
   public void testLatencyMeasuredAccurately() throws InterruptedException {
     Random random = new Random();
-    LatencySampling<FooBar> latency = new LatencySampling<FooBar>(of(FooBar.FOO), 1.0f);
+    LatencySampling<FooBar> latency = new LatencySampling<>(of(FooBar.FOO), 1.0f);
     final AtomicLong expected = new AtomicLong();
-    latency.addDerivedStatistic(new ChainedEventObserver() {
-
-      @Override
-      public void event(long time, long ... parameters) {
-        assertThat(parameters[0], greaterThanOrEqualTo(expected.get()));
-      }
-    });
+    latency.addDerivedStatistic((time, parameters) -> assertThat(parameters[0], greaterThanOrEqualTo(expected.get())));
     
     for (int i = 0; i < 10; i++) {
       long start = random.nextLong();

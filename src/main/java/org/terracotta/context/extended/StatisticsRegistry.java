@@ -53,7 +53,7 @@ import static org.terracotta.context.query.QueryBuilder.queryBuilder;
 public class StatisticsRegistry {
 
   private final Object contextObject;
-  private final Map<String, RegisteredStatistic> registrations = new ConcurrentHashMap<String, RegisteredStatistic>();
+  private final Map<String, RegisteredStatistic> registrations = new ConcurrentHashMap<>();
 
   private final ScheduledExecutorService executor;
   private final Runnable disableTask;
@@ -84,13 +84,10 @@ public class StatisticsRegistry {
   }
 
   private Runnable createDisableTask() {
-    return new Runnable() {
-      @Override
-      public void run() {
-        long expireThreshold = Time.absoluteTime() - timeToDisableUnit.toMillis(timeToDisable);
-        for (RegisteredStatistic registeredStatistic : registrations.values()) {
-          registeredStatistic.getSupport().expire(expireThreshold);
-        }
+    return () -> {
+      long expireThreshold = Time.absoluteTime() - timeToDisableUnit.toMillis(timeToDisable);
+      for (RegisteredStatistic registeredStatistic : registrations.values()) {
+        registeredStatistic.getSupport().expire(expireThreshold);
       }
     };
   }
@@ -126,35 +123,25 @@ public class StatisticsRegistry {
   }
 
   public void registerSize(String name, ValueStatisticDescriptor descriptor) {
-    registerStatistic(name, descriptor, StatisticType.SIZE, new Function<ExpiringSampledStatistic<Long>, RegisteredStatistic>() {
-      @Override
-      public RegisteredStatistic apply(ExpiringSampledStatistic<Long> expiringSampledStatistic) {
-        return new RegisteredSizeStatistic(expiringSampledStatistic);
-      }
-    });
+    registerStatistic(name, descriptor, StatisticType.SIZE, (Function<ExpiringSampledStatistic<Long>, RegisteredStatistic>) RegisteredSizeStatistic::new);
   }
 
   public void registerCounter(String name, ValueStatisticDescriptor descriptor) {
-    registerStatistic(name, descriptor, StatisticType.COUNTER, new Function<ExpiringSampledStatistic<Long>, RegisteredStatistic>() {
-      @Override
-      public RegisteredStatistic apply(ExpiringSampledStatistic<Long> expiringSampledStatistic) {
-        return new RegisteredCounterStatistic(expiringSampledStatistic);
-      }
-    });
+    registerStatistic(name, descriptor, StatisticType.COUNTER, (Function<ExpiringSampledStatistic<Long>, RegisteredStatistic>) RegisteredCounterStatistic::new);
   }
 
   private <N extends Number> void registerStatistic(String name, ValueStatisticDescriptor descriptor, StatisticType type, Function<ExpiringSampledStatistic<N>, RegisteredStatistic> registeredStatisticFunction) {
-    Map<String, RegisteredStatistic> registeredStatistics = new HashMap<String, RegisteredStatistic>();
+    Map<String, RegisteredStatistic> registeredStatistics = new HashMap<>();
 
     Map<String, ValueStatistic<N>> valueStatistics = findValueStatistics(contextObject, name, descriptor.getObserverName(), descriptor.getTags());
-    Set<String> duplicates = new HashSet<String>();
+    Set<String> duplicates = new HashSet<>();
     for (Map.Entry<String, ValueStatistic<N>> entry : valueStatistics.entrySet()) {
       String key = entry.getKey();
       ValueStatistic<N> value = entry.getValue();
       if (registrations.containsKey(key)) {
         duplicates.add(key);
       }
-      ExpiringSampledStatistic<N> expiringSampledStatistic = new ExpiringSampledStatistic<N>(value, executor, historySize, historyInterval, historyIntervalUnit, type);
+      ExpiringSampledStatistic<N> expiringSampledStatistic = new ExpiringSampledStatistic<>(value, executor, historySize, historyInterval, historyIntervalUnit, type);
       RegisteredStatistic registeredStatistic = registeredStatisticFunction.apply(expiringSampledStatistic);
       registeredStatistics.put(key, registeredStatistic);
     }
@@ -168,14 +155,14 @@ public class StatisticsRegistry {
   public <T extends Enum<T>> void registerCompoundOperations(String name, OperationStatisticDescriptor<T> descriptor, EnumSet<T> compound) {
     Map<String, CompoundOperation<T>> compoundOperations = createCompoundOperations(name, descriptor.getObserverName(), descriptor.getTags(), descriptor.getType());
 
-    Map<String, RegisteredCompoundStatistic<T>> registeredStatistics = new HashMap<String, RegisteredCompoundStatistic<T>>();
-    Set<String> duplicates = new HashSet<String>();
+    Map<String, RegisteredCompoundStatistic<T>> registeredStatistics = new HashMap<>();
+    Set<String> duplicates = new HashSet<>();
     for (Map.Entry<String, CompoundOperation<T>> entry : compoundOperations.entrySet()) {
       String key = entry.getKey();
       if (registrations.containsKey(key)) {
         duplicates.add(key);
       }
-      registeredStatistics.put(key, new RegisteredCompoundStatistic<T>(entry.getValue(), compound));
+      registeredStatistics.put(key, new RegisteredCompoundStatistic<>(entry.getValue(), compound));
     }
     if (!duplicates.isEmpty()) {
       throw new IllegalArgumentException("Found duplicate operation statistic(s) " + duplicates);
@@ -190,14 +177,14 @@ public class StatisticsRegistry {
   public <T extends Enum<T>> void registerRatios(String name, OperationStatisticDescriptor<T> descriptor, EnumSet<T> ratioNumerator, EnumSet<T> ratioDenominator) {
     Map<String, CompoundOperation<T>> compoundOperations = createCompoundOperations(name, descriptor.getObserverName(), descriptor.getTags(), descriptor.getType());
 
-    Map<String, RegisteredRatioStatistic<T>> registeredStatistics = new HashMap<String, RegisteredRatioStatistic<T>>();
-    Set<String> duplicates = new HashSet<String>();
+    Map<String, RegisteredRatioStatistic<T>> registeredStatistics = new HashMap<>();
+    Set<String> duplicates = new HashSet<>();
     for (Map.Entry<String, CompoundOperation<T>> entry : compoundOperations.entrySet()) {
       String key = entry.getKey();
       if (registrations.containsKey(key)) {
         duplicates.add(key);
       }
-      registeredStatistics.put(key, new RegisteredRatioStatistic<T>(entry.getValue(), ratioNumerator, ratioDenominator));
+      registeredStatistics.put(key, new RegisteredRatioStatistic<>(entry.getValue(), ratioNumerator, ratioDenominator));
     }
     if (!duplicates.isEmpty()) {
       throw new IllegalArgumentException("Found duplicate operation statistic(s) " + duplicates);
@@ -250,7 +237,7 @@ public class StatisticsRegistry {
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   private <T extends Enum<T>> Map<String, CompoundOperation<T>> createCompoundOperations(String name, String observerName, Set<String> tags, Class<T> type) {
-    Map<String, CompoundOperation<T>> result = new HashMap<String, CompoundOperation<T>>();
+    Map<String, CompoundOperation<T>> result = new HashMap<>();
 
     Map<String, OperationStatistic<T>> operationObservers = findOperationStatistics(contextObject, name, type, observerName, tags);
     if (operationObservers.isEmpty()) {
@@ -286,7 +273,7 @@ public class StatisticsRegistry {
     if (result.isEmpty()) {
       return Collections.emptyMap();
     } else {
-      Map<String, OperationStatistic<T>> observers = new HashMap<String, OperationStatistic<T>>();
+      Map<String, OperationStatistic<T>> observers = new HashMap<>();
       for (TreeNode node : result) {
         String discriminator = null;
 
@@ -323,7 +310,7 @@ public class StatisticsRegistry {
     if (result.isEmpty()) {
       return Collections.emptyMap();
     } else {
-      Map<String, ValueStatistic<N>> observers = new HashMap<String, ValueStatistic<N>>();
+      Map<String, ValueStatistic<N>> observers = new HashMap<>();
       for (TreeNode node : result) {
         String discriminator = null;
 

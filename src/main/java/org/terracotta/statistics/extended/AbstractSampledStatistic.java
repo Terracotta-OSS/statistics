@@ -47,12 +47,12 @@ abstract class AbstractSampledStatistic<T extends Number> implements SampledStat
    * @param historySize     the history size
    * @param historyPeriod   the history period
    * @param historyTimeUnit the history time unit
-   * @param type
+   * @param type type of statistic sampled
    */
   AbstractSampledStatistic(ValueStatistic<T> source, ScheduledExecutorService executor, int historySize, long historyPeriod, TimeUnit historyTimeUnit, StatisticType type) {
     this.source = source;
     this.type = type;
-    this.history = new StatisticHistory<T>(source, executor, historySize, historyPeriod, historyTimeUnit);
+    this.history = new StatisticHistory<>(source, executor, historySize, historyPeriod, historyTimeUnit);
   }
 
   /**

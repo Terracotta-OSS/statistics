@@ -15,8 +15,6 @@
  */
 package org.terracotta.context;
 
-import java.util.Collection;
-
 import org.hamcrest.collection.IsEmptyCollection;
 import org.hamcrest.collection.IsIterableContainingInOrder;
 import org.junit.Test;

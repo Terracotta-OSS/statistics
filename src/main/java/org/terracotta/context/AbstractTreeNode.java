@@ -25,11 +25,11 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 abstract class AbstractTreeNode implements TreeNode {
 
-  private final CopyOnWriteArraySet<AbstractTreeNode> children = new CopyOnWriteArraySet<AbstractTreeNode>();
+  private final CopyOnWriteArraySet<AbstractTreeNode> children = new CopyOnWriteArraySet<>();
   
   public boolean addChild(AbstractTreeNode child) {
     synchronized (this) {
-      Collection<AbstractTreeNode> ancestors = new HashSet<AbstractTreeNode>(getAncestors());
+      Collection<AbstractTreeNode> ancestors = new HashSet<>(getAncestors());
       ancestors.removeAll(child.getAncestors());
       if (children.add(child)) {
         child.addedParent(this);
@@ -49,7 +49,7 @@ abstract class AbstractTreeNode implements TreeNode {
     synchronized (this) {
       if (children.remove(child)) {
         child.removedParent(this);
-        Collection<AbstractTreeNode> ancestors = new HashSet<AbstractTreeNode>(getAncestors());
+        Collection<AbstractTreeNode> ancestors = new HashSet<>(getAncestors());
         ancestors.removeAll(child.getAncestors());
         for (AbstractTreeNode ancestor : ancestors) {
           for (ContextListener listener : ancestor.getListeners()) {

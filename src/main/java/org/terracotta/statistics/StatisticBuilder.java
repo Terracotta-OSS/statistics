@@ -90,10 +90,10 @@ public final class StatisticBuilder {
   static class AbstractStatisticBuilder<T extends AbstractStatisticBuilder> {
 
     /** The tags. */
-    protected final Set<String> tags = new HashSet<String>();
+    protected final Set<String> tags = new HashSet<>();
 
     /** The properties. */
-    protected final Map<String, Object> properties = new HashMap<String, Object>();
+    protected final Map<String, Object> properties = new HashMap<>();
 
     /** The context. */
     protected Object            context;

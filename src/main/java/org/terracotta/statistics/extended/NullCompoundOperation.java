@@ -180,9 +180,9 @@ public final class NullCompoundOperation<T extends Enum<T>> implements CompoundO
     /**
      * Instance method
      *
-     * @return
+     * @return singleton instance
      */
-    static final Result instance() {
+    static Result instance() {
       return INSTANCE;
     }
 
@@ -229,7 +229,7 @@ public final class NullCompoundOperation<T extends Enum<T>> implements CompoundO
     /**
      * Instance accessor
      *
-     * @return
+     * @return singleton instance
      */
     static Latency instance() {
       return INSTANCE;
@@ -268,16 +268,16 @@ public final class NullCompoundOperation<T extends Enum<T>> implements CompoundO
    */
   final static class NullSampledStatistic<T extends Number> implements SampledStatistic<T> {
 
-    private static final Map<StatisticType, SampledStatistic<?>> COMMON = new HashMap<StatisticType, SampledStatistic<?>>();
+    private static final Map<StatisticType, SampledStatistic<?>> COMMON = new HashMap<>();
 
     static {
-      COMMON.put(StatisticType.COUNTER, new NullSampledStatistic<Long>(0L, StatisticType.COUNTER));
-      COMMON.put(StatisticType.RATE, new NullSampledStatistic<Double>(Double.NaN, StatisticType.RATE));
+      COMMON.put(StatisticType.COUNTER, new NullSampledStatistic<>(0L, StatisticType.COUNTER));
+      COMMON.put(StatisticType.RATE, new NullSampledStatistic<>(Double.NaN, StatisticType.RATE));
       COMMON.put(StatisticType.LATENCY_MIN, new NullSampledStatistic<Long>(null, StatisticType.LATENCY_MIN));
       COMMON.put(StatisticType.LATENCY_MAX, new NullSampledStatistic<Long>(null, StatisticType.LATENCY_MAX));
-      COMMON.put(StatisticType.LATENCY_AVG, new NullSampledStatistic<Double>(Double.NaN, StatisticType.LATENCY_AVG));
-      COMMON.put(StatisticType.RATIO, new NullSampledStatistic<Double>(Double.NaN, StatisticType.RATIO));
-      COMMON.put(StatisticType.SIZE, new NullSampledStatistic<Long>(0L, StatisticType.SIZE));
+      COMMON.put(StatisticType.LATENCY_AVG, new NullSampledStatistic<>(Double.NaN, StatisticType.LATENCY_AVG));
+      COMMON.put(StatisticType.RATIO, new NullSampledStatistic<>(Double.NaN, StatisticType.RATIO));
+      COMMON.put(StatisticType.SIZE, new NullSampledStatistic<>(0L, StatisticType.SIZE));
     }
 
     private final T value;
@@ -287,7 +287,7 @@ public final class NullCompoundOperation<T extends Enum<T>> implements CompoundO
      * Constructor
      *
      * @param value initial value
-     * @param type
+     * @param type type of statistic to track
      */
     private NullSampledStatistic(T value, StatisticType type) {
       this.value = value;

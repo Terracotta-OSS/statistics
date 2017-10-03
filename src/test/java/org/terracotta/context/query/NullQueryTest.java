@@ -54,7 +54,7 @@ public class NullQueryTest {
   
   @Test
   public void testPopulatedSetUnmodified() {
-    Set<TreeNode> nodes = new HashSet<TreeNode>();
+    Set<TreeNode> nodes = new HashSet<>();
     nodes.add(createTreeNode(A.class));
     nodes.add(createTreeNode(B.class));
     

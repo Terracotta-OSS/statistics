@@ -52,8 +52,8 @@ class StatisticHistory<T extends Number> {
    * @param periodTimeUnit the period's time unit
    */
   public StatisticHistory(ValueStatistic<T> statistic, ScheduledExecutorService executor, int historySize, long period, TimeUnit periodTimeUnit) {
-    this.history = new StatisticArchive<T>(historySize);
-    this.sampler = new StatisticSampler<T>(executor, period, periodTimeUnit, statistic, history);
+    this.history = new StatisticArchive<>(historySize);
+    this.sampler = new StatisticSampler<>(executor, period, periodTimeUnit, statistic, history);
   }
 
   /**

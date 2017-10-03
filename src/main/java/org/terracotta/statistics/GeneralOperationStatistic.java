@@ -39,7 +39,7 @@ class GeneralOperationStatistic<T extends Enum<T>> extends AbstractOperationStat
    */
   GeneralOperationStatistic(String name, Set<String> tags, Map<String, ? extends Object> properties, Class<T> type) {
     super(name, tags, properties, type);
-    this.counts = new EnumMap<T, LongAdder>(type);
+    this.counts = new EnumMap<>(type);
     for (T t : type.getEnumConstants()) {
       counts.put(t, new LongAdder());
     }

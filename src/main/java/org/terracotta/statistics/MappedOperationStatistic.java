@@ -50,7 +50,7 @@ public class MappedOperationStatistic<S extends Enum<S>, D extends Enum<D>> impl
 
     this.name = statisticName;
     this.tags = Collections.singleton("tier");
-    this.properties = new HashMap<String, Object>();
+    this.properties = new HashMap<>();
     this.properties.put("tierHeight", tierHeight);
     this.properties.put("discriminator", discriminator);
 
@@ -58,7 +58,7 @@ public class MappedOperationStatistic<S extends Enum<S>, D extends Enum<D>> impl
     Class<S> outcomeType = first.getValue().iterator().next().getDeclaringClass();
     this.outcomeType = first.getKey().getDeclaringClass();
 
-    this.mapper = new StatisticMapper<S, D>(translation, findOperationStat(tier, outcomeType, targetName));
+    this.mapper = new StatisticMapper<>(translation, findOperationStat(tier, outcomeType, targetName));
   }
 
   @Override

@@ -50,15 +50,11 @@ public class MinMaxAverage implements ChainedEventObserver {
   
   @Override
   public void event(long time, final long ... parameters) {
-    executor.execute(new Runnable() {
-
-      @Override
-      public void run() {
-        for (long max = maximum.get(); max < parameters[0] && !maximum.compareAndSet(max, parameters[0]); max = maximum.get());
-        for (long min = minimum.get(); min > parameters[0] && !minimum.compareAndSet(min, parameters[0]); min = minimum.get());
-        for (long sumBits = summation.get(); !summation.compareAndSet(sumBits, doubleToLongBits(longBitsToDouble(sumBits) + parameters[0])); sumBits = summation.get());
-        count.incrementAndGet();
-      }
+    executor.execute(() -> {
+      for (long max = maximum.get(); max < parameters[0] && !maximum.compareAndSet(max, parameters[0]); max = maximum.get());
+      for (long min = minimum.get(); min > parameters[0] && !minimum.compareAndSet(min, parameters[0]); min = minimum.get());
+      for (long sumBits = summation.get(); !summation.compareAndSet(sumBits, doubleToLongBits(longBitsToDouble(sumBits) + parameters[0])); sumBits = summation.get());
+      count.incrementAndGet();
     });
   }
 
@@ -71,13 +67,7 @@ public class MinMaxAverage implements ChainedEventObserver {
   }
   
   public ValueStatistic<Long> minStatistic() {
-    return new ValueStatistic<Long>() {
-
-      @Override
-      public Long value() {
-        return min();
-      }
-    };
+    return this::min;
   }
   
   public Double mean() {
@@ -89,13 +79,7 @@ public class MinMaxAverage implements ChainedEventObserver {
   }
   
   public ValueStatistic<Double> meanStatistic() {
-    return new ValueStatistic<Double>() {
-
-      @Override
-      public Double value() {
-        return mean();
-      }
-    };
+    return this::mean;
   }
   
   public Long max() {
@@ -107,12 +91,6 @@ public class MinMaxAverage implements ChainedEventObserver {
   }
   
   public ValueStatistic<Long> maxStatistic() {
-    return new ValueStatistic<Long>() {
-
-      @Override
-      public Long value() {
-        return max();
-      }
-    };
+    return this::max;
   }
 }

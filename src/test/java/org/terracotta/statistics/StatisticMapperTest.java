@@ -44,7 +44,7 @@ public class StatisticMapperTest {
   @Test
   public void testInvalidSourceStatisticSet() {
     try {
-      new StatisticMapper<Source, Target>(Collections.singletonMap(A, of(C, D)), null);
+      new StatisticMapper<>(Collections.singletonMap(A, of(C, D)), null);
       fail("should throw");
     } catch (IllegalArgumentException e) {
       assertThat(e.getMessage(), containsString("target outcomes [B]"));
@@ -54,10 +54,10 @@ public class StatisticMapperTest {
   @Test
   public void testInvalidTargetStatisticSet() {
     try {
-      Map<Target, Set<Source>> translation = new EnumMap<Target, Set<Source>>(Target.class);
+      Map<Target, Set<Source>> translation = new EnumMap<>(Target.class);
       translation.put(A, of(C));
       translation.put(B, of(D));
-      new StatisticMapper<Source, Target>(translation, null);
+      new StatisticMapper<>(translation, null);
       fail("should throw");
     } catch (IllegalArgumentException e) {
       assertThat(e.getMessage(), containsString("source outcomes [E]"));
@@ -67,10 +67,10 @@ public class StatisticMapperTest {
   @Test
   public void testIllDefinedTranslation() {
     try {
-      Map<Target, Set<Source>> translation = new EnumMap<Target, Set<Source>>(Target.class);
+      Map<Target, Set<Source>> translation = new EnumMap<>(Target.class);
       translation.put(A, of(C, D));
       translation.put(B, of(D, E));
-      new StatisticMapper<Source, Target>(translation, null);
+      new StatisticMapper<>(translation, null);
       fail("should throw");
     } catch (IllegalArgumentException e) {
       assertThat(e.getMessage(), containsString("mapping is ill-defined"));
@@ -79,10 +79,10 @@ public class StatisticMapperTest {
 
   @Test
   public void testTargetTypeExtraction() {
-    Map<Target, Set<Source>> translation = new EnumMap<Target, Set<Source>>(Target.class);
+    Map<Target, Set<Source>> translation = new EnumMap<>(Target.class);
     translation.put(A, of(C));
     translation.put(B, of(D, E));
-    StatisticMapper<Source, Target> mapper = new StatisticMapper<Source, Target>(translation, null);
+    StatisticMapper<Source, Target> mapper = new StatisticMapper<>(translation, null);
 
     assertThat(mapper.type(), equalTo(Target.class));
   }
@@ -90,10 +90,10 @@ public class StatisticMapperTest {
   @Test
   public void testStatisticTranslation() {
     OperationStatistic<Source> statistic = mock(OperationStatistic.class);
-    Map<Target, Set<Source>> translation = new EnumMap<Target, Set<Source>>(Target.class);
+    Map<Target, Set<Source>> translation = new EnumMap<>(Target.class);
     translation.put(A, of(C));
     translation.put(B, of(D, E));
-    StatisticMapper<Source, Target  > mapper = new StatisticMapper<Source, Target>(translation, statistic);
+    StatisticMapper<Source, Target  > mapper = new StatisticMapper<>(translation, statistic);
 
     mapper.statistic(B);
     verify(statistic).statistic(of(D, E));
@@ -105,10 +105,10 @@ public class StatisticMapperTest {
   @Test
   public void testStatisticSetTranslation() {
     OperationStatistic<Source> statistic = mock(OperationStatistic.class);
-    Map<Target, Set<Source>> translation = new EnumMap<Target, Set<Source>>(Target.class);
+    Map<Target, Set<Source>> translation = new EnumMap<>(Target.class);
     translation.put(A, of(C));
     translation.put(B, of(D, E));
-    StatisticMapper<Source, Target  > mapper = new StatisticMapper<Source, Target>(translation, statistic);
+    StatisticMapper<Source, Target  > mapper = new StatisticMapper<>(translation, statistic);
 
     mapper.statistic(of(A, B));
     verify(statistic).statistic(of(C, D, E));
@@ -117,10 +117,10 @@ public class StatisticMapperTest {
   @Test
   public void testCountTranslation() {
     OperationStatistic<Source> statistic = mock(OperationStatistic.class);
-    Map<Target, Set<Source>> translation = new EnumMap<Target, Set<Source>>(Target.class);
+    Map<Target, Set<Source>> translation = new EnumMap<>(Target.class);
     translation.put(A, of(C));
     translation.put(B, of(D, E));
-    StatisticMapper<Source, Target  > mapper = new StatisticMapper<Source, Target>(translation, statistic);
+    StatisticMapper<Source, Target  > mapper = new StatisticMapper<>(translation, statistic);
 
     mapper.count(B);
     verify(statistic).sum(of(D, E));
@@ -132,10 +132,10 @@ public class StatisticMapperTest {
   @Test
   public void testSumTranslation() {
     OperationStatistic<Source> statistic = mock(OperationStatistic.class);
-    Map<Target, Set<Source>> translation = new EnumMap<Target, Set<Source>>(Target.class);
+    Map<Target, Set<Source>> translation = new EnumMap<>(Target.class);
     translation.put(A, of(C));
     translation.put(B, of(D, E));
-    StatisticMapper<Source, Target  > mapper = new StatisticMapper<Source, Target>(translation, statistic);
+    StatisticMapper<Source, Target  > mapper = new StatisticMapper<>(translation, statistic);
 
     mapper.sum(of(A, B));
     verify(statistic).sum(of(C, D, E));
@@ -144,10 +144,10 @@ public class StatisticMapperTest {
   @Test
   public void testFullSum() {
     OperationStatistic<Source> statistic = mock(OperationStatistic.class);
-    Map<Target, Set<Source>> translation = new EnumMap<Target, Set<Source>>(Target.class);
+    Map<Target, Set<Source>> translation = new EnumMap<>(Target.class);
     translation.put(A, of(C));
     translation.put(B, of(D, E));
-    StatisticMapper<Source, Target  > mapper = new StatisticMapper<Source, Target>(translation, statistic);
+    StatisticMapper<Source, Target  > mapper = new StatisticMapper<>(translation, statistic);
 
     mapper.sum();
 
@@ -161,10 +161,10 @@ public class StatisticMapperTest {
     OperationStatistic<Source> statistic = mock(OperationStatistic.class);
     doNothing().when(statistic).addDerivedStatistic(wrapperCapture.capture());
 
-    Map<Target, Set<Source>> translation = new EnumMap<Target, Set<Source>>(Target.class);
+    Map<Target, Set<Source>> translation = new EnumMap<>(Target.class);
     translation.put(A, of(C));
     translation.put(B, of(D, E));
-    StatisticMapper<Source, Target  > mapper = new StatisticMapper<Source, Target>(translation, statistic);
+    StatisticMapper<Source, Target  > mapper = new StatisticMapper<>(translation, statistic);
 
     ChainedOperationObserver<? super Target> derived = mock(ChainedOperationObserver.class);
 
@@ -183,10 +183,10 @@ public class StatisticMapperTest {
     OperationStatistic<Source> statistic = mock(OperationStatistic.class);
     doNothing().when(statistic).addDerivedStatistic(wrapperCapture.capture());
 
-    Map<Target, Set<Source>> translation = new EnumMap<Target, Set<Source>>(Target.class);
+    Map<Target, Set<Source>> translation = new EnumMap<>(Target.class);
     translation.put(A, of(C));
     translation.put(B, of(D, E));
-    StatisticMapper<Source, Target  > mapper = new StatisticMapper<Source, Target>(translation, statistic);
+    StatisticMapper<Source, Target  > mapper = new StatisticMapper<>(translation, statistic);
 
     ChainedOperationObserver<? super Target> derived = mock(ChainedOperationObserver.class);
 
@@ -211,10 +211,10 @@ public class StatisticMapperTest {
     OperationStatistic<Source> statistic = mock(OperationStatistic.class);
     doNothing().when(statistic).addDerivedStatistic(wrapperCapture.capture());
 
-    Map<Target, Set<Source>> translation = new EnumMap<Target, Set<Source>>(Target.class);
+    Map<Target, Set<Source>> translation = new EnumMap<>(Target.class);
     translation.put(A, of(C));
     translation.put(B, of(D, E));
-    StatisticMapper<Source, Target  > mapper = new StatisticMapper<Source, Target>(translation, statistic);
+    StatisticMapper<Source, Target  > mapper = new StatisticMapper<>(translation, statistic);
 
     ChainedOperationObserver<? super Target> derived = mock(ChainedOperationObserver.class);
 
@@ -236,10 +236,10 @@ public class StatisticMapperTest {
   public void testDerivedStatisticRemovalDelegation() {
     OperationStatistic<Source> statistic = mock(OperationStatistic.class);
 
-    Map<Target, Set<Source>> translation = new EnumMap<Target, Set<Source>>(Target.class);
+    Map<Target, Set<Source>> translation = new EnumMap<>(Target.class);
     translation.put(A, of(C));
     translation.put(B, of(D, E));
-    StatisticMapper<Source, Target  > mapper = new StatisticMapper<Source, Target>(translation, statistic);
+    StatisticMapper<Source, Target  > mapper = new StatisticMapper<>(translation, statistic);
 
     ChainedOperationObserver<? super Target> derived = mock(ChainedOperationObserver.class);
 

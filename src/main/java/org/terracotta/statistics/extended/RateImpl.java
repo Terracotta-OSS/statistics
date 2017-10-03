@@ -58,7 +58,7 @@ public class RateImpl<T extends Enum<T>> implements SampledStatistic<Double> {
     this.rate = new EventRateSimpleMovingAverage(averagePeriod, averageTimeUnit);
     this.delegate = new ExpiringSampledStatistic<Double>(rate, executor, historySize, historyPeriod, historyTimeUnit, StatisticType.RATE) {
 
-      private final ChainedOperationObserver<T> observer = new OperationResultFilter<T>(targets, rate);
+      private final ChainedOperationObserver<T> observer = new OperationResultFilter<>(targets, rate);
 
       @Override
       protected void stopStatistic() {

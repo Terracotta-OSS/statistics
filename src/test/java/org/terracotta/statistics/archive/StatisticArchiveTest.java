@@ -17,8 +17,7 @@ package org.terracotta.statistics.archive;
 
 import org.hamcrest.collection.IsEmptyCollection;
 import static org.hamcrest.collection.IsIterableContainingInOrder.*;
-import org.hamcrest.core.IsCollectionContaining;
-import org.hamcrest.core.IsEqual;
+
 import org.junit.Test;
 
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -32,7 +31,7 @@ public class StatisticArchiveTest {
 
   @Test
   public void test_since() {
-    StatisticArchive<String> archive = new StatisticArchive<String>(2);
+    StatisticArchive<String> archive = new StatisticArchive<>(2);
     Timestamped<String> sample1 = new Sample("foo", 1479819723336L);
     Timestamped<String> sample2 = new Sample("bar", 1479819721336L);
     archive.accept(sample1);
@@ -42,13 +41,13 @@ public class StatisticArchiveTest {
 
   @Test
   public void testEmptyArchive() {
-    StatisticArchive<String> archive = new StatisticArchive<String>(2);
+    StatisticArchive<String> archive = new StatisticArchive<>(2);
     assertThat(archive.getArchive(), IsEmptyCollection.empty());
   }
   
   @Test
   public void testOccupiedArchive() {
-    StatisticArchive<String> archive = new StatisticArchive<String>(2);
+    StatisticArchive<String> archive = new StatisticArchive<>(2);
     Timestamped<String> sample1 = new Sample("foo", 0);
     Timestamped<String> sample2 = new Sample("bar", 1);
     archive.accept(sample1);
@@ -58,8 +57,8 @@ public class StatisticArchiveTest {
 
   @Test
   public void testArchiveOverspill() {
-    StatisticArchive<String> overspill = new StatisticArchive<String>(1);
-    StatisticArchive<String> archive = new StatisticArchive<String>(1, overspill);
+    StatisticArchive<String> overspill = new StatisticArchive<>(1);
+    StatisticArchive<String> archive = new StatisticArchive<>(1, overspill);
     Timestamped<String> sample1 = new Sample("foo", 0);
     Timestamped<String> sample2 = new Sample("bar", 1);
     archive.accept(sample1);

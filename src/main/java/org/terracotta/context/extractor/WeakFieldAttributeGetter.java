@@ -28,7 +28,7 @@ public class WeakFieldAttributeGetter<T> extends FieldAttributeGetter<T> {
   
   public WeakFieldAttributeGetter(Object target, Field field) {
     super(field);
-    this.targetRef = new WeakReference<Object>(target);
+    this.targetRef = new WeakReference<>(target);
   }
 
   @Override

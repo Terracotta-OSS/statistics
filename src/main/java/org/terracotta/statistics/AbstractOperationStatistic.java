@@ -45,7 +45,7 @@ public abstract class AbstractOperationStatistic<T extends Enum<T>> extends Abst
    */
   AbstractOperationStatistic(String name, Set<String> tags, Map<String, ? extends Object> properties, Class<T> type) {
     this.name = name;
-    this.tags = Collections.unmodifiableSet(new HashSet<String>(tags));
+    this.tags = Collections.unmodifiableSet(new HashSet<>(tags));
     this.properties = Collections.unmodifiableMap(new HashMap<String, Object>(properties));
     this.type = type;
   }
@@ -63,24 +63,12 @@ public abstract class AbstractOperationStatistic<T extends Enum<T>> extends Abst
    */
   @Override
   public ValueStatistic<Long> statistic(final T result) {
-    return new ValueStatistic<Long>() {
-
-      @Override
-      public Long value() {
-        return count(result);
-      }
-    };
+    return () -> count(result);
   }
 
   @Override
   public ValueStatistic<Long> statistic(final Set<T> results) {
-    return new ValueStatistic<Long>() {
-
-      @Override
-      public Long value() {
-        return sum(results);
-      }
-    };
+    return () -> sum(results);
   }
   
   @Override

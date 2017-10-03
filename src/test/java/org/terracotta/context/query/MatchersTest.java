@@ -69,14 +69,14 @@ public class MatchersTest {
   }
   
   public void testHasAttributeOnMatchingMap() {
-    Map<String, String> map = new HashMap<String, String>();
+    Map<String, String> map = new HashMap<>();
     map.put("foo", "bar");
     map.put("alice", "bob");
     assertTrue(Matchers.hasAttribute("foo", "bar").matches(map));
   }
 
   public void testHasAttributeOnNonMatchingMap() {
-    Map<String, String> map = new HashMap<String, String>();
+    Map<String, String> map = new HashMap<>();
     map.put("foo", "baz");
     map.put("alice", "bob");
     assertTrue(Matchers.hasAttribute("foo", "bar").matches(map));

@@ -25,7 +25,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 class MutableTreeNode extends AbstractTreeNode {
 
-  private final CopyOnWriteArraySet<AbstractTreeNode> parents = new CopyOnWriteArraySet<AbstractTreeNode>();
+  private final CopyOnWriteArraySet<AbstractTreeNode> parents = new CopyOnWriteArraySet<>();
   private final ContextElement context;
   
   public MutableTreeNode(ContextElement context) {
@@ -69,11 +69,11 @@ class MutableTreeNode extends AbstractTreeNode {
 
   @Override
   public Collection<List<? extends TreeNode>> getPaths() {
-    Collection<List<? extends TreeNode>> paths = new ArrayList<List<? extends TreeNode>>();
+    Collection<List<? extends TreeNode>> paths = new ArrayList<>();
     
     for (TreeNode node : parents) {
       for (List<? extends TreeNode> path : node.getPaths()) {
-        List<TreeNode> newPath = new ArrayList<TreeNode>(path);
+        List<TreeNode> newPath = new ArrayList<>(path);
         newPath.add(this);
         paths.add(newPath);
       }

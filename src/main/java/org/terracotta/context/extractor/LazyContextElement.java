@@ -39,7 +39,7 @@ class LazyContextElement implements ContextElement {
 
   @Override
   public Map<String, Object> attributes() {
-    Map<String, Object> realized = new HashMap<String, Object>();
+    Map<String, Object> realized = new HashMap<>();
     for (Entry<? extends String, AttributeGetter<? extends Object>> e : attributes.entrySet()) {
       realized.put(e.getKey(), e.getValue().get());
     }

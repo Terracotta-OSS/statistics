@@ -38,8 +38,8 @@ import static org.terracotta.context.query.QueryBuilder.*;
 public class ContextManager {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ContextManager.class);
-  private static final WeakIdentityHashMap<Object, MutableTreeNode> CONTEXT_OBJECTS = new WeakIdentityHashMap<Object, MutableTreeNode>();
-  private static final Collection<ContextCreationListener> contextCreationListeners = new CopyOnWriteArrayList<ContextCreationListener>();
+  private static final WeakIdentityHashMap<Object, MutableTreeNode> CONTEXT_OBJECTS = new WeakIdentityHashMap<>();
+  private static final Collection<ContextCreationListener> contextCreationListeners = new CopyOnWriteArrayList<>();
   
   private final RootNode root = new RootNode();
   

@@ -26,7 +26,7 @@ class Descendants implements Query {
 
   @Override
   public Set<TreeNode> execute(Set<TreeNode> input) {
-    Set<TreeNode> descendants = new HashSet<TreeNode>();
+    Set<TreeNode> descendants = new HashSet<>();
     for (Set<TreeNode> children = Children.INSTANCE.execute(input); !children.isEmpty(); children = Children.INSTANCE.execute(children)) {
       if (!descendants.addAll(children)) {
         break;

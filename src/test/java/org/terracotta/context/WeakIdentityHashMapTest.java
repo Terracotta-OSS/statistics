@@ -33,7 +33,7 @@ public class WeakIdentityHashMapTest {
   
   @Test
   public void testEnqueuedReferenceIsRemoved() {
-    Queue<Reference<String>> references = new LinkedList<Reference<String>>();
+    Queue<Reference<String>> references = new LinkedList<>();
     WeakIdentityHashMap<String, String> map = createRefTrackingWeakIdentityHashMap(references);
     
     assertThat(map.putIfAbsent("test", "test"), nullValue());
@@ -46,7 +46,7 @@ public class WeakIdentityHashMapTest {
 
   @Test
   public void testEnqueuedCleanableReferenceIsRemovedAndCleaned() {
-    Queue<Reference<String>> references = new LinkedList<Reference<String>>();
+    Queue<Reference<String>> references = new LinkedList<>();
     WeakIdentityHashMap<String, DummyCleanable> map = createRefTrackingWeakIdentityHashMap(references);
     
     DummyCleanable value = new DummyCleanable();
@@ -61,7 +61,7 @@ public class WeakIdentityHashMapTest {
 
   @Test
   public void testRemoveActiveRef() {
-    Queue<Reference<String>> references = new LinkedList<Reference<String>>();
+    Queue<Reference<String>> references = new LinkedList<>();
     WeakIdentityHashMap<String, String> map = createRefTrackingWeakIdentityHashMap(references);
 
     map.putIfAbsent("key", "value");

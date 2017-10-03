@@ -101,7 +101,7 @@ public class EventRateSimpleMovingAverageTest {
     try {
       double totalRate = 0.0;
       for (Future<Double> f : executor.invokeAll(Arrays.asList(c1, c2))) {
-        totalRate += f.get().doubleValue();
+        totalRate += f.get();
       }
       assertThat(stat.rate(TimeUnit.SECONDS), closeTo(totalRate, EXPECTED_ACCURACY * totalRate));
     } finally {

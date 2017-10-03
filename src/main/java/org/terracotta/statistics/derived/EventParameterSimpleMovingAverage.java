@@ -36,7 +36,7 @@ public class EventParameterSimpleMovingAverage implements ChainedEventObserver {
 
   private static final int PARTITION_COUNT = 10;
 
-  private final Queue<AveragePartition> archive = new ConcurrentLinkedQueue<AveragePartition>();
+  private final Queue<AveragePartition> archive = new ConcurrentLinkedQueue<>();
   private final AtomicReference<AveragePartition> activePartition;
   
   private volatile long windowSize;
@@ -45,7 +45,7 @@ public class EventParameterSimpleMovingAverage implements ChainedEventObserver {
   public EventParameterSimpleMovingAverage(long time, TimeUnit unit) {
     this.windowSize  = unit.toNanos(time);
     this.partitionSize = windowSize / PARTITION_COUNT;
-    this.activePartition = new AtomicReference<AveragePartition>(new AveragePartition(Long.MIN_VALUE, partitionSize));
+    this.activePartition = new AtomicReference<>(new AveragePartition(Long.MIN_VALUE, partitionSize));
   }
 
   public void setWindow(long time, TimeUnit unit) {
@@ -58,32 +58,15 @@ public class EventParameterSimpleMovingAverage implements ChainedEventObserver {
   }
 
   public ValueStatistic<Double> averageStatistic() {
-    return new ValueStatistic<Double>() {
-      @Override
-      public Double value() {
-        return average();
-      }
-    };
+    return this::average;
   }
   
   public ValueStatistic<Long> minimumStatistic() {
-    return new ValueStatistic<Long>() {
-
-      @Override
-      public Long value() {
-        return minimum();
-      }
-    };
+    return this::minimum;
   }
   
   public ValueStatistic<Long> maximumStatistic() {
-    return new ValueStatistic<Long>() {
-
-      @Override
-      public Long value() {
-        return maximum();
-      }
-    };
+    return this::maximum;
   }
   
   public final double average() {

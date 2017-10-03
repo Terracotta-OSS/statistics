@@ -69,7 +69,7 @@ public class FilterTest {
   
   @Test
   public void testAlwaysFailMatcher() {
-    Set<TreeNode> input = new HashSet<TreeNode>();
+    Set<TreeNode> input = new HashSet<>();
     input.add(createTreeNode(A.class));
     input.add(createTreeNode(B.class));
     
@@ -84,7 +84,7 @@ public class FilterTest {
   
   @Test
   public void testAlwaysPassMatcher() {
-    Set<TreeNode> input = new HashSet<TreeNode>();
+    Set<TreeNode> input = new HashSet<>();
     input.add(createTreeNode(A.class));
     input.add(createTreeNode(B.class));
     
@@ -99,7 +99,7 @@ public class FilterTest {
   
   @Test
   public void testHalfPassMatcher() {
-    Set<TreeNode> input = new HashSet<TreeNode>();
+    Set<TreeNode> input = new HashSet<>();
     input.add(createTreeNode(A.class));
     input.add(createTreeNode(B.class));
     

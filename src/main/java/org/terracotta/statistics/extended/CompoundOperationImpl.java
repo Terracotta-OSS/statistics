@@ -43,8 +43,8 @@ public class CompoundOperationImpl<T extends Enum<T>> implements CompoundOperati
 
   private final Class<T> type;
   private final Map<T, ResultImpl<T>> operations;
-  private final ConcurrentMap<Set<T>, ResultImpl<T>> compounds = new ConcurrentHashMap<Set<T>, ResultImpl<T>>();
-  private final ConcurrentMap<List<Set<T>>, ExpiringSampledStatistic<Double>> ratios = new ConcurrentHashMap<List<Set<T>>, ExpiringSampledStatistic<Double>>();
+  private final ConcurrentMap<Set<T>, ResultImpl<T>> compounds = new ConcurrentHashMap<>();
+  private final ConcurrentMap<List<Set<T>>, ExpiringSampledStatistic<Double>> ratios = new ConcurrentHashMap<>();
 
   private final ScheduledExecutorService executor;
 
@@ -80,9 +80,9 @@ public class CompoundOperationImpl<T extends Enum<T>> implements CompoundOperati
     this.historyPeriod = historyPeriod;
     this.historyTimeUnit = historyTimeUnit;
 
-    this.operations = new EnumMap<T, ResultImpl<T>>(type);
+    this.operations = new EnumMap<>(type);
     for (T result : type.getEnumConstants()) {
-      operations.put(result, new ResultImpl<T>(source, EnumSet.of(result), averagePeriod, averageTimeUnit, executor, historySize, historyPeriod, historyTimeUnit));
+      operations.put(result, new ResultImpl<>(source, EnumSet.of(result), averagePeriod, averageTimeUnit, executor, historySize, historyPeriod, historyTimeUnit));
     }
   }
 
@@ -104,7 +104,7 @@ public class CompoundOperationImpl<T extends Enum<T>> implements CompoundOperati
       Set<T> key = EnumSet.copyOf(results);
       ResultImpl<T> existing = compounds.get(key);
       if (existing == null) {
-        ResultImpl<T> created = new ResultImpl<T>(source, key, averagePeriod, averageTimeUnit, executor, historySize, historyPeriod, historyTimeUnit);
+        ResultImpl<T> created = new ResultImpl<>(source, key, averagePeriod, averageTimeUnit, executor, historySize, historyPeriod, historyTimeUnit);
         ResultImpl<T> racer = compounds.putIfAbsent(key, created);
         if (racer == null) {
           return created;
@@ -119,7 +119,7 @@ public class CompoundOperationImpl<T extends Enum<T>> implements CompoundOperati
 
   @Override
   public CountOperation<T> asCountOperation() {
-    return new CountOperationImpl<T>(this);
+    return new CountOperationImpl<>(this);
   }
 
   @Override
@@ -131,12 +131,7 @@ public class CompoundOperationImpl<T extends Enum<T>> implements CompoundOperati
     if (existing == null) {
       final SampledStatistic<Double> numeratorRate = compound(numerator).rate();
       final SampledStatistic<Double> denominatorRate = compound(denominator).rate();
-      ExpiringSampledStatistic<Double> created = new ExpiringSampledStatistic<Double>(new ValueStatistic<Double>() {
-        @Override
-        public Double value() {
-          return numeratorRate.value() / denominatorRate.value();
-        }
-      }, executor, historySize, historyPeriod, historyTimeUnit, StatisticType.RATIO);
+      ExpiringSampledStatistic<Double> created = new ExpiringSampledStatistic<>(() -> numeratorRate.value() / denominatorRate.value(), executor, historySize, historyPeriod, historyTimeUnit, StatisticType.RATIO);
       ExpiringSampledStatistic<Double> racer = ratios.putIfAbsent(key, created);
       if (racer == null) {
         return created;
@@ -235,16 +230,8 @@ public class CompoundOperationImpl<T extends Enum<T>> implements CompoundOperati
         // Not using && on purpose here. expire() has a side-effect. We want to make sure it's called (no short-circuit evaluation)
         expired &= o.expire(expiryTime);
       }
-      for (Iterator<ResultImpl<T>> it = compounds.values().iterator(); it.hasNext(); ) {
-        if (it.next().expire(expiryTime)) {
-          it.remove();
-        }
-      }
-      for (Iterator<ExpiringSampledStatistic<Double>> it = ratios.values().iterator(); it.hasNext(); ) {
-        if (it.next().expire(expiryTime)) {
-          it.remove();
-        }
-      }
+      compounds.values().removeIf(tResult -> tResult.expire(expiryTime));
+      ratios.values().removeIf(doubleExpiringSampledStatistic -> doubleExpiringSampledStatistic.expire(expiryTime));
       return expired && compounds.isEmpty() && ratios.isEmpty();
     }
   }

@@ -33,7 +33,7 @@ public class LatencySampling<T extends Enum<T>> extends AbstractSourceStatistic<
 
   private static final Logger LOGGER = LoggerFactory.getLogger(LatencySampling.class);
 
-  private final ThreadLocal<Long> operationStartTime = new ThreadLocal<Long>();
+  private final ThreadLocal<Long> operationStartTime = new ThreadLocal<>();
   private final Set<T> targetOperations;
   private final int ceiling;
   
@@ -57,7 +57,7 @@ public class LatencySampling<T extends Enum<T>> extends AbstractSourceStatistic<
     if (targetOperations.contains(result)) {
       Long start  = operationStartTime.get();
       if (start != null) {
-        long latency = time - start.longValue();
+        long latency = time - start;
         if (!derivedStatistics.isEmpty()) {
           if (latency < 0) {
             LOGGER.info("Dropping {} event with negative latency {} (possible backwards nanoTime() movement)", result, time);

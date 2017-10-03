@@ -46,7 +46,7 @@ public final class ObjectContextExtractor {
    * @return a {@code ContextElement}
    */
   public static ContextElement extract(Object from) {
-    Map<String, AttributeGetter<? extends Object>> attributes = new HashMap<String, AttributeGetter<? extends Object>>();
+    Map<String, AttributeGetter<? extends Object>> attributes = new HashMap<>();
     attributes.putAll(extractInstanceAttribute(from));
     attributes.putAll(extractMethodAttributes(from));
     attributes.putAll(extractFieldAttributes(from));
@@ -58,12 +58,12 @@ public final class ObjectContextExtractor {
     if (annotation == null) {
       return Collections.emptyMap();
     } else {
-      return Collections.singletonMap(annotation.value(), new WeakAttributeGetter<Object>(from));
+      return Collections.singletonMap(annotation.value(), new WeakAttributeGetter<>(from));
     }
   }
 
   private static Map<String, AttributeGetter<? extends Object>> extractMethodAttributes(Object from) {
-    Map<String, AttributeGetter<? extends Object>> attributes = new HashMap<String, AttributeGetter<? extends Object>>();
+    Map<String, AttributeGetter<? extends Object>> attributes = new HashMap<>();
     
     for (Method m : from.getClass().getMethods()) {
       if (m.getParameterTypes().length == 0 && m.getReturnType() != Void.TYPE) {
@@ -77,7 +77,7 @@ public final class ObjectContextExtractor {
   }
 
   private static Map<String, AttributeGetter<? extends Object>> extractFieldAttributes(Object from) {
-    Map<String, AttributeGetter<? extends Object>> attributes = new HashMap<String, AttributeGetter<? extends Object>>();
+    Map<String, AttributeGetter<? extends Object>> attributes = new HashMap<>();
     
     for (Class c = from.getClass(); c != null; c = c.getSuperclass()) {
       for (Field f : c.getDeclaredFields()) {
@@ -96,9 +96,7 @@ public final class ObjectContextExtractor {
     if (Modifier.isFinal(f.getModifiers())) {
       try {
         return new DirectAttributeGetter(f.get(from));
-      } catch (IllegalArgumentException ex) {
-        throw new RuntimeException(ex);
-      } catch (IllegalAccessException ex) {
+      } catch (IllegalArgumentException | IllegalAccessException ex) {
         throw new RuntimeException(ex);
       }
     } else {

@@ -39,12 +39,7 @@ import static org.terracotta.context.query.QueryBuilder.queryBuilder;
  */
 public class PassThroughStatisticTest {
 
-  private Callable<Number> callable = new Callable<Number>() {
-    @Override
-    public Number call() {
-      return 12;
-    }
-  };
+  private Callable<Number> callable = () -> 12;
 
   @Test
   public void testClean() {
@@ -76,8 +71,8 @@ public class PassThroughStatisticTest {
     ValueStatistic<Number> fooStat = extractThis(foo);
     ValueStatistic<Number> barStat = extractThis(bar);
 
-    assertThat(fooStat.value(), equalTo(Integer.valueOf(42)));
-    assertThat(barStat.value(), equalTo(Long.valueOf(42L)));
+    assertThat(fooStat.value(), equalTo(42));
+    assertThat(barStat.value(), equalTo(42L));
   }
 
   @SuppressWarnings("unchecked")
