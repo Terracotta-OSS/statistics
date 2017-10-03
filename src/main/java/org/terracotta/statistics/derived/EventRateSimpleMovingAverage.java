@@ -22,9 +22,9 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.LongAdder;
 
 import org.terracotta.statistics.ValueStatistic;
-import org.terracotta.statistics.jsr166e.LongAdder;
 import org.terracotta.statistics.observer.ChainedEventObserver;
 
 /**

@@ -18,9 +18,8 @@ package org.terracotta.statistics;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.LongAdder;
 
-import org.terracotta.statistics.jsr166e.LongAdder;
-import org.terracotta.statistics.observer.OperationObserver;
 import org.terracotta.statistics.observer.ChainedOperationObserver;
 
 /**

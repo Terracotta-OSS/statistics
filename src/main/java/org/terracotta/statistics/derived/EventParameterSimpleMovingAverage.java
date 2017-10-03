@@ -22,10 +22,10 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.LongAccumulator;
+import java.util.concurrent.atomic.LongAdder;
 
 import org.terracotta.statistics.ValueStatistic;
-import org.terracotta.statistics.jsr166e.LongAdder;
-import org.terracotta.statistics.jsr166e.LongMaxUpdater;
 import org.terracotta.statistics.observer.ChainedEventObserver;
 
 /**
@@ -190,8 +190,8 @@ public class EventParameterSimpleMovingAverage implements ChainedEventObserver {
 
     private final LongAdder total = new LongAdder();
     private final LongAdder count = new LongAdder();
-    private final LongMaxUpdater maximum = new LongMaxUpdater();
-    private final LongMaxUpdater minimum = new LongMaxUpdater();
+    private final LongAccumulator maximum = new LongAccumulator(Math::max, Long.MIN_VALUE);
+    private final LongAccumulator minimum = new LongAccumulator(Math::min, Long.MAX_VALUE);
     
     private final long start;
     private final long end;
@@ -220,8 +220,8 @@ public class EventParameterSimpleMovingAverage implements ChainedEventObserver {
     public void event(long parameter) {
       total.add(parameter);
       count.increment();
-      maximum.update(parameter);
-      minimum.update(-parameter);
+      maximum.accumulate(parameter);
+      minimum.accumulate(parameter);
     }
     
     public void aggregate(Average average) {
@@ -230,11 +230,11 @@ public class EventParameterSimpleMovingAverage implements ChainedEventObserver {
     }
 
     public long maximum() {
-      return maximum.max();
+      return maximum.get();
     }
     
     public long minimum() {
-      return -minimum.max();
+      return minimum.get();
     }
   }
   

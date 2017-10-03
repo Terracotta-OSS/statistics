@@ -17,11 +17,11 @@ package org.terracotta.statistics.derived;
 
 import java.util.EnumSet;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terracotta.statistics.AbstractSourceStatistic;
-import org.terracotta.statistics.jsr166e.ThreadLocalRandom;
 import org.terracotta.statistics.observer.ChainedEventObserver;
 import org.terracotta.statistics.observer.ChainedOperationObserver;
 
