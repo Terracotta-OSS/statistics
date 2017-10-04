@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.terracotta.context.annotations.ContextAttribute;
-import org.terracotta.context.annotations.ContextChild;
 
 import static org.terracotta.statistics.StatisticsManager.associate;
 import static org.terracotta.statistics.StatisticsManager.dissociate;
@@ -28,7 +27,7 @@ public class CacheManager {
   
   @ContextAttribute("name") private final String name;
   
-  private final Collection<Cache> caches = new ArrayList<Cache>();
+  private final Collection<Cache> caches = new ArrayList<>();
   
   public CacheManager(String name) {
     this.name = name;

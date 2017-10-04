@@ -53,20 +53,20 @@ public class ChildrenTest {
   
   @Test
   public void testSingleNodeWithNoChildren() {
-    assertThat(query.execute(Collections.singleton(createTreeNode(A.class))), IsEmptyCollection.<TreeNode>empty());
+    assertThat(query.execute(Collections.singleton(createTreeNode(A.class))), IsEmptyCollection.empty());
   }
 
   @Test
   public void testMultipleNodesWithNoChildren() {
-    Set<TreeNode> nodes = new HashSet<TreeNode>();
+    Set<TreeNode> nodes = new HashSet<>();
     nodes.add(createTreeNode(A.class));
     nodes.add(createTreeNode(B.class));
-    assertThat(query.execute(nodes), IsEmptyCollection.<TreeNode>empty());
+    assertThat(query.execute(nodes), IsEmptyCollection.empty());
   }
 
   @Test
   public void testSingleNodeWithChildren() {
-    Set<TreeNode> children = new HashSet<TreeNode>();
+    Set<TreeNode> children = new HashSet<>();
     children.add(createTreeNode(A.class));
     children.add(createTreeNode(B.class));
     
@@ -77,23 +77,23 @@ public class ChildrenTest {
   
   @Test
   public void testMultipleNodesWithChildren() {
-    Set<TreeNode> cChildren = new HashSet<TreeNode>();
+    Set<TreeNode> cChildren = new HashSet<>();
     cChildren.add(createTreeNode(A.class));
     cChildren.add(createTreeNode(B.class));
     
     TreeNode c = createTreeNode(C.class, cChildren);
     
-    Set<TreeNode> fChildren = new HashSet<TreeNode>();
+    Set<TreeNode> fChildren = new HashSet<>();
     fChildren.add(createTreeNode(D.class));
     fChildren.add(createTreeNode(E.class));
     
     TreeNode f = createTreeNode(F.class, fChildren);
     
-    Set<TreeNode> input = new HashSet<TreeNode>();
+    Set<TreeNode> input = new HashSet<>();
     input.add(c);
     input.add(f);
     
-    Set<TreeNode> children = new HashSet<TreeNode>();
+    Set<TreeNode> children = new HashSet<>();
     children.addAll(fChildren);
     children.addAll(cChildren);
     
@@ -104,23 +104,23 @@ public class ChildrenTest {
   public void testMultipleNodesWithCommonChildren() {
     TreeNode a = createTreeNode(A.class);
     
-    Set<TreeNode> bazChildren = new HashSet<TreeNode>();
+    Set<TreeNode> bazChildren = new HashSet<>();
     bazChildren.add(createTreeNode(B.class));
     bazChildren.add(a);
     
     TreeNode c = createTreeNode(C.class, bazChildren);
     
-    Set<TreeNode> eChildren = new HashSet<TreeNode>();
+    Set<TreeNode> eChildren = new HashSet<>();
     eChildren.add(createTreeNode(D.class));
     eChildren.add(a);
     
     TreeNode e = createTreeNode(E.class, eChildren);
     
-    Set<TreeNode> input = new HashSet<TreeNode>();
+    Set<TreeNode> input = new HashSet<>();
     input.add(c);
     input.add(e);
     
-    Set<TreeNode> children = new HashSet<TreeNode>();
+    Set<TreeNode> children = new HashSet<>();
     children.addAll(eChildren);
     children.addAll(bazChildren);
     assertThat(children, hasSize(3));
@@ -131,13 +131,13 @@ public class ChildrenTest {
 
   @Test
   public void testNodeWIthChildrenAndExtraDescendants() {
-    Set<TreeNode> cChildren = new HashSet<TreeNode>();
+    Set<TreeNode> cChildren = new HashSet<>();
     cChildren.add(createTreeNode(A.class));
     cChildren.add(createTreeNode(B.class));
     
     TreeNode c = createTreeNode(C.class, cChildren);
     
-    Set<TreeNode> fChildren = new HashSet<TreeNode>();
+    Set<TreeNode> fChildren = new HashSet<>();
     fChildren.add(createTreeNode(D.class));
     fChildren.add(createTreeNode(E.class));
     fChildren.add(c);

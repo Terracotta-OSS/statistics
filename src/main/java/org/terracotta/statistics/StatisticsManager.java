@@ -16,7 +16,6 @@
 package org.terracotta.statistics;
 
 
-import org.terracotta.context.ContextCreationListener;
 import org.terracotta.context.ContextElement;
 import org.terracotta.context.ContextManager;
 import org.terracotta.context.TreeNode;
@@ -35,16 +34,11 @@ import java.util.concurrent.Callable;
 public class StatisticsManager extends ContextManager {
   
   static {
-    ContextManager.registerContextCreationListener(new ContextCreationListener() {
-      @Override
-      public void contextCreated(Object object) {
-        parseStatisticAnnotations(object);
-      }
-    });
+    ContextManager.registerContextCreationListener(StatisticsManager::parseStatisticAnnotations);
   }
 
   public static <T extends Enum<T>> OperationObserver<T> createOperationStatistic(Object context, String name, Set<String> tags, Class<T> eventTypes) {
-    return createOperationStatistic(context, name, tags, Collections.<String, Object>emptyMap(), eventTypes);
+    return createOperationStatistic(context, name, tags, Collections.emptyMap(), eventTypes);
   }
   
   public static <T extends Enum<T>> OperationObserver<T> createOperationStatistic(Object context, String name, Set<String> tags, Map<String, ? extends Object> properties, Class<T> resultType) {
@@ -54,7 +48,7 @@ public class StatisticsManager extends ContextManager {
   }
 
   private static <T extends Enum<T>> OperationStatistic<T> createOperationStatistic(String name, Set<String> tags, Map<String, ? extends Object> properties, Class<T> resultType) {
-    return new GeneralOperationStatistic<T>(name, tags, properties, resultType);
+    return new GeneralOperationStatistic<>(name, tags, properties, resultType);
   }
   
   public static <T extends Enum<T>> OperationStatistic<T> getOperationStatisticFor(OperationObserver<T> observer) {
@@ -74,11 +68,11 @@ public class StatisticsManager extends ContextManager {
   }
   
   public static <T extends Number> void createPassThroughStatistic(Object context, String name, Set<String> tags, Callable<T> source) {
-    createPassThroughStatistic(context, name, tags, Collections.<String, Object>emptyMap(), source);
+    createPassThroughStatistic(context, name, tags, Collections.emptyMap(), source);
   }
   
   public static <T extends Number> void createPassThroughStatistic(Object context, String name, Set<String> tags, Map<String, ? extends Object> properties, Callable<T> source) {
-    PassThroughStatistic<T> stat = new PassThroughStatistic<T>(context, name, tags, properties, source);
+    PassThroughStatistic<T> stat = new PassThroughStatistic<>(context, name, tags, properties, source);
     associate(context).withChild(stat);
   }
 
@@ -98,7 +92,7 @@ public class StatisticsManager extends ContextManager {
         } else if (Modifier.isStatic(m.getModifiers())) {
           throw new IllegalArgumentException("Statistic methods must be non-static: " + m);
         } else {
-          StatisticsManager.createPassThroughStatistic(object, anno.name(), new HashSet<String>(Arrays.asList(anno.tags())), new MethodCallable<Number>(object, m));
+          StatisticsManager.createPassThroughStatistic(object, anno.name(), new HashSet<>(Arrays.asList(anno.tags())), new MethodCallable<>(object, m));
         }
       } 
     }
@@ -110,7 +104,7 @@ public class StatisticsManager extends ContextManager {
     private final Method method;
     
     MethodCallable(Object target, Method method) {
-      this.targetRef = new WeakReference<Object>(target);
+      this.targetRef = new WeakReference<>(target);
       this.method = method;
     }
 

@@ -23,7 +23,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 class RootNode extends AbstractTreeNode {
 
-  private final Collection<ContextListener> listeners = new CopyOnWriteArrayList<ContextListener>();
+  private final Collection<ContextListener> listeners = new CopyOnWriteArrayList<>();
   
   @Override
   void addedParent(AbstractTreeNode child) {
@@ -60,6 +60,6 @@ class RootNode extends AbstractTreeNode {
 
   @Override
   public Collection<List<? extends TreeNode>> getPaths() {
-    return Collections.<List<? extends TreeNode>>singleton(Collections.<TreeNode>emptyList());
+    return Collections.singleton(Collections.emptyList());
   }
 }

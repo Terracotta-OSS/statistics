@@ -16,7 +16,6 @@
 package org.terracotta.context.query;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import org.terracotta.context.TreeNode;
@@ -35,12 +34,8 @@ class Filter implements Query {
   
   @Override
   public Set<TreeNode> execute(Set<TreeNode> input) {
-    Set<TreeNode> output = new HashSet<TreeNode>(input);
-    for (Iterator<TreeNode> it = output.iterator(); it.hasNext(); ) {
-      if (!filter.matches(it.next())) {
-        it.remove();
-      }
-    }
+    Set<TreeNode> output = new HashSet<>(input);
+    output.removeIf(treeNode -> !filter.matches(treeNode));
     return output;
   }
 

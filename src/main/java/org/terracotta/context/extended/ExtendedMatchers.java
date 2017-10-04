@@ -100,7 +100,7 @@ public final class ExtendedMatchers {
       @Override
       protected boolean matchesSafely(Map<String, Object> properties) {
         Object val = properties.get(key);
-        return val == null ? false : value.equals(val);
+        return val != null && value.equals(val);
       }
     });
   }

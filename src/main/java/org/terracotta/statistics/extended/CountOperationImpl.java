@@ -35,7 +35,8 @@ class CountOperationImpl<T extends Enum<T>> implements CountOperation<T> {
   }
 
   @Override
-  public long value(T... results) {
+  @SafeVarargs
+  public final long value(T... results) {
     return compoundOperation.compound(EnumSet.copyOf(Arrays.asList(results))).count().value();
   }
 }

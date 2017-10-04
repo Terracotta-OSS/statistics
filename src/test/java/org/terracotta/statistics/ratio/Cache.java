@@ -47,7 +47,7 @@ class Cache {
     getObserver = operation(StoreOperationOutcomes.GetOutcome.class).named("get").of(this).tag("OnHeap").build();
 
     MappedOperationStatistic<StoreOperationOutcomes.GetOutcome, TierOperationOutcomes.GetOutcome> get =
-        new MappedOperationStatistic<StoreOperationOutcomes.GetOutcome, TierOperationOutcomes.GetOutcome>(
+        new MappedOperationStatistic<>(
             this,
             TierOperationOutcomes.GET_TRANSLATION,
             "get",

@@ -49,20 +49,20 @@ public class DescendantsTest {
   
   @Test
   public void testSingleNodeWithNoDescendants() {
-    assertThat(query.execute(Collections.singleton(createTreeNode(A.class))), IsEmptyCollection.<TreeNode>empty());
+    assertThat(query.execute(Collections.singleton(createTreeNode(A.class))), IsEmptyCollection.empty());
   }
 
   @Test
   public void testMultipleNodesWithNoDescendants() {
-    Set<TreeNode> nodes = new HashSet<TreeNode>();
+    Set<TreeNode> nodes = new HashSet<>();
     nodes.add(createTreeNode(A.class));
     nodes.add(createTreeNode(B.class));
-    assertThat(query.execute(nodes), IsEmptyCollection.<TreeNode>empty());
+    assertThat(query.execute(nodes), IsEmptyCollection.empty());
   }
 
   @Test
   public void testSingleNodeWithChildren() {
-    Set<TreeNode> children = new HashSet<TreeNode>();
+    Set<TreeNode> children = new HashSet<>();
     children.add(createTreeNode(A.class));
     children.add(createTreeNode(B.class));
     
@@ -73,17 +73,17 @@ public class DescendantsTest {
 
   @Test
   public void testSingleNodeWithChildrenAndGrandChildren() {
-    Set<TreeNode> grandChildren = new HashSet<TreeNode>();
+    Set<TreeNode> grandChildren = new HashSet<>();
     grandChildren.add(createTreeNode(A.class));
     grandChildren.add(createTreeNode(B.class));
 
-    Set<TreeNode> children = new HashSet<TreeNode>();
+    Set<TreeNode> children = new HashSet<>();
     children.add(createTreeNode(C.class, grandChildren));
     children.add(createTreeNode(D.class));
     
     TreeNode node = createTreeNode(E.class, children);
     
-    Set<TreeNode> descendants = new HashSet<TreeNode>();
+    Set<TreeNode> descendants = new HashSet<>();
     descendants.addAll(grandChildren);
     descendants.addAll(children);
     
@@ -92,23 +92,23 @@ public class DescendantsTest {
   
   @Test
   public void testMultipleNodesWithChildren() {
-    Set<TreeNode> cChildren = new HashSet<TreeNode>();
+    Set<TreeNode> cChildren = new HashSet<>();
     cChildren.add(createTreeNode(A.class));
     cChildren.add(createTreeNode(B.class));
     
     TreeNode c = createTreeNode(C.class, cChildren);
     
-    Set<TreeNode> fChildren = new HashSet<TreeNode>();
+    Set<TreeNode> fChildren = new HashSet<>();
     fChildren.add(createTreeNode(D.class));
     fChildren.add(createTreeNode(E.class));
     
     TreeNode f = createTreeNode(F.class, fChildren);
     
-    Set<TreeNode> input = new HashSet<TreeNode>();
+    Set<TreeNode> input = new HashSet<>();
     input.add(c);
     input.add(f);
     
-    Set<TreeNode> children = new HashSet<TreeNode>();
+    Set<TreeNode> children = new HashSet<>();
     children.addAll(fChildren);
     children.addAll(cChildren);
     
@@ -117,31 +117,31 @@ public class DescendantsTest {
 
   @Test
   public void testMultipleNodesWithChildrenAndGrandchildren() {
-    Set<TreeNode> eGrandchildren = new HashSet<TreeNode>();
+    Set<TreeNode> eGrandchildren = new HashSet<>();
     eGrandchildren.add(createTreeNode(A.class));
     eGrandchildren.add(createTreeNode(B.class));
     
-    Set<TreeNode> eChildren = new HashSet<TreeNode>();
+    Set<TreeNode> eChildren = new HashSet<>();
     eChildren.add(createTreeNode(C.class, eGrandchildren));
     eChildren.add(createTreeNode(D.class));
     
     TreeNode e = createTreeNode(E.class, eChildren);
     
-    Set<TreeNode> jGrandchildren = new HashSet<TreeNode>();
+    Set<TreeNode> jGrandchildren = new HashSet<>();
     jGrandchildren.add(createTreeNode(F.class));
     jGrandchildren.add(createTreeNode(G.class));
     
-    Set<TreeNode> jChildren = new HashSet<TreeNode>();
+    Set<TreeNode> jChildren = new HashSet<>();
     jChildren.add(createTreeNode(H.class, jGrandchildren));
     jChildren.add(createTreeNode(I.class));
     
     TreeNode j = createTreeNode(J.class, jChildren);
     
-    Set<TreeNode> input = new HashSet<TreeNode>();
+    Set<TreeNode> input = new HashSet<>();
     input.add(e);
     input.add(j);
     
-    Set<TreeNode> descendants = new HashSet<TreeNode>();
+    Set<TreeNode> descendants = new HashSet<>();
     descendants.addAll(jChildren);
     descendants.addAll(jGrandchildren);
     descendants.addAll(eChildren);
@@ -154,23 +154,23 @@ public class DescendantsTest {
   public void testMultipleNodesWithCommonChildren() {
     TreeNode a = createTreeNode(A.class);
     
-    Set<TreeNode> cChildren = new HashSet<TreeNode>();
+    Set<TreeNode> cChildren = new HashSet<>();
     cChildren.add(createTreeNode(B.class));
     cChildren.add(a);
     
     TreeNode c = createTreeNode(C.class, cChildren);
     
-    Set<TreeNode> eChildren = new HashSet<TreeNode>();
+    Set<TreeNode> eChildren = new HashSet<>();
     eChildren.add(createTreeNode(D.class));
     eChildren.add(a);
     
     TreeNode e = createTreeNode(E.class, eChildren);
     
-    Set<TreeNode> input = new HashSet<TreeNode>();
+    Set<TreeNode> input = new HashSet<>();
     input.add(c);
     input.add(e);
     
-    Set<TreeNode> children = new HashSet<TreeNode>();
+    Set<TreeNode> children = new HashSet<>();
     children.addAll(eChildren);
     children.addAll(cChildren);
     assertThat(children, hasSize(3));
@@ -180,31 +180,31 @@ public class DescendantsTest {
 
   @Test
   public void testMultipleNodesWithCommonGrandchildren() {
-    Set<TreeNode> eGrandchildren = new HashSet<TreeNode>();
+    Set<TreeNode> eGrandchildren = new HashSet<>();
     eGrandchildren.add(createTreeNode(A.class));
     eGrandchildren.add(createTreeNode(B.class));
     
-    Set<TreeNode> eChildren = new HashSet<TreeNode>();
+    Set<TreeNode> eChildren = new HashSet<>();
     eChildren.add(createTreeNode(C.class, eGrandchildren));
     eChildren.add(createTreeNode(D.class));
     
     TreeNode e = createTreeNode(E.class, eChildren);
     
-    Set<TreeNode> jGrandchildren = new HashSet<TreeNode>();
+    Set<TreeNode> jGrandchildren = new HashSet<>();
     jGrandchildren.add(createTreeNode(F.class));
     jGrandchildren.add(createTreeNode(G.class));
     
-    Set<TreeNode> jChildren = new HashSet<TreeNode>();
+    Set<TreeNode> jChildren = new HashSet<>();
     jChildren.add(createTreeNode(H.class, jGrandchildren));
     jChildren.add(createTreeNode(I.class));
     
     TreeNode j = createTreeNode(J.class, jChildren);
     
-    Set<TreeNode> input = new HashSet<TreeNode>();
+    Set<TreeNode> input = new HashSet<>();
     input.add(e);
     input.add(j);
     
-    Set<TreeNode> descendants = new HashSet<TreeNode>();
+    Set<TreeNode> descendants = new HashSet<>();
     descendants.addAll(jChildren);
     descendants.addAll(jGrandchildren);
     descendants.addAll(eChildren);

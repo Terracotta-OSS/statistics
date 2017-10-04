@@ -28,7 +28,7 @@ class WeakMethodAttributeGetter<T> extends MethodAttributeGetter<T> {
 
   WeakMethodAttributeGetter(Object target, Method method) {
     super(method);
-    this.targetRef = new WeakReference<Object>(target);
+    this.targetRef = new WeakReference<>(target);
   }
   
   @Override

@@ -30,14 +30,11 @@ abstract class MethodAttributeGetter<T> implements AttributeGetter<T> {
   abstract Object target();
   
   @Override
+  @SuppressWarnings("unchecked")
   public T get() {
     try {
       return (T) method.invoke(target());
-    } catch (IllegalAccessException ex) {
-      throw new RuntimeException(ex);
-    } catch (IllegalArgumentException ex) {
-      throw new RuntimeException(ex);
-    } catch (InvocationTargetException ex) {
+    } catch (IllegalAccessException | InvocationTargetException | IllegalArgumentException ex) {
       throw new RuntimeException(ex);
     }
   }

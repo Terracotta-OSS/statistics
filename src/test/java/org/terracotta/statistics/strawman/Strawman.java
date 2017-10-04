@@ -15,7 +15,6 @@
  */
 package org.terracotta.statistics.strawman;
 
-import org.terracotta.context.ContextElement;
 import org.terracotta.context.TreeNode;
 import org.terracotta.context.query.Matchers;
 import org.terracotta.context.query.Query;
@@ -23,7 +22,6 @@ import org.terracotta.statistics.OperationStatistic;
 import org.terracotta.statistics.StatisticsManager;
 import org.terracotta.statistics.derived.LatencySampling;
 import org.terracotta.statistics.derived.MinMaxAverage;
-import org.terracotta.statistics.observer.ChainedEventObserver;
 
 import java.util.Arrays;
 
@@ -39,7 +37,7 @@ public final class Strawman {
   
   public static void main(String[] args) {
     CacheManager manager = new CacheManager("manager-one");
-    Cache<String, String> cache = new Cache<String, String>("cache-one");
+    Cache<String, String> cache = new Cache<>("cache-one");
     
     manager.addCache(cache);
 
@@ -47,13 +45,13 @@ public final class Strawman {
     stats.root(manager);
 
     @SuppressWarnings("unchecked")
-    Query query = queryBuilder().descendants().filter(context(Matchers.<ContextElement>allOf(identifier(subclassOf(OperationStatistic.class)), attributes(hasAttribute("name", "get"))))).build();
+    Query query = queryBuilder().descendants().filter(context(Matchers.allOf(identifier(subclassOf(OperationStatistic.class)), attributes(hasAttribute("name", "get"))))).build();
     System.out.println(query);
     TreeNode getStatisticNode = stats.queryForSingleton(query);
 
     @SuppressWarnings("unchecked")
     OperationStatistic<GetResult> getStatistic = (OperationStatistic<GetResult>) getStatisticNode.getContext().attributes().get("this");
-    LatencySampling<GetResult> hitLatency = new LatencySampling<GetResult>(of(GetResult.HIT), 1.0f);
+    LatencySampling<GetResult> hitLatency = new LatencySampling<>(of(GetResult.HIT), 1.0f);
     MinMaxAverage hitLatencyStats = new MinMaxAverage();
     hitLatency.addDerivedStatistic(hitLatencyStats);
     getStatistic.addDerivedStatistic(hitLatency);
@@ -69,13 +67,7 @@ public final class Strawman {
     System.err.println("MISSES      : " + getStatistic.count(GetResult.MISS));
     System.err.println("HIT LATENCY : " + hitLatencyStats.mean());
 
-    hitLatency.addDerivedStatistic(new ChainedEventObserver() {
-
-      @Override
-      public void event(long time, long ... parameters) {
-        System.out.println("Event Latency : " + parameters[0]);
-      }
-    });
+    hitLatency.addDerivedStatistic((time, parameters) -> System.out.println("Event Latency : " + parameters[0]));
     
     cache.get("foo");
     System.err.println("HITS        : " + getStatistic.count(GetResult.HIT));

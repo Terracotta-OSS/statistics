@@ -29,12 +29,11 @@ abstract class FieldAttributeGetter<T> implements AttributeGetter<T> {
   abstract Object target();
 
   @Override
+  @SuppressWarnings("unchecked")
   public T get() {
     try {
       return (T) field.get(target());
-    } catch (IllegalArgumentException ex) {
-      throw new RuntimeException(ex);
-    } catch (IllegalAccessException ex) {
+    } catch (IllegalArgumentException | IllegalAccessException ex) {
       throw new RuntimeException(ex);
     }
   }

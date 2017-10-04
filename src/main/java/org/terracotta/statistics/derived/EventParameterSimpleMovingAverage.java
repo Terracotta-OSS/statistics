@@ -22,10 +22,10 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.LongAccumulator;
+import java.util.concurrent.atomic.LongAdder;
 
 import org.terracotta.statistics.ValueStatistic;
-import org.terracotta.statistics.jsr166e.LongAdder;
-import org.terracotta.statistics.jsr166e.LongMaxUpdater;
 import org.terracotta.statistics.observer.ChainedEventObserver;
 
 /**
@@ -36,7 +36,7 @@ public class EventParameterSimpleMovingAverage implements ChainedEventObserver {
 
   private static final int PARTITION_COUNT = 10;
 
-  private final Queue<AveragePartition> archive = new ConcurrentLinkedQueue<AveragePartition>();
+  private final Queue<AveragePartition> archive = new ConcurrentLinkedQueue<>();
   private final AtomicReference<AveragePartition> activePartition;
   
   private volatile long windowSize;
@@ -45,7 +45,7 @@ public class EventParameterSimpleMovingAverage implements ChainedEventObserver {
   public EventParameterSimpleMovingAverage(long time, TimeUnit unit) {
     this.windowSize  = unit.toNanos(time);
     this.partitionSize = windowSize / PARTITION_COUNT;
-    this.activePartition = new AtomicReference<AveragePartition>(new AveragePartition(Long.MIN_VALUE, partitionSize));
+    this.activePartition = new AtomicReference<>(new AveragePartition(Long.MIN_VALUE, partitionSize));
   }
 
   public void setWindow(long time, TimeUnit unit) {
@@ -58,32 +58,15 @@ public class EventParameterSimpleMovingAverage implements ChainedEventObserver {
   }
 
   public ValueStatistic<Double> averageStatistic() {
-    return new ValueStatistic<Double>() {
-      @Override
-      public Double value() {
-        return average();
-      }
-    };
+    return this::average;
   }
   
   public ValueStatistic<Long> minimumStatistic() {
-    return new ValueStatistic<Long>() {
-
-      @Override
-      public Long value() {
-        return minimum();
-      }
-    };
+    return this::minimum;
   }
   
   public ValueStatistic<Long> maximumStatistic() {
-    return new ValueStatistic<Long>() {
-
-      @Override
-      public Long value() {
-        return maximum();
-      }
-    };
+    return this::maximum;
   }
   
   public final double average() {
@@ -190,8 +173,8 @@ public class EventParameterSimpleMovingAverage implements ChainedEventObserver {
 
     private final LongAdder total = new LongAdder();
     private final LongAdder count = new LongAdder();
-    private final LongMaxUpdater maximum = new LongMaxUpdater();
-    private final LongMaxUpdater minimum = new LongMaxUpdater();
+    private final LongAccumulator maximum = new LongAccumulator(Math::max, Long.MIN_VALUE);
+    private final LongAccumulator minimum = new LongAccumulator(Math::min, Long.MAX_VALUE);
     
     private final long start;
     private final long end;
@@ -220,8 +203,8 @@ public class EventParameterSimpleMovingAverage implements ChainedEventObserver {
     public void event(long parameter) {
       total.add(parameter);
       count.increment();
-      maximum.update(parameter);
-      minimum.update(-parameter);
+      maximum.accumulate(parameter);
+      minimum.accumulate(parameter);
     }
     
     public void aggregate(Average average) {
@@ -230,11 +213,11 @@ public class EventParameterSimpleMovingAverage implements ChainedEventObserver {
     }
 
     public long maximum() {
-      return maximum.max();
+      return maximum.get();
     }
     
     public long minimum() {
-      return -minimum.max();
+      return minimum.get();
     }
   }
   

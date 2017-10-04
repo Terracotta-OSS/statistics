@@ -16,5 +16,5 @@
 package org.terracotta.statistics.strawman;
 
 public   enum RemoveResult {
-  SUCCESS, FAIL;
+  SUCCESS, FAIL
 }

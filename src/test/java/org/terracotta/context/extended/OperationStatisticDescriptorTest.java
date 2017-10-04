@@ -55,7 +55,7 @@ public class OperationStatisticDescriptorTest {
   }
 
   private Set<String> asSet(String... tags) {
-    return new HashSet<String>(Arrays.asList(tags));
+    return new HashSet<>(Arrays.asList(tags));
   }
 
 }

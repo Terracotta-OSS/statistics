@@ -19,7 +19,12 @@ package org.terracotta.statistics.archive;
  *
  * @author cdennis
  */
+@FunctionalInterface
 public interface SampleSink<T> {
-  
+
+  static <T> SampleSink<T> devNull() {
+    return object -> {};
+  }
+
   void accept(T object);
 }

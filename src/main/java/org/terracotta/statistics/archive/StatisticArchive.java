@@ -26,15 +26,7 @@ import java.util.List;
  */
 public class StatisticArchive<T> implements SampleSink<Timestamped<T>> {
 
-  private static final Comparator<Timestamped<?>> TIMESTAMPED_COMPARATOR = new Comparator<Timestamped<?>>() {
-    @Override
-    public int compare(Timestamped<?> o1, Timestamped<?> o2) {
-      // o1 - o2
-      if(o1.getTimestamp() == o2.getTimestamp()) return 0;
-      if(o1.getTimestamp() < o2.getTimestamp()) return -1;
-      return 1;
-    }
-  };
+  private static final Comparator<Timestamped<?>> TIMESTAMPED_COMPARATOR = Comparator.comparingLong(Timestamped::getTimestamp);
 
   private final SampleSink<? super Timestamped<T>> overspill;
 
@@ -42,7 +34,7 @@ public class StatisticArchive<T> implements SampleSink<Timestamped<T>> {
   private volatile CircularBuffer<Timestamped<T>> buffer;
 
   public StatisticArchive(int size) {
-    this(size, DevNull.DEV_NULL);
+    this(size, SampleSink.devNull());
   }
 
   public StatisticArchive(int size, SampleSink<? super Timestamped<T>> overspill) {
@@ -54,7 +46,7 @@ public class StatisticArchive<T> implements SampleSink<Timestamped<T>> {
     if (samples != size) {
       size = samples;
       if (buffer != null) {
-        CircularBuffer<Timestamped<T>> newBuffer = new CircularBuffer<Timestamped<T>>(size);
+        CircularBuffer<Timestamped<T>> newBuffer = new CircularBuffer<>(size);
         for (Timestamped<T> sample : getArchive()) {
           overspill.accept(newBuffer.insert(sample));
         }
@@ -66,7 +58,7 @@ public class StatisticArchive<T> implements SampleSink<Timestamped<T>> {
   @Override
   public synchronized void accept(Timestamped<T> object) {
     if (buffer == null) {
-      buffer = new CircularBuffer<Timestamped<T>>(size);
+      buffer = new CircularBuffer<>(size);
     }
     overspill.accept(buffer.insert(object));
   }
@@ -75,12 +67,13 @@ public class StatisticArchive<T> implements SampleSink<Timestamped<T>> {
     buffer = null;
   }
 
+  @SuppressWarnings("unchecked")
   public List<Timestamped<T>> getArchive() {
     CircularBuffer<Timestamped<T>> read = buffer;
     if (read == null) {
       return Collections.emptyList();
     } else {
-      return Collections.unmodifiableList(Arrays.asList((Timestamped<T>[]) read.toArray(Timestamped[].class)));
+      return Collections.unmodifiableList(Arrays.<Timestamped<T>>asList(read.toArray(Timestamped[].class)));
     }
   }
 
@@ -89,7 +82,8 @@ public class StatisticArchive<T> implements SampleSink<Timestamped<T>> {
     if (read == null) {
       return Collections.emptyList();
     } else {
-      Timestamped<T> e = new StatisticSampler.Sample<T>(since, null);
+      Timestamped<T> e = new StatisticSampler.Sample<>(since, null);
+      @SuppressWarnings("unchecked")
       Timestamped<T>[] array = (Timestamped<T>[]) read.toArray(Timestamped[].class);
       int pos = Arrays.binarySearch(array, e, TIMESTAMPED_COMPARATOR);
       if(pos < 0) {

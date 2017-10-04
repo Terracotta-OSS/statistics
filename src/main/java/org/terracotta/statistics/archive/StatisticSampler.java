@@ -34,16 +34,16 @@ public class StatisticSampler<T extends Number> {
 
   private final boolean exclusiveExecutor;
   private final ScheduledExecutorService executor;
-  private final Runnable task;
+  private final SamplingTask<T> task;
   
   private ScheduledFuture<?> currentExecution;
   private long period;  
   
-  public StatisticSampler(long time, TimeUnit unit, ValueStatistic<T> statistic, SampleSink<? super Timestamped<T>> sink) {
+  public StatisticSampler(long time, TimeUnit unit, ValueStatistic<T> statistic, SampleSink<Timestamped<T>> sink) {
     this(null, time, unit, statistic, sink);
   }
   
-  public StatisticSampler(ScheduledExecutorService executor, long time, TimeUnit unit, ValueStatistic<T> statistic, SampleSink<? super Timestamped<T>> sink) {
+  public StatisticSampler(ScheduledExecutorService executor, long time, TimeUnit unit, ValueStatistic<T> statistic, SampleSink<Timestamped<T>> sink) {
     if (executor == null) {
       this.exclusiveExecutor = true;
       this.executor = Executors.newSingleThreadScheduledExecutor(new SamplerThreadFactory());
@@ -52,7 +52,7 @@ public class StatisticSampler<T extends Number> {
       this.executor = executor;
     }
     this.period = unit.toNanos(time);
-    this.task = new SamplingTask(statistic, sink);
+    this.task = new SamplingTask<>(statistic, sink);
   }
   
   public synchronized void setPeriod(long time, TimeUnit unit) {
@@ -102,7 +102,7 @@ public class StatisticSampler<T extends Number> {
     
     @Override
     public void run() {
-      sink.accept(new Sample(absoluteTime(), statistic.value()));
+      sink.accept(new Sample<>(absoluteTime(), statistic.value()));
     }
   }
   

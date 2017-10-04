@@ -39,17 +39,12 @@ import static org.terracotta.context.query.QueryBuilder.queryBuilder;
  */
 public class PassThroughStatisticTest {
 
-  private Callable<Number> callable = new Callable<Number>() {
-    @Override
-    public Number call() {
-      return 12;
-    }
-  };
+  private Callable<Number> callable = () -> 12;
 
   @Test
   public void testClean() {
     StatisticsManager.createPassThroughStatistic(this, "mystat",
-        Collections.<String>emptySet(), callable);
+        Collections.emptySet(), callable);
 
     assertTrue(PassThroughStatistic.hasStatisticsFor(this));
 
@@ -62,7 +57,7 @@ public class PassThroughStatisticTest {
 
     Query query = queryBuilder().descendants().filter(context(attributes(hasAttribute("name", "mystat")))).build();
     Set<TreeNode> nodes = manager.query(query);
-    assertThat(nodes, IsEmptyCollection.<TreeNode>empty());
+    assertThat(nodes, IsEmptyCollection.empty());
   }
 
   @Test
@@ -76,8 +71,8 @@ public class PassThroughStatisticTest {
     ValueStatistic<Number> fooStat = extractThis(foo);
     ValueStatistic<Number> barStat = extractThis(bar);
 
-    assertThat(fooStat.value(), equalTo((Number) Integer.valueOf(42)));
-    assertThat(barStat.value(), equalTo((Number) Long.valueOf(42L)));
+    assertThat(fooStat.value(), equalTo(42));
+    assertThat(barStat.value(), equalTo(42L));
   }
 
   @SuppressWarnings("unchecked")

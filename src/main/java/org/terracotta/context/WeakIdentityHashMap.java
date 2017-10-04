@@ -27,8 +27,8 @@ public class WeakIdentityHashMap<K, V> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(WeakIdentityHashMap.class);
   
-  private final ReferenceQueue<K> referenceQueue = new ReferenceQueue<K>();
-  private final ConcurrentHashMap<Reference<K>, V> backing = new ConcurrentHashMap<Reference<K>, V>();
+  private final ReferenceQueue<K> referenceQueue = new ReferenceQueue<>();
+  private final ConcurrentHashMap<Reference<K>, V> backing = new ConcurrentHashMap<>();
 
   public V get(K key) {
     clean();
@@ -61,7 +61,7 @@ public class WeakIdentityHashMap<K, V> {
   }
   
   protected Reference<K> createReference(K key, ReferenceQueue<? super K> queue) {
-    return new IdentityWeakReference<K>(key, queue);
+    return new IdentityWeakReference<>(key, queue);
   }
   
   static class IdentityWeakReference<T> extends WeakReference<T> {

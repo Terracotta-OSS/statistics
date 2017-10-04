@@ -36,7 +36,7 @@ public class StatisticMapper<SOURCE extends Enum<SOURCE>, TARGET extends Enum<TA
   private final Map<TARGET, Set<SOURCE>> translation;
   private final Map<SOURCE, TARGET> reverseTranslation;
   private final ConcurrentMap<ChainedOperationObserver<? super TARGET>, ChainedOperationObserver<SOURCE>> derivedStats
-          = new ConcurrentHashMap<ChainedOperationObserver<? super TARGET>, ChainedOperationObserver<SOURCE>>();
+          = new ConcurrentHashMap<>();
 
   public StatisticMapper(Map<TARGET, Set<SOURCE>> translation, OperationStatistic<SOURCE> statistic) {
     Entry<TARGET, Set<SOURCE>> first = translation.entrySet().iterator().next();
@@ -65,7 +65,7 @@ public class StatisticMapper<SOURCE extends Enum<SOURCE>, TARGET extends Enum<TA
     for (Entry<A, Set<B>> e : map.entrySet()) {
       for (B b : e.getValue()) {
         if (reverse.isEmpty()) {
-          reverse = new EnumMap<B, A>(b.getDeclaringClass());
+          reverse = new EnumMap<>(b.getDeclaringClass());
         }
         if (reverse.put(b, e.getKey()) != null) {
           throw new IllegalArgumentException("Reverse statistic outcome mapping is ill-defined: " + map);

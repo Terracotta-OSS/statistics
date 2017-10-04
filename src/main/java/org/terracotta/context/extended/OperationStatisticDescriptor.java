@@ -48,11 +48,11 @@ public final class OperationStatisticDescriptor<T extends Enum<T>> {
   }
 
   public static <T extends Enum<T>> OperationStatisticDescriptor<T> descriptor(String observerName, Set<String> tags, Class<T> type) {
-    return new OperationStatisticDescriptor<T>(observerName, tags, type);
+    return new OperationStatisticDescriptor<>(observerName, tags, type);
   }
 
   public static <T extends Enum<T>> OperationStatisticDescriptor<T> descriptor(String observerName, Class<T> type, String... tags) {
-    return new OperationStatisticDescriptor<T>(observerName, new HashSet<String>(Arrays.asList(tags)), type);
+    return new OperationStatisticDescriptor<>(observerName, new HashSet<>(Arrays.asList(tags)), type);
   }
 
 }

@@ -26,7 +26,7 @@ class Children implements Query {
   
   @Override
   public Set<TreeNode> execute(Set<TreeNode> input) {
-    Set<TreeNode> output = new HashSet<TreeNode>();
+    Set<TreeNode> output = new HashSet<>();
     for (TreeNode node : input) {
       output.addAll(node.getChildren());
     }

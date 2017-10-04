@@ -58,10 +58,10 @@ public class FilterTest {
   
   @Test(expected=UnsupportedOperationException.class)
   public void testMatcherExceptionPropagates() {
-    buildQuery(new Matcher() {
+    buildQuery(new Matcher<TreeNode>() {
 
       @Override
-      protected boolean matchesSafely(Object object) {
+      protected boolean matchesSafely(TreeNode object) {
         throw new UnsupportedOperationException();
       }
     }).execute(Collections.singleton(createTreeNode(A.class)));
@@ -69,29 +69,28 @@ public class FilterTest {
   
   @Test
   public void testAlwaysFailMatcher() {
-    Set<TreeNode> input = new HashSet<TreeNode>();
+    Set<TreeNode> input = new HashSet<>();
     input.add(createTreeNode(A.class));
     input.add(createTreeNode(B.class));
     
-    assertThat(buildQuery(new Matcher() {
-
+    assertThat(buildQuery(new Matcher<TreeNode>() {
       @Override
-      protected boolean matchesSafely(Object object) {
+      protected boolean matchesSafely(TreeNode object) {
         return false;
       }
-    }).execute(input), IsEmptyCollection.<TreeNode>empty());
+    }).execute(input), IsEmptyCollection.empty());
   }
   
   @Test
   public void testAlwaysPassMatcher() {
-    Set<TreeNode> input = new HashSet<TreeNode>();
+    Set<TreeNode> input = new HashSet<>();
     input.add(createTreeNode(A.class));
     input.add(createTreeNode(B.class));
     
-    assertThat(buildQuery(new Matcher() {
+    assertThat(buildQuery(new Matcher<TreeNode>() {
 
       @Override
-      protected boolean matchesSafely(Object object) {
+      protected boolean matchesSafely(TreeNode object) {
         return true;
       }
     }).execute(input), IsEqual.equalTo(input));
@@ -99,22 +98,22 @@ public class FilterTest {
   
   @Test
   public void testHalfPassMatcher() {
-    Set<TreeNode> input = new HashSet<TreeNode>();
+    Set<TreeNode> input = new HashSet<>();
     input.add(createTreeNode(A.class));
     input.add(createTreeNode(B.class));
     
-    assertThat(buildQuery(new Matcher() {
+    assertThat(buildQuery(new Matcher<TreeNode>() {
 
       private boolean match;
       
       @Override
-      protected boolean matchesSafely(Object object) {
+      protected boolean matchesSafely(TreeNode object) {
         return match ^= true;
       }
     }).execute(input), IsCollectionWithSize.hasSize(input.size() / 2));
   }  
 
-  private Query buildQuery(Matcher matcher) {
+  private Query buildQuery(Matcher<? super TreeNode> matcher) {
     if ("constructor".equals(buildHow)) {
       return new Filter(matcher);
     } else if ("builder".equals(buildHow)) {

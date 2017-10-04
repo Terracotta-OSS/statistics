@@ -22,9 +22,9 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.LongAdder;
 
 import org.terracotta.statistics.ValueStatistic;
-import org.terracotta.statistics.jsr166e.LongAdder;
 import org.terracotta.statistics.observer.ChainedEventObserver;
 
 /**
@@ -35,7 +35,7 @@ public class EventRateSimpleMovingAverage implements ChainedEventObserver, Value
 
   private static final int PARTITION_COUNT = 10;
 
-  private final Queue<CounterPartition> archive = new ConcurrentLinkedQueue<CounterPartition>();
+  private final Queue<CounterPartition> archive = new ConcurrentLinkedQueue<>();
   private final AtomicReference<CounterPartition> activePartition;
   
   private volatile long windowSize;
@@ -44,7 +44,7 @@ public class EventRateSimpleMovingAverage implements ChainedEventObserver, Value
   public EventRateSimpleMovingAverage(long time, TimeUnit unit) {
     this.windowSize  = unit.toNanos(time);
     this.partitionSize = windowSize / PARTITION_COUNT;
-    this.activePartition = new AtomicReference<CounterPartition>(new CounterPartition(time(), partitionSize));
+    this.activePartition = new AtomicReference<>(new CounterPartition(time(), partitionSize));
   }
 
   public void setWindow(long time, TimeUnit unit) {

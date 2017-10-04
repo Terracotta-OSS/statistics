@@ -49,12 +49,12 @@ public class NullQueryTest {
   
   @Test
   public void testEmptySetUnmodified() {
-    assertThat(query.execute(Collections.<TreeNode>emptySet()), IsEmptyCollection.<TreeNode>empty());
+    assertThat(query.execute(Collections.emptySet()), IsEmptyCollection.empty());
   }
   
   @Test
   public void testPopulatedSetUnmodified() {
-    Set<TreeNode> nodes = new HashSet<TreeNode>();
+    Set<TreeNode> nodes = new HashSet<>();
     nodes.add(createTreeNode(A.class));
     nodes.add(createTreeNode(B.class));
     

@@ -56,7 +56,7 @@ public class EnsureUniqueTest {
   
   @Test(expected = IllegalStateException.class)
   public void testNonUniqueInput() {
-    Set<TreeNode> nodes = new HashSet<TreeNode>();
+    Set<TreeNode> nodes = new HashSet<>();
     nodes.add(createTreeNode(A.class));
     nodes.add(createTreeNode(B.class));
     query.execute(nodes);
@@ -64,6 +64,6 @@ public class EnsureUniqueTest {
   
   @Test(expected = IllegalStateException.class)
   public void testEmptyInput() {
-    query.execute(Collections.<TreeNode>emptySet());
+    query.execute(Collections.emptySet());
   }
 }

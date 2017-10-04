@@ -46,6 +46,6 @@ public final class ValueStatisticDescriptor {
   }
 
   public static ValueStatisticDescriptor descriptor(String observerName, String... tags) {
-    return new ValueStatisticDescriptor(observerName, new HashSet<String>(Arrays.asList(tags)));
+    return new ValueStatisticDescriptor(observerName, new HashSet<>(Arrays.asList(tags)));
   }
 }

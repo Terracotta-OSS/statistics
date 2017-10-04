@@ -16,9 +16,6 @@
 package org.terracotta.context;
 
 import org.junit.Test;
-import org.terracotta.context.annotations.ContextAttribute;
-import org.terracotta.context.annotations.ContextChild;
-import org.terracotta.context.annotations.ContextParent;
 
 import static org.terracotta.context.ContextTestUtils.*;
 

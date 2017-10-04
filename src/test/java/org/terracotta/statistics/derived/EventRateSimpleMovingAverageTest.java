@@ -88,7 +88,7 @@ public class EventRateSimpleMovingAverageTest {
     
     double finalRate = new EventDriver(stat, 10, 20, 20, TimeUnit.MILLISECONDS).call();
     double rate = stat.rate(TimeUnit.SECONDS);
-    assertThat(rate, CombinableMatcher.<Double>both(greaterThan(lowRate)).and(lessThan(finalRate)));
+    assertThat(rate, CombinableMatcher.both(greaterThan(lowRate)).and(lessThan(finalRate)));
   }
 
   @Test
@@ -100,8 +100,8 @@ public class EventRateSimpleMovingAverageTest {
     ExecutorService executor = Executors.newFixedThreadPool(2);
     try {
       double totalRate = 0.0;
-      for (Future<Double> f : executor.invokeAll(Arrays.<Callable<Double>>asList(c1, c2))) {
-        totalRate += f.get().doubleValue();
+      for (Future<Double> f : executor.invokeAll(Arrays.asList(c1, c2))) {
+        totalRate += f.get();
       }
       assertThat(stat.rate(TimeUnit.SECONDS), closeTo(totalRate, EXPECTED_ACCURACY * totalRate));
     } finally {

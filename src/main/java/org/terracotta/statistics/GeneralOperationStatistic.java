@@ -18,9 +18,8 @@ package org.terracotta.statistics;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.LongAdder;
 
-import org.terracotta.statistics.jsr166e.LongAdder;
-import org.terracotta.statistics.observer.OperationObserver;
 import org.terracotta.statistics.observer.ChainedOperationObserver;
 
 /**
@@ -40,7 +39,7 @@ class GeneralOperationStatistic<T extends Enum<T>> extends AbstractOperationStat
    */
   GeneralOperationStatistic(String name, Set<String> tags, Map<String, ? extends Object> properties, Class<T> type) {
     super(name, tags, properties, type);
-    this.counts = new EnumMap<T, LongAdder>(type);
+    this.counts = new EnumMap<>(type);
     for (T t : type.getEnumConstants()) {
       counts.put(t, new LongAdder());
     }

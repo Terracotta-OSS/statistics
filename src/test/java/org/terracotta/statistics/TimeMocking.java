@@ -29,22 +29,18 @@ public class TimeMocking {
     try {
       TIME_SOURCE_FIELD = Time.class.getDeclaredField("TIME_SOURCE");
       TIME_SOURCE_FIELD.setAccessible(true);
-    } catch (NoSuchFieldException ex) {
-      throw new AssertionError(ex);
-    } catch (SecurityException ex) {
+    } catch (NoSuchFieldException | SecurityException ex) {
       throw new AssertionError(ex);
     }
   }
   
-  public static final Stack<Time.TimeSource> SOURCES = new Stack();
+  public static final Stack<Time.TimeSource> SOURCES = new Stack<>();
   
   public synchronized static <T extends Time.TimeSource> T push(T source) {
     try {
       SOURCES.push((Time.TimeSource) TIME_SOURCE_FIELD.get(null));
       TIME_SOURCE_FIELD.set(null, source);
-    } catch (IllegalArgumentException ex) {
-      throw new AssertionError(ex);
-    } catch (IllegalAccessException ex) {
+    } catch (IllegalArgumentException | IllegalAccessException ex) {
       throw new AssertionError(ex);
     }
     return source;
@@ -55,9 +51,7 @@ public class TimeMocking {
       Time.TimeSource popped = (Time.TimeSource) TIME_SOURCE_FIELD.get(null);
       TIME_SOURCE_FIELD.set(null, SOURCES.pop());
       return popped;
-    } catch (IllegalArgumentException ex) {
-      throw new AssertionError(ex);
-    } catch (IllegalAccessException ex) {
+    } catch (IllegalArgumentException | IllegalAccessException ex) {
       throw new AssertionError(ex);
     }
   }

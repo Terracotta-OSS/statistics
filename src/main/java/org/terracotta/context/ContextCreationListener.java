@@ -21,6 +21,6 @@ package org.terracotta.context;
  */
 public interface ContextCreationListener {
 
-  public void contextCreated(Object object);
+  void contextCreated(Object object);
   
 }
