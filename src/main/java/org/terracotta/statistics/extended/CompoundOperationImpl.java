@@ -228,8 +228,8 @@ public class CompoundOperationImpl<T extends Enum<T>> implements CompoundOperati
         // Not using && on purpose here. expire() has a side-effect. We want to make sure it's called (no short-circuit evaluation)
         expired &= o.expire(expiryTime);
       }
-      compounds.values().removeIf(tResult -> tResult.expire(expiryTime));
-      ratios.values().removeIf(doubleExpiringSampledStatistic -> doubleExpiringSampledStatistic.expire(expiryTime));
+      compounds.values().removeIf(result -> result.expire(expiryTime));
+      ratios.values().removeIf(statistic -> statistic.expire(expiryTime));
       return expired && compounds.isEmpty() && ratios.isEmpty();
     }
   }

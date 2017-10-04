@@ -24,7 +24,7 @@ import java.util.Map;
  */
 public class ConstantValueStatistic<T extends Number> implements ValueStatistic<T> {
 
-  private static final Map<Object, ValueStatistic<Number>> common = new HashMap<>();
+  private static final Map<Object, ValueStatistic<?>> common = new HashMap<>();
   static {
     common.put(0, new ConstantValueStatistic<>(0));
     common.put(0L, new ConstantValueStatistic<>(0L));

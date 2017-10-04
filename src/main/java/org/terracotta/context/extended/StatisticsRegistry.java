@@ -123,11 +123,11 @@ public class StatisticsRegistry {
   }
 
   public void registerSize(String name, ValueStatisticDescriptor descriptor) {
-    registerStatistic(name, descriptor, StatisticType.SIZE, (Function<ExpiringSampledStatistic<Long>, RegisteredStatistic>) RegisteredSizeStatistic::new);
+    registerStatistic(name, descriptor, StatisticType.SIZE, RegisteredSizeStatistic::new);
   }
 
   public void registerCounter(String name, ValueStatisticDescriptor descriptor) {
-    registerStatistic(name, descriptor, StatisticType.COUNTER, (Function<ExpiringSampledStatistic<Long>, RegisteredStatistic>) RegisteredCounterStatistic::new);
+    registerStatistic(name, descriptor, StatisticType.COUNTER, RegisteredCounterStatistic::new);
   }
 
   private <N extends Number> void registerStatistic(String name, ValueStatisticDescriptor descriptor, StatisticType type, Function<ExpiringSampledStatistic<N>, RegisteredStatistic> registeredStatisticFunction) {
