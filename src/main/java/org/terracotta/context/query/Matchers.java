@@ -163,6 +163,7 @@ public final class Matchers {
    * @param matchers list of matchers to match
    * @return a compound matcher
    */
+  @SafeVarargs
   public static <T> Matcher<T> anyOf(final Matcher<? super T> ... matchers) {
     return new Matcher<T>() {
 
@@ -186,6 +187,7 @@ public final class Matchers {
    * @param matchers list of matchers to match
    * @return a compound matcher
    */
+  @SafeVarargs
   public static <T> Matcher<T> allOf(final Matcher<? super T> ... matchers) {
     return new Matcher<T>() {
 

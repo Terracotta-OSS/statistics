@@ -42,7 +42,7 @@ public final class StatisticBuilder {
    * @return the operation statistic builder
    */
   public static <T extends Enum<T>> OperationStatisticBuilder<T> operation(Class<T> type) {
-    return new OperationStatisticBuilder(type);
+    return new OperationStatisticBuilder<>(type);
   }
 
   /**
@@ -108,6 +108,7 @@ public final class StatisticBuilder {
      *          the of
      * @return the builder
      */
+    @SuppressWarnings("unchecked")
     public T of(Object of) {
       if (context == null) {
         context = of;
@@ -124,6 +125,7 @@ public final class StatisticBuilder {
      *          the name
      * @return the builder
      */
+    @SuppressWarnings("unchecked")
     public T named(String name) {
       if (this.name == null) {
         this.name = name;
@@ -140,6 +142,7 @@ public final class StatisticBuilder {
      *          the tags
      * @return the builder
      */
+    @SuppressWarnings("unchecked")
     public T tag(String... tags) {
       Collections.addAll(this.tags, tags);
       return (T) this;
@@ -154,6 +157,7 @@ public final class StatisticBuilder {
      *          the property value
      * @return the builder
      */
+    @SuppressWarnings("unchecked")
     public T property(String key, Object value) {
       this.properties.put(key, value);
       return (T) this;

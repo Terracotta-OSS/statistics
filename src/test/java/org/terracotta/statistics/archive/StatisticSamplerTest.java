@@ -39,9 +39,9 @@ public class StatisticSamplerTest {
   
   @Test
   public void testUnstartedSampler() throws InterruptedException {
-    StatisticSampler<Integer> sampler = new StatisticSampler<>(1L, TimeUnit.NANOSECONDS, () -> {
+    StatisticSampler<Integer> sampler = new StatisticSampler<Integer>(1L, TimeUnit.NANOSECONDS, () -> {
       throw new AssertionError();
-    }, DevNull.DEV_NULL);
+    }, SampleSink.devNull());
     
     sampler.shutdown();
   }
@@ -51,7 +51,7 @@ public class StatisticSamplerTest {
     ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     try {
       StatisticSampler<Integer> sampler = new StatisticSampler<>(executor, 1L, TimeUnit.NANOSECONDS, ConstantValueStatistic
-          .instance(42), DevNull.DEV_NULL);
+          .instance(42), SampleSink.devNull());
       sampler.shutdown();
     } finally {
       executor.shutdown();

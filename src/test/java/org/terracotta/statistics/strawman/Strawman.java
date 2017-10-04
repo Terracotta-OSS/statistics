@@ -22,7 +22,6 @@ import org.terracotta.statistics.OperationStatistic;
 import org.terracotta.statistics.StatisticsManager;
 import org.terracotta.statistics.derived.LatencySampling;
 import org.terracotta.statistics.derived.MinMaxAverage;
-import org.terracotta.statistics.observer.ChainedEventObserver;
 
 import java.util.Arrays;
 

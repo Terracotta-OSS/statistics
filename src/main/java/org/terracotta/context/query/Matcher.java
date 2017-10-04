@@ -52,11 +52,7 @@ public abstract class Matcher<T> {
    * @return {@code true} if the object matches
    */
   public final boolean matches(Object object) {
-    if (boundType.isAssignableFrom(object.getClass())) {
-      return matchesSafely(boundType.cast(object));
-    } else {
-      return false;
-    }
+    return boundType.isAssignableFrom(object.getClass()) && matchesSafely(boundType.cast(object));
   }
   
   /**

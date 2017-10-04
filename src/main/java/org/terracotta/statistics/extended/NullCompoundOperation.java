@@ -85,7 +85,8 @@ public final class NullCompoundOperation<T extends Enum<T>> implements CompoundO
       }
 
       @Override
-      public long value(T... results) {
+      @SafeVarargs
+      public final long value(T... results) {
         return -1L;
       }
     };

@@ -37,7 +37,8 @@ public final class ContextTestUtils {
   private ContextTestUtils() {
     //static
   }
-  
+
+  @SuppressWarnings("unchecked")
   public static void validateAssociation(ContextManager manager, Object parent, Object child) {
     TreeNode parentNode = manager.queryForSingleton(queryBuilder().descendants().filter(context(attributes(hasAttribute("this", parent)))).build());
     TreeNode childNode = manager.queryForSingleton(queryBuilder().descendants().filter(context(attributes(hasAttribute("this", child)))).build());

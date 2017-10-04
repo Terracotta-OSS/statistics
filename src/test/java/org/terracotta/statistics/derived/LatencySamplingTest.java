@@ -20,7 +20,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.Test;
-import org.terracotta.statistics.observer.ChainedEventObserver;
 
 import static java.util.EnumSet.*;
 import static org.hamcrest.core.Is.*;

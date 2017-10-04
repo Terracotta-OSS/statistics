@@ -34,7 +34,7 @@ public class StatisticArchive<T> implements SampleSink<Timestamped<T>> {
   private volatile CircularBuffer<Timestamped<T>> buffer;
 
   public StatisticArchive(int size) {
-    this(size, DevNull.DEV_NULL);
+    this(size, SampleSink.devNull());
   }
 
   public StatisticArchive(int size, SampleSink<? super Timestamped<T>> overspill) {
@@ -67,12 +67,13 @@ public class StatisticArchive<T> implements SampleSink<Timestamped<T>> {
     buffer = null;
   }
 
+  @SuppressWarnings("unchecked")
   public List<Timestamped<T>> getArchive() {
     CircularBuffer<Timestamped<T>> read = buffer;
     if (read == null) {
       return Collections.emptyList();
     } else {
-      return Collections.unmodifiableList(Arrays.asList((Timestamped<T>[]) read.toArray(Timestamped[].class)));
+      return Collections.unmodifiableList(Arrays.<Timestamped<T>>asList(read.toArray(Timestamped[].class)));
     }
   }
 
@@ -82,6 +83,7 @@ public class StatisticArchive<T> implements SampleSink<Timestamped<T>> {
       return Collections.emptyList();
     } else {
       Timestamped<T> e = new StatisticSampler.Sample<>(since, null);
+      @SuppressWarnings("unchecked")
       Timestamped<T>[] array = (Timestamped<T>[]) read.toArray(Timestamped[].class);
       int pos = Arrays.binarySearch(array, e, TIMESTAMPED_COMPARATOR);
       if(pos < 0) {

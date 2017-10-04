@@ -46,14 +46,14 @@ public final class ObjectContextExtractor {
    * @return a {@code ContextElement}
    */
   public static ContextElement extract(Object from) {
-    Map<String, AttributeGetter<? extends Object>> attributes = new HashMap<>();
+    Map<String, AttributeGetter<Object>> attributes = new HashMap<>();
     attributes.putAll(extractInstanceAttribute(from));
     attributes.putAll(extractMethodAttributes(from));
     attributes.putAll(extractFieldAttributes(from));
     return new LazyContextElement(from.getClass(), attributes);
   }
 
-  private static Map<? extends String, ? extends AttributeGetter<? extends Object>> extractInstanceAttribute(Object from) {
+  private static Map<? extends String, ? extends AttributeGetter<Object>> extractInstanceAttribute(Object from) {
     ContextAttribute annotation = from.getClass().getAnnotation(ContextAttribute.class);
     if (annotation == null) {
       return Collections.emptyMap();
@@ -62,22 +62,22 @@ public final class ObjectContextExtractor {
     }
   }
 
-  private static Map<String, AttributeGetter<? extends Object>> extractMethodAttributes(Object from) {
-    Map<String, AttributeGetter<? extends Object>> attributes = new HashMap<>();
+  private static Map<String, AttributeGetter<Object>> extractMethodAttributes(Object from) {
+    Map<String, AttributeGetter<Object>> attributes = new HashMap<>();
     
     for (Method m : from.getClass().getMethods()) {
       if (m.getParameterTypes().length == 0 && m.getReturnType() != Void.TYPE) {
         ContextAttribute annotation = m.getAnnotation(ContextAttribute.class);
         if (annotation != null) {
-          attributes.put(annotation.value(), new WeakMethodAttributeGetter(from, m));
+          attributes.put(annotation.value(), new WeakMethodAttributeGetter<>(from, m));
         }
       }
     }
     return attributes;
   }
 
-  private static Map<String, AttributeGetter<? extends Object>> extractFieldAttributes(Object from) {
-    Map<String, AttributeGetter<? extends Object>> attributes = new HashMap<>();
+  private static Map<String, AttributeGetter<Object>> extractFieldAttributes(Object from) {
+    Map<String, AttributeGetter<Object>> attributes = new HashMap<>();
     
     for (Class c = from.getClass(); c != null; c = c.getSuperclass()) {
       for (Field f : c.getDeclaredFields()) {
@@ -91,16 +91,16 @@ public final class ObjectContextExtractor {
     return attributes;
   }
 
-  private static AttributeGetter<? extends Object> createFieldAttributeGetter(Object from, Field f) {
+  private static AttributeGetter<Object> createFieldAttributeGetter(Object from, Field f) {
     f.setAccessible(true);
     if (Modifier.isFinal(f.getModifiers())) {
       try {
-        return new DirectAttributeGetter(f.get(from));
+        return new DirectAttributeGetter<>(f.get(from));
       } catch (IllegalArgumentException | IllegalAccessException ex) {
         throw new RuntimeException(ex);
       }
     } else {
-      return new WeakFieldAttributeGetter(from, f);
+      return new WeakFieldAttributeGetter<>(from, f);
     }
   }
 }

@@ -34,7 +34,7 @@ public class TimeMocking {
     }
   }
   
-  public static final Stack<Time.TimeSource> SOURCES = new Stack();
+  public static final Stack<Time.TimeSource> SOURCES = new Stack<>();
   
   public synchronized static <T extends Time.TimeSource> T push(T source) {
     try {

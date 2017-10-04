@@ -26,7 +26,8 @@ public class CircularBuffer<E> {
   private final E[] buffer;
   private int writeIndex;
   private int size;
-  
+
+  @SuppressWarnings("unchecked")
   public CircularBuffer(int size) {
     this.buffer = (E[]) new Object[size];
   }

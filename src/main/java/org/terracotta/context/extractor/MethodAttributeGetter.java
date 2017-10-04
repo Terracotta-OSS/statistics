@@ -30,6 +30,7 @@ abstract class MethodAttributeGetter<T> implements AttributeGetter<T> {
   abstract Object target();
   
   @Override
+  @SuppressWarnings("unchecked")
   public T get() {
     try {
       return (T) method.invoke(target());

@@ -34,6 +34,7 @@ public interface CountOperation<T> {
    * @param results the results
    * @return the long
    */
+  @SuppressWarnings("unchecked")
   long value(T... results);
 
 }

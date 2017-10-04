@@ -16,7 +16,6 @@
 package org.terracotta.statistics;
 
 
-import org.terracotta.context.ContextCreationListener;
 import org.terracotta.context.ContextElement;
 import org.terracotta.context.ContextManager;
 import org.terracotta.context.TreeNode;

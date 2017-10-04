@@ -17,12 +17,10 @@ package org.terracotta.statistics.extended;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.terracotta.statistics.OperationStatistic;
-import org.terracotta.statistics.ValueStatistic;
 
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.EnumSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;

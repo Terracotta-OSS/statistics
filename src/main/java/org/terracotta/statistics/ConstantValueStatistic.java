@@ -24,14 +24,15 @@ import java.util.Map;
  */
 public class ConstantValueStatistic<T extends Number> implements ValueStatistic<T> {
 
-  private static final Map<Object, ValueStatistic<?>> common = new HashMap<>();
+  private static final Map<Object, ValueStatistic<Number>> common = new HashMap<>();
   static {
     common.put(0, new ConstantValueStatistic<>(0));
     common.put(0L, new ConstantValueStatistic<>(0L));
-    common.put(null, new ConstantValueStatistic(null));
+    common.put(null, new ConstantValueStatistic<>(null));
   }
   
   public static <T extends Number> ValueStatistic<T> instance(T value) {
+    @SuppressWarnings("unchecked")
     ValueStatistic<T> interned = (ValueStatistic<T>) common.get(value);
     if (interned == null) {
       return new ConstantValueStatistic<>(value);
