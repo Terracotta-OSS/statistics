@@ -17,13 +17,12 @@ package org.terracotta.statistics.derived;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.DoubleAdder;
+import java.util.concurrent.atomic.LongAccumulator;
 
 import org.terracotta.statistics.ValueStatistic;
 import org.terracotta.statistics.observer.ChainedEventObserver;
 import org.terracotta.statistics.util.InThreadExecutor;
-
-import static java.lang.Double.doubleToLongBits;
-import static java.lang.Double.longBitsToDouble;
 
 /**
  *
@@ -31,10 +30,10 @@ import static java.lang.Double.longBitsToDouble;
  */
 public class MinMaxAverage implements ChainedEventObserver {
 
-  private final AtomicLong maximum = new AtomicLong(Long.MIN_VALUE);
-  private final AtomicLong minimum = new AtomicLong(Long.MAX_VALUE);
-  
-  private final AtomicLong summation = new AtomicLong(doubleToLongBits(0.0));
+  private final LongAccumulator maximum = new LongAccumulator(Math::max, Long.MIN_VALUE);
+  private final LongAccumulator minimum = new LongAccumulator(Math::min, Long.MAX_VALUE);
+
+  private final DoubleAdder summation = new DoubleAdder();
   private final AtomicLong count = new AtomicLong(0);
 
   private final Executor executor;
@@ -47,13 +46,13 @@ public class MinMaxAverage implements ChainedEventObserver {
     this.executor = executor;
   }
   
-  
   @Override
   public void event(long time, final long ... parameters) {
     executor.execute(() -> {
-      for (long max = maximum.get(); max < parameters[0] && !maximum.compareAndSet(max, parameters[0]); max = maximum.get());
-      for (long min = minimum.get(); min > parameters[0] && !minimum.compareAndSet(min, parameters[0]); min = minimum.get());
-      for (long sumBits = summation.get(); !summation.compareAndSet(sumBits, doubleToLongBits(longBitsToDouble(sumBits) + parameters[0])); sumBits = summation.get());
+      long value = parameters[0];
+      maximum.accumulate(value);
+      minimum.accumulate(value);
+      summation.add(value);
       count.incrementAndGet();
     });
   }
@@ -74,7 +73,7 @@ public class MinMaxAverage implements ChainedEventObserver {
     if (count.get() == 0) {
       return null;
     } else {
-      return longBitsToDouble(summation.get()) / count.get();
+      return summation.sum() / count.get();
     }
   }
   
