@@ -20,6 +20,8 @@ import java.util.Set;
 import org.terracotta.statistics.observer.ChainedOperationObserver;
 import org.terracotta.statistics.observer.OperationObserver;
 
+import static org.terracotta.statistics.SuppliedValueStatistic.counter;
+
 /**
  *
  * @author cdennis
@@ -34,9 +36,13 @@ public interface OperationStatistic<T extends Enum<T>> extends OperationObserver
    * @param result the result of interest 
    * @return a {@code ValueStatistic} instance
    */
-  ValueStatistic<Long> statistic(T result);
+  default ValueStatistic<Long> statistic(T result) {
+    return counter(() -> count(result));
+  }
 
-  ValueStatistic<Long> statistic(Set<T> results);
+  default ValueStatistic<Long> statistic(Set<T> results) {
+    return counter(() -> sum(results));
+  }
   
   /**
    * Return the count of operations with the given type.

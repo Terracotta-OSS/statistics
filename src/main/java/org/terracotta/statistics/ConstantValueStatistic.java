@@ -15,40 +15,40 @@
  */
 package org.terracotta.statistics;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.terracotta.statistics.extended.StatisticType;
+
+import java.io.Serializable;
 
 /**
- *
  * @author cdennis
  */
-public class ConstantValueStatistic<T extends Number> implements ValueStatistic<T> {
+public class ConstantValueStatistic<T extends Serializable> implements ValueStatistic<T>, Serializable {
 
-  private static final Map<Object, ValueStatistic<?>> common = new HashMap<>();
-  static {
-    common.put(0, new ConstantValueStatistic<>(0));
-    common.put(0L, new ConstantValueStatistic<>(0L));
-    common.put(null, new ConstantValueStatistic<>(null));
+  public static <T extends Serializable> ConstantValueStatistic<T> constant(StatisticType type, T value) {
+    return new ConstantValueStatistic<>(type, value);
   }
   
-  public static <T extends Number> ValueStatistic<T> instance(T value) {
-    @SuppressWarnings("unchecked")
-    ValueStatistic<T> interned = (ValueStatistic<T>) common.get(value);
-    if (interned == null) {
-      return new ConstantValueStatistic<>(value);
-    } else {
-      return interned;
-    }
+  public static <T extends Serializable> ConstantValueStatistic<T> nullValue(StatisticType type) {
+    return new ConstantValueStatistic<>(type, null);
   }
+  
+  private static final long serialVersionUID = 1L;
   
   private final T value;
-  
-  private ConstantValueStatistic(T value) {
+  private final StatisticType type;
+
+  private ConstantValueStatistic(StatisticType type, T value) {
     this.value = value;
+    this.type = type;
   }
-  
+
   @Override
   public T value() {
     return value;
+  }
+
+  @Override
+  public StatisticType type() {
+    return type;
   }
 }

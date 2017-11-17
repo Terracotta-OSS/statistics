@@ -24,6 +24,8 @@ import org.terracotta.statistics.ValueStatistic;
 import org.terracotta.statistics.observer.ChainedEventObserver;
 import org.terracotta.statistics.util.InThreadExecutor;
 
+import static org.terracotta.statistics.SuppliedValueStatistic.gauge;
+
 /**
  *
  * @author cdennis
@@ -66,7 +68,7 @@ public class MinMaxAverage implements ChainedEventObserver {
   }
   
   public ValueStatistic<Long> minStatistic() {
-    return this::min;
+    return gauge(this::min);
   }
   
   public Double mean() {
@@ -78,7 +80,7 @@ public class MinMaxAverage implements ChainedEventObserver {
   }
   
   public ValueStatistic<Double> meanStatistic() {
-    return this::mean;
+    return gauge(this::mean);
   }
   
   public Long max() {
@@ -90,6 +92,6 @@ public class MinMaxAverage implements ChainedEventObserver {
   }
   
   public ValueStatistic<Long> maxStatistic() {
-    return this::max;
+    return gauge(this::max);
   }
 }

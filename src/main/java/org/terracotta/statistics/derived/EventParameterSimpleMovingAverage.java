@@ -15,6 +15,7 @@
  */
 package org.terracotta.statistics.derived;
 
+import static org.terracotta.statistics.SuppliedValueStatistic.gauge;
 import static org.terracotta.statistics.Time.time;
 
 import java.util.Iterator;
@@ -26,13 +27,16 @@ import java.util.concurrent.atomic.LongAccumulator;
 import java.util.concurrent.atomic.LongAdder;
 
 import org.terracotta.statistics.ValueStatistic;
+import org.terracotta.statistics.extended.StatisticType;
 import org.terracotta.statistics.observer.ChainedEventObserver;
+
+import static org.terracotta.statistics.extended.StatisticType.GAUGE;
 
 /**
  *
  * @author cdennis
  */
-public class EventParameterSimpleMovingAverage implements ChainedEventObserver {
+public class EventParameterSimpleMovingAverage implements ChainedEventObserver, ValueStatistic<Double> {
 
   private static final int PARTITION_COUNT = 10;
 
@@ -53,20 +57,26 @@ public class EventParameterSimpleMovingAverage implements ChainedEventObserver {
     this.partitionSize = windowSize / PARTITION_COUNT;
   }
 
+  @Override
   public Double value() {
     return average();
   }
 
+  @Override
+  public StatisticType type() {
+    return GAUGE;
+  }
+
   public ValueStatistic<Double> averageStatistic() {
-    return this::average;
+    return this;
   }
   
   public ValueStatistic<Long> minimumStatistic() {
-    return this::minimum;
+    return gauge(this::minimum);
   }
   
   public ValueStatistic<Long> maximumStatistic() {
-    return this::maximum;
+    return gauge(this::maximum);
   }
   
   public final double average() {

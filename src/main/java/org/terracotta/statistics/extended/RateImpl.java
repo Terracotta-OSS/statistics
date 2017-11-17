@@ -16,7 +16,7 @@
 package org.terracotta.statistics.extended;
 
 import org.terracotta.statistics.OperationStatistic;
-import org.terracotta.statistics.archive.Timestamped;
+import org.terracotta.statistics.archive.Sample;
 import org.terracotta.statistics.derived.EventRateSimpleMovingAverage;
 import org.terracotta.statistics.derived.OperationResultFilter;
 import org.terracotta.statistics.observer.ChainedOperationObserver;
@@ -56,7 +56,7 @@ public class RateImpl<T extends Enum<T>> implements SampledStatistic<Double> {
   public RateImpl(final OperationStatistic<T> source, final Set<T> targets, long averagePeriod, TimeUnit averageTimeUnit,
                   ScheduledExecutorService executor, int historySize, long historyPeriod, TimeUnit historyTimeUnit) {
     this.rate = new EventRateSimpleMovingAverage(averagePeriod, averageTimeUnit);
-    this.delegate = new ExpiringSampledStatistic<Double>(rate, executor, historySize, historyPeriod, historyTimeUnit, StatisticType.RATE) {
+    this.delegate = new ExpiringSampledStatistic<Double>(rate, executor, historySize, historyPeriod, historyTimeUnit) {
 
       private final ChainedOperationObserver<T> observer = new OperationResultFilter<>(targets, rate);
 
@@ -74,7 +74,6 @@ public class RateImpl<T extends Enum<T>> implements SampledStatistic<Double> {
     };
   }
 
-  @Override
   public boolean active() {
     return delegate.active();
   }
@@ -85,12 +84,12 @@ public class RateImpl<T extends Enum<T>> implements SampledStatistic<Double> {
   }
 
   @Override
-  public List<Timestamped<Double>> history() {
+  public List<Sample<Double>> history() {
     return delegate.history();
   }
 
   @Override
-  public List<Timestamped<Double>> history(long since) {
+  public List<Sample<Double>> history(long since) {
     return delegate.history(since);
   }
 

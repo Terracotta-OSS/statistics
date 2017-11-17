@@ -25,10 +25,9 @@ import org.terracotta.statistics.ValueStatistic;
 import org.terracotta.statistics.extended.CompoundOperation;
 import org.terracotta.statistics.extended.CompoundOperationImpl;
 import org.terracotta.statistics.extended.ExpiringSampledStatistic;
-import org.terracotta.statistics.extended.Result;
-import org.terracotta.statistics.extended.StatisticType;
 import org.terracotta.statistics.extended.SampledStatistic;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -49,7 +48,9 @@ import static org.terracotta.context.query.QueryBuilder.queryBuilder;
 
 /**
  * @author Ludovic Orban
+ * @deprecated Use {@link org.terracotta.statistics.extended.StatisticRegistry instead}
  */
+@Deprecated
 public class StatisticsRegistry {
 
   private final Object contextObject;
@@ -123,14 +124,14 @@ public class StatisticsRegistry {
   }
 
   public void registerSize(String name, ValueStatisticDescriptor descriptor) {
-    registerStatistic(name, descriptor, StatisticType.SIZE, RegisteredSizeStatistic::new);
+    registerStatistic(name, descriptor, RegisteredSizeStatistic::new);
   }
 
   public void registerCounter(String name, ValueStatisticDescriptor descriptor) {
-    registerStatistic(name, descriptor, StatisticType.COUNTER, RegisteredCounterStatistic::new);
+    registerStatistic(name, descriptor, RegisteredCounterStatistic::new);
   }
 
-  private <N extends Number> void registerStatistic(String name, ValueStatisticDescriptor descriptor, StatisticType type, Function<ExpiringSampledStatistic<N>, RegisteredStatistic> registeredStatisticFunction) {
+  private <N extends Serializable> void registerStatistic(String name, ValueStatisticDescriptor descriptor, Function<ExpiringSampledStatistic<N>, RegisteredStatistic> registeredStatisticFunction) {
     Map<String, RegisteredStatistic> registeredStatistics = new HashMap<>();
 
     Map<String, ValueStatistic<N>> valueStatistics = findValueStatistics(contextObject, name, descriptor.getObserverName(), descriptor.getTags());
@@ -141,7 +142,7 @@ public class StatisticsRegistry {
       if (registrations.containsKey(key)) {
         duplicates.add(key);
       }
-      ExpiringSampledStatistic<N> expiringSampledStatistic = new ExpiringSampledStatistic<>(value, executor, historySize, historyInterval, historyIntervalUnit, type);
+      ExpiringSampledStatistic<N> expiringSampledStatistic = new ExpiringSampledStatistic<>(value, executor, historySize, historyInterval, historyIntervalUnit);
       RegisteredStatistic registeredStatistic = registeredStatisticFunction.apply(expiringSampledStatistic);
       registeredStatistics.put(key, registeredStatistic);
     }
@@ -204,31 +205,14 @@ public class StatisticsRegistry {
     registrations.clear();
   }
 
-  public SampledStatistic<? extends Number> findSampledStatistic(String statisticName) {
+  public SampledStatistic<? extends Serializable> findSampledStatistic(String statisticName) {
     RegisteredStatistic registeredStatistic = registrations.get(statisticName);
 
     if (registeredStatistic != null) {
       switch (registeredStatistic.getType()) {
         case COUNTER: return ((RegisteredCounterStatistic) registeredStatistic).getSampledStatistic();
         case RATIO: return ((RegisteredRatioStatistic<?>) registeredStatistic).getSampledStatistic();
-        case SIZE: return ((RegisteredSizeStatistic) registeredStatistic).getSampledStatistic();
-      }
-    }
-
-    return null;
-  }
-
-  public SampledStatistic<? extends Number> findSampledCompoundStatistic(String statisticName, StatisticType statisticType) {
-    RegisteredStatistic registeredStatistic = registrations.get(statisticName);
-
-    if (registeredStatistic != null && registeredStatistic.getType() == RegistrationType.COMPOUND) {
-      Result result = ((RegisteredCompoundStatistic<?>) registeredStatistic).getResult();
-      switch (statisticType) {
-        case COUNTER: return result.count();
-        case RATE: return result.rate();
-        case LATENCY_MIN: return result.latency().minimum();
-        case LATENCY_MAX: return result.latency().maximum();
-        case LATENCY_AVG: return result.latency().average();
+        case GAUGE: return ((RegisteredSizeStatistic) registeredStatistic).getSampledStatistic();
       }
     }
 
@@ -293,7 +277,7 @@ public class StatisticsRegistry {
   }
 
   @SuppressWarnings("unchecked")
-  private static <N extends Number> Map<String, ValueStatistic<N>> findValueStatistics(Object contextObject, String name, String observerName, final Set<String> tags) {
+  private static <N extends Serializable> Map<String, ValueStatistic<N>> findValueStatistics(Object contextObject, String name, String observerName, final Set<String> tags) {
     Set<TreeNode> result = queryBuilder()
         .descendants()
         .filter(context(attributes(Matchers.allOf(
@@ -320,7 +304,7 @@ public class StatisticsRegistry {
         }
 
         String completeName = (discriminator == null ? "" : (discriminator + ":")) + name;
-        ValueStatistic<?> existing = observers.put(completeName, (ValueStatistic<N>) node.getContext().attributes().get("this"));
+        ValueStatistic<? extends Serializable> existing = observers.put(completeName, (ValueStatistic<N>) node.getContext().attributes().get("this"));
         if (existing != null) {
           throw new IllegalStateException("Duplicate ValueStatistic found for '" + completeName + "'");
         }

@@ -15,7 +15,7 @@
  */
 package org.terracotta.statistics.archive;
 
-import java.util.Date;
+import java.io.Serializable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -30,7 +30,7 @@ import static org.terracotta.statistics.Time.absoluteTime;
  *
  * @author cdennis
  */
-public class StatisticSampler<T extends Number> {
+public class StatisticSampler<T extends Serializable> {
 
   private final boolean exclusiveExecutor;
   private final ScheduledExecutorService executor;
@@ -39,11 +39,11 @@ public class StatisticSampler<T extends Number> {
   private ScheduledFuture<?> currentExecution;
   private long period;  
   
-  public StatisticSampler(long time, TimeUnit unit, ValueStatistic<T> statistic, SampleSink<Timestamped<T>> sink) {
+  public StatisticSampler(long time, TimeUnit unit, ValueStatistic<T> statistic, SampleSink<Sample<T>> sink) {
     this(null, time, unit, statistic, sink);
   }
   
-  public StatisticSampler(ScheduledExecutorService executor, long time, TimeUnit unit, ValueStatistic<T> statistic, SampleSink<Timestamped<T>> sink) {
+  public StatisticSampler(ScheduledExecutorService executor, long time, TimeUnit unit, ValueStatistic<T> statistic, SampleSink<Sample<T>> sink) {
     if (executor == null) {
       this.exclusiveExecutor = true;
       this.executor = Executors.newSingleThreadScheduledExecutor(new SamplerThreadFactory());
@@ -90,12 +90,12 @@ public class StatisticSampler<T extends Number> {
     }
   }
   
-  static class SamplingTask<T extends Number> implements Runnable {
+  static class SamplingTask<T extends Serializable> implements Runnable {
 
     private final ValueStatistic<T> statistic;
-    private final SampleSink<Timestamped<T>> sink;
+    private final SampleSink<Sample<T>> sink;
     
-    SamplingTask(ValueStatistic<T> statistic, SampleSink<Timestamped<T>> sink) {
+    SamplingTask(ValueStatistic<T> statistic, SampleSink<Sample<T>> sink) {
       this.statistic = statistic;
       this.sink = sink;
     }
@@ -103,32 +103,6 @@ public class StatisticSampler<T extends Number> {
     @Override
     public void run() {
       sink.accept(new Sample<>(absoluteTime(), statistic.value()));
-    }
-  }
-  
-  static class Sample<T> implements Timestamped<T> {
-
-    private final T sample;
-    private final long timestamp;
-
-    public Sample(long timestamp, T sample) {
-      this.sample = sample;
-      this.timestamp = timestamp;
-    }
-
-    @Override
-    public T getSample() {
-      return sample;
-    }
-
-    @Override
-    public long getTimestamp() {
-      return timestamp;
-    }
-    
-    @Override
-    public String toString() {
-      return getSample() + " @ " + new Date(getTimestamp());
     }
   }
   
