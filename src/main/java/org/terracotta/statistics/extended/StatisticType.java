@@ -24,5 +24,6 @@ public enum StatisticType {
   RATE,
   RATIO,
   GAUGE,
+  TABLE
 
 }
