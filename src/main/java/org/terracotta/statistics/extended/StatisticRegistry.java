@@ -22,6 +22,7 @@ import org.terracotta.context.extended.ValueStatisticDescriptor;
 import org.terracotta.context.query.Matcher;
 import org.terracotta.context.query.Matchers;
 import org.terracotta.statistics.OperationStatistic;
+import org.terracotta.statistics.Table;
 import org.terracotta.statistics.Time;
 import org.terracotta.statistics.ValueStatistic;
 import org.terracotta.statistics.archive.Sample;
@@ -48,6 +49,7 @@ import static org.terracotta.context.query.QueryBuilder.queryBuilder;
 import static org.terracotta.statistics.SuppliedValueStatistic.counter;
 import static org.terracotta.statistics.SuppliedValueStatistic.gauge;
 import static org.terracotta.statistics.SuppliedValueStatistic.supply;
+import static org.terracotta.statistics.SuppliedValueStatistic.table;
 import static org.terracotta.statistics.extended.SampledStatisticAdapter.sample;
 
 /**
@@ -121,6 +123,13 @@ public class StatisticRegistry {
     if (statistics.put(fullStatName, accessor) != null) {
       throw new IllegalArgumentException("Found duplicate statistic " + fullStatName);
     }
+  }
+
+  /**
+   * Directly register a TABLE stat with its accessors
+   */
+  public void registerTable(String fullStatName, Supplier<Table> accessor) {
+    registerStatistic(fullStatName, table(accessor));
   }
 
   /**

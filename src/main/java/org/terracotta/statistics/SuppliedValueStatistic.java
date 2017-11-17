@@ -25,6 +25,7 @@ import static org.terracotta.statistics.extended.StatisticType.COUNTER;
 import static org.terracotta.statistics.extended.StatisticType.GAUGE;
 import static org.terracotta.statistics.extended.StatisticType.RATE;
 import static org.terracotta.statistics.extended.StatisticType.RATIO;
+import static org.terracotta.statistics.extended.StatisticType.TABLE;
 
 /**
  * This class can be used to create a {@link ValueStatistic} with a specific {@link StatisticType}
@@ -52,6 +53,10 @@ public class SuppliedValueStatistic<T extends Serializable> implements ValueStat
 
   public static <T extends Number> ValueStatistic<T> ratio(Supplier<T> supplier) {
     return supply(RATIO, supplier);
+  }
+
+  public static <T extends Table> ValueStatistic<T> table(Supplier<T> supplier) {
+    return supply(TABLE, supplier);
   }
 
   private final Supplier<T> supplier;
