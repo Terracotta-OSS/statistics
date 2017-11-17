@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.LongAdder;
 
 import org.terracotta.statistics.ValueStatistic;
 import org.terracotta.statistics.observer.ChainedEventObserver;
+import org.terracotta.statistics.extended.StatisticType;
 
 /**
  *
@@ -57,6 +58,11 @@ public class EventRateSimpleMovingAverage implements ChainedEventObserver, Value
     return rateUsingSeconds();
   }
   
+  @Override
+  public StatisticType type() {
+    return StatisticType.RATE;
+  }
+
   public Double rateUsingSeconds() {
     final long endTime = time();
     final long startTime = endTime - windowSize;

@@ -17,6 +17,7 @@ package org.terracotta.statistics.extended;
 
 import org.terracotta.statistics.ValueStatistic;
 
+import java.io.Serializable;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -26,7 +27,7 @@ import java.util.concurrent.TimeUnit;
  * @param <T> statistic type
  * @author Chris Dennis
  */
-public class ExpiringSampledStatistic<T extends Number> extends SemiExpiringSampledStatistic<T> {
+public class ExpiringSampledStatistic<T extends Serializable> extends SemiExpiringSampledStatistic<T> {
 
   /**
    * Creates an expiring statistic.
@@ -36,10 +37,9 @@ public class ExpiringSampledStatistic<T extends Number> extends SemiExpiringSamp
    * @param historySize     size of sample history
    * @param historyPeriod   period between samples
    * @param historyTimeUnit unit of period between samples
-   * @param type            sampling type
    */
-  public ExpiringSampledStatistic(ValueStatistic<T> source, ScheduledExecutorService executor, int historySize, long historyPeriod, TimeUnit historyTimeUnit, StatisticType type) {
-    super(source, executor, historySize, historyPeriod, historyTimeUnit, type);
+  public ExpiringSampledStatistic(ValueStatistic<T> source, ScheduledExecutorService executor, int historySize, long historyPeriod, TimeUnit historyTimeUnit) {
+    super(source, executor, historySize, historyPeriod, historyTimeUnit);
   }
 
   @Override

@@ -18,8 +18,9 @@ package org.terracotta.statistics.extended;
 import org.terracotta.statistics.ValueStatistic;
 import org.terracotta.statistics.archive.StatisticArchive;
 import org.terracotta.statistics.archive.StatisticSampler;
-import org.terracotta.statistics.archive.Timestamped;
+import org.terracotta.statistics.archive.Sample;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -30,7 +31,7 @@ import java.util.concurrent.TimeUnit;
  * @param <T> the generic type
  * @author cdennis
  */
-class StatisticHistory<T extends Number> {
+class StatisticHistory<T extends Serializable> {
 
   /**
    * The sampler.
@@ -76,7 +77,7 @@ class StatisticHistory<T extends Number> {
    *
    * @return the list
    */
-  public List<Timestamped<T>> history() {
+  public List<Sample<T>> history() {
     return history.getArchive();
   }
 
@@ -85,7 +86,7 @@ class StatisticHistory<T extends Number> {
    *
    * @return the list
    */
-  public List<Timestamped<T>> history(long since) {
+  public List<Sample<T>> history(long since) {
     return history.getArchive(since);
   }
 

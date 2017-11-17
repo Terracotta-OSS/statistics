@@ -32,7 +32,7 @@ public class RegisteredSizeStatistic implements RegisteredStatistic {
 
   @Override
   public RegistrationType getType() {
-    return RegistrationType.SIZE;
+    return RegistrationType.GAUGE;
   }
 
   public SampledStatistic<Long> getSampledStatistic() {

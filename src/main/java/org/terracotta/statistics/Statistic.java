@@ -15,6 +15,8 @@
  */
 package org.terracotta.statistics;
 
+import org.terracotta.statistics.extended.StatisticType;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -29,6 +31,8 @@ import java.lang.annotation.Target;
 public @interface Statistic {
   
   String name();
+  
+  StatisticType type();
   
   String[] tags() default {};
 }

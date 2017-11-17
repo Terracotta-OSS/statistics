@@ -29,6 +29,9 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static org.terracotta.statistics.SuppliedValueStatistic.supply;
+import static org.terracotta.statistics.extended.StatisticType.RATIO;
+
 /**
  * The Class CompoundOperationImpl.
  *
@@ -129,7 +132,7 @@ public class CompoundOperationImpl<T extends Enum<T>> implements CompoundOperati
     if (existing == null) {
       final SampledStatistic<Double> numeratorRate = compound(numerator).rate();
       final SampledStatistic<Double> denominatorRate = compound(denominator).rate();
-      ExpiringSampledStatistic<Double> created = new ExpiringSampledStatistic<>(() -> numeratorRate.value() / denominatorRate.value(), executor, historySize, historyPeriod, historyTimeUnit, StatisticType.RATIO);
+      ExpiringSampledStatistic<Double> created = new ExpiringSampledStatistic<>(supply(RATIO, () -> numeratorRate.value() / denominatorRate.value()), executor, historySize, historyPeriod, historyTimeUnit);
       ExpiringSampledStatistic<Double> racer = ratios.putIfAbsent(key, created);
       if (racer == null) {
         return created;

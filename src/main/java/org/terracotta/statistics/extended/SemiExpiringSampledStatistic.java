@@ -17,8 +17,9 @@ package org.terracotta.statistics.extended;
 
 import org.terracotta.statistics.Time;
 import org.terracotta.statistics.ValueStatistic;
-import org.terracotta.statistics.archive.Timestamped;
+import org.terracotta.statistics.archive.Sample;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -30,7 +31,7 @@ import java.util.concurrent.TimeUnit;
  * @param <T> statistic type
  * @author Chris Dennis
  */
-public class SemiExpiringSampledStatistic<T extends Number> extends AbstractSampledStatistic<T> implements SamplingSupport {
+public class SemiExpiringSampledStatistic<T extends Serializable> extends AbstractSampledStatistic<T> implements SamplingSupport {
 
   /**
    * The active.
@@ -52,25 +53,23 @@ public class SemiExpiringSampledStatistic<T extends Number> extends AbstractSamp
    * @param historySize     size of sample history
    * @param historyTime     period between samples
    * @param historyTimeUnit unit of period between samples
-   * @param type            sampling type
    */
-  public SemiExpiringSampledStatistic(ValueStatistic<T> source, ScheduledExecutorService executor, int historySize, long historyTime, TimeUnit historyTimeUnit, StatisticType type) {
-    super(source, executor, historySize, historyTime, historyTimeUnit, type);
+  public SemiExpiringSampledStatistic(ValueStatistic<T> source, ScheduledExecutorService executor, int historySize, long historyTime, TimeUnit historyTimeUnit) {
+    super(source, executor, historySize, historyTime, historyTimeUnit);
   }
 
   @Override
-  public List<Timestamped<T>> history() {
+  public List<Sample<T>> history() {
     touch();
     return super.history();
   }
 
   @Override
-  public List<Timestamped<T>> history(long since) {
+  public List<Sample<T>> history(long since) {
     touch();
     return super.history(since);
   }
 
-  @Override
   public final synchronized boolean active() {
     return active;
   }

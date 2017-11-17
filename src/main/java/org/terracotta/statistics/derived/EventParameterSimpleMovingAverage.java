@@ -28,6 +28,9 @@ import java.util.concurrent.atomic.LongAdder;
 import org.terracotta.statistics.ValueStatistic;
 import org.terracotta.statistics.observer.ChainedEventObserver;
 
+import static org.terracotta.statistics.SuppliedValueStatistic.supply;
+import static org.terracotta.statistics.extended.StatisticType.GAUGE;
+
 /**
  *
  * @author cdennis
@@ -58,15 +61,15 @@ public class EventParameterSimpleMovingAverage implements ChainedEventObserver {
   }
 
   public ValueStatistic<Double> averageStatistic() {
-    return this::average;
+    return supply(GAUGE, this::average);
   }
   
   public ValueStatistic<Long> minimumStatistic() {
-    return this::minimum;
+    return supply(GAUGE, this::minimum);
   }
   
   public ValueStatistic<Long> maximumStatistic() {
-    return this::maximum;
+    return supply(GAUGE, this::maximum);
   }
   
   public final double average() {

@@ -57,7 +57,7 @@ class ResultImpl<T extends Enum<T>> implements Result {
    */
   public ResultImpl(OperationStatistic<T> source, Set<T> targets, long averagePeriod, TimeUnit averageTimeUnit,
                     ScheduledExecutorService executor, int historySize, long historyPeriod, TimeUnit historyTimeUnit) {
-    this.count = new SemiExpiringSampledStatistic<>(source.statistic(targets), executor, historySize, historyPeriod, historyTimeUnit, StatisticType.COUNTER);
+    this.count = new SemiExpiringSampledStatistic<>(source.statistic(targets), executor, historySize, historyPeriod, historyTimeUnit);
     this.latency = new LatencyImpl<>(source, targets, averagePeriod, averageTimeUnit, executor, historySize, historyPeriod, historyTimeUnit);
     this.rate = new RateImpl<>(source, targets, averagePeriod, averageTimeUnit, executor, historySize, historyPeriod, historyTimeUnit);
   }

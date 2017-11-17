@@ -21,6 +21,6 @@ package org.terracotta.context.extended;
 public enum RegistrationType {
   COMPOUND,
   RATIO,
-  SIZE,
+  GAUGE,
   COUNTER
 }
