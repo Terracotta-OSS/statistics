@@ -60,7 +60,4 @@ public class SampledStatisticAdapter<T extends Serializable> implements SampledS
     return new SampledStatisticAdapter<>(accessor, timeSource);
   }
 
-  public static <T extends Serializable> SampledStatistic<T> sample(ValueStatistic<T> accessor) {
-    return new SampledStatisticAdapter<>(accessor, Time::absoluteTime);
-  }
 }

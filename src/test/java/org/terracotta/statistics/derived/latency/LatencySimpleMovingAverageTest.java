@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terracotta.statistics.derived;
+package org.terracotta.statistics.derived.latency;
 
 import org.junit.AfterClass;
 import org.junit.Test;

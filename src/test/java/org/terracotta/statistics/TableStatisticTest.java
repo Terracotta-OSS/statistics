@@ -37,7 +37,7 @@ public class TableStatisticTest {
 
   @Test
   public void test_returning_live_independent_stats() throws Exception {
-    StatisticRegistry registry = new StatisticRegistry(this);
+    StatisticRegistry registry = new StatisticRegistry(this, Time::absoluteTime);
 
     // fetching the live stats
     Map<String, Map<String, Supplier<Number>>> liveDbStats = getLiveDbStats();
@@ -58,7 +58,7 @@ public class TableStatisticTest {
 
   @Test
   public void test_returning_dependent_stats_snapshot() throws Exception {
-    StatisticRegistry registry = new StatisticRegistry(this);
+    StatisticRegistry registry = new StatisticRegistry(this, Time::absoluteTime);
 
     // create a statistic that is fetched when queried
     registry.registerTable("Database:TopQueries", () -> {

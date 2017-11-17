@@ -22,24 +22,25 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * @author cdennis
  */
-public class StatisticArchive<T extends Serializable> implements SampleSink<Sample<T>> {
+public class StatisticArchive<T extends Serializable> {
 
   private static final Comparator<Sample<?>> TIMESTAMPED_COMPARATOR = Comparator.comparingLong(Sample::getTimestamp);
 
-  private final SampleSink<? super Sample<T>> overspill;
+  private final Consumer<? super Sample<T>> overspill;
 
   private volatile int size;
   private volatile CircularBuffer<Sample<T>> buffer;
 
   public StatisticArchive(int size) {
-    this(size, SampleSink.devNull());
+    this(size, sample -> {});
   }
 
-  public StatisticArchive(int size, SampleSink<? super Sample<T>> overspill) {
+  public StatisticArchive(int size, Consumer<? super Sample<T>> overspill) {
     this.size = size;
     this.overspill = overspill;
   }
@@ -57,8 +58,7 @@ public class StatisticArchive<T extends Serializable> implements SampleSink<Samp
     }
   }
 
-  @Override
-  public synchronized void accept(Sample<T> object) {
+  public synchronized void add(Sample<T> object) {
     if (buffer == null) {
       buffer = new CircularBuffer<>(size);
     }

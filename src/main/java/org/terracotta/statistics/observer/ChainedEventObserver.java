@@ -26,8 +26,8 @@ public interface ChainedEventObserver extends ChainedObserver {
   /**
    * Called to indicate an event happened.
    *
-   * @param time    the time at event completion
-   * @param latency the event latency
+   * @param time    the clock at event completion in ns
+   * @param latency the event latency in ns
    */
   void event(long time, long latency);
 }

@@ -24,8 +24,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-
-import static org.terracotta.statistics.Time.absoluteTime;
+import java.util.function.Consumer;
+import java.util.function.LongSupplier;
 
 /**
  * @author cdennis
@@ -39,11 +39,11 @@ public class StatisticSampler<T extends Serializable> {
   private ScheduledFuture<?> currentExecution;
   private long period;
 
-  public StatisticSampler(long time, TimeUnit unit, ValueStatistic<T> statistic, SampleSink<Sample<T>> sink) {
-    this(null, time, unit, statistic, sink);
+  public StatisticSampler(long time, TimeUnit unit, ValueStatistic<T> statistic, Consumer<Sample<T>> sink, LongSupplier timeSupplier) {
+    this(null, time, unit, statistic, sink, timeSupplier);
   }
 
-  public StatisticSampler(ScheduledExecutorService executor, long time, TimeUnit unit, ValueStatistic<T> statistic, SampleSink<Sample<T>> sink) {
+  public StatisticSampler(ScheduledExecutorService executor, long time, TimeUnit unit, ValueStatistic<T> statistic, Consumer<Sample<T>> sink, LongSupplier timeSupplier) {
     if (executor == null) {
       this.exclusiveExecutor = true;
       this.executor = Executors.newSingleThreadScheduledExecutor(new SamplerThreadFactory());
@@ -52,7 +52,7 @@ public class StatisticSampler<T extends Serializable> {
       this.executor = executor;
     }
     this.period = unit.toNanos(time);
-    this.task = new SamplingTask<>(statistic, sink);
+    this.task = new SamplingTask<>(statistic, sink, timeSupplier);
   }
 
   public synchronized void setPeriod(long time, TimeUnit unit) {
@@ -93,16 +93,18 @@ public class StatisticSampler<T extends Serializable> {
   static class SamplingTask<T extends Serializable> implements Runnable {
 
     private final ValueStatistic<T> statistic;
-    private final SampleSink<Sample<T>> sink;
+    private final Consumer<Sample<T>> sink;
+    private final LongSupplier timeSupplier;
 
-    SamplingTask(ValueStatistic<T> statistic, SampleSink<Sample<T>> sink) {
+    SamplingTask(ValueStatistic<T> statistic, Consumer<Sample<T>> sink, LongSupplier timeSupplier) {
       this.statistic = statistic;
       this.sink = sink;
+      this.timeSupplier = timeSupplier;
     }
 
     @Override
     public void run() {
-      sink.accept(new Sample<>(absoluteTime(), statistic.value()));
+      sink.accept(new Sample<>(timeSupplier.getAsLong(), statistic.value()));
     }
   }
 

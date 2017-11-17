@@ -19,6 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.terracotta.statistics.StatisticType;
 import org.terracotta.statistics.StatisticsManager;
+import org.terracotta.statistics.Time;
 import org.terracotta.statistics.observer.OperationObserver;
 
 import java.io.Serializable;
@@ -45,7 +46,7 @@ import static org.terracotta.statistics.ValueStatistics.gauge;
 public class StatisticRegistryTest {
 
   OperationObserver<TimeUnit> timeUnitObserver = operation(TimeUnit.class).named("timeUnit").property("discriminator", "Axis").of(this).tag("axis").build();
-  StatisticRegistry registry = new StatisticRegistry(this);
+  StatisticRegistry registry = new StatisticRegistry(this, Time::absoluteTime);
 
   @Before
   public void setUp() throws Exception {
@@ -60,7 +61,7 @@ public class StatisticRegistryTest {
 
     registry.registerCounter("Cache:Hits", () -> 1L);
     registry.registerGauge("Cache:OffHeapMemoryUsed", () -> 1024L);
-    registry.registerStatistic("Cache:GetLatencies", sample(gauge(() -> 100L)));
+    registry.registerStatistic("Cache:GetLatencies", sample(gauge(() -> 100L), Time::absoluteTime));
     registry.registerStatistic("Cache:PutLatencies", gauge(() -> 200L));
     registry.registerStatistic("Cache:ClearLatencies", GAUGE, () -> 300L);
     assertThat(registry.registerStatistic("AllocatedMemory", ValueStatisticDescriptor.descriptor("allocatedMemory", "tier", "OffHeapResource")), is(true));

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terracotta.statistics.derived;
+package org.terracotta.statistics.derived.latency;
 
 import org.terracotta.statistics.ValueStatistic;
 
@@ -35,9 +35,9 @@ public interface LatencyStatistic {
   Long maximum();
 
   /**
-   * @return The average in ns or null if it does not exist yet
+   * @return The average in ns
    */
-  Double average();
+  double average();
 
   default ValueStatistic<Double> averageStatistic() {
     return gauge(this::average);

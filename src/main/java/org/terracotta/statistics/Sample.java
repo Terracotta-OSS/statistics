@@ -37,6 +37,9 @@ public class Sample<T extends Serializable> implements Serializable {
     return sample;
   }
 
+  /**
+   * @return The sample time in milliseconds
+   */
   public long getTimestamp() {
     return timestamp;
   }

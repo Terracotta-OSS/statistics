@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terracotta.statistics.derived;
+package org.terracotta.statistics.derived.latency;
 
 import org.junit.Test;
 
@@ -24,14 +24,14 @@ import static org.junit.Assert.assertThat;
 /**
  * @author cdennis
  */
-public class LatencyMinMaxAverageTest {
+public class LatencyAccumulatorTest {
 
   @Test
   public void testMinimumBehavior() {
-    LatencyMinMaxAverage stats = new LatencyMinMaxAverage();
+    LatencyAccumulator stats = LatencyAccumulator.empty();
 
     assertThat(stats.minimum(), nullValue());
-    stats.event(0, 100L);
+    stats.accumulate(100L);
     assertThat(stats.minimum(), is(100L));
     stats.event(0, 200L);
     assertThat(stats.minimum(), is(100L));
@@ -49,7 +49,7 @@ public class LatencyMinMaxAverageTest {
 
   @Test
   public void testMaximumBehavior() {
-    LatencyMinMaxAverage stats = new LatencyMinMaxAverage();
+    LatencyAccumulator stats = LatencyAccumulator.empty();
 
     assertThat(stats.maximum(), nullValue());
     stats.event(0, -100L);
@@ -70,9 +70,9 @@ public class LatencyMinMaxAverageTest {
 
   @Test
   public void testAverageBehavior() {
-    LatencyMinMaxAverage stats = new LatencyMinMaxAverage();
+    LatencyAccumulator stats = LatencyAccumulator.empty();
 
-    assertThat(stats.average(), nullValue());
+    assertThat(stats.average(), is(Double.NaN));
     stats.event(0, 1L);
     assertThat(stats.average(), is(1.0));
     stats.event(0, 3L);
@@ -80,5 +80,17 @@ public class LatencyMinMaxAverageTest {
     stats.event(0, 0L);
     stats.event(0, 0L);
     assertThat(stats.average(), is(1.0));
+  }
+
+  @Test
+  public void testAccumulate() {
+    LatencyAccumulator a3 = LatencyAccumulator.empty();
+    a3.accumulate(LatencyAccumulator.accumulator(1, 2, 3));
+    a3.accumulate(LatencyAccumulator.accumulator(4, 5, 6));
+
+    assertThat(a3.count(), is(6L));
+    assertThat(a3.average(), is(3.5D));
+    assertThat(a3.minimum(), is(1L));
+    assertThat(a3.maximum(), is(6L));
   }
 }
