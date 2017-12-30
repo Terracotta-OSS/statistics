@@ -16,8 +16,9 @@
 package org.terracotta.statistics.extended;
 
 import org.terracotta.statistics.ValueStatistic;
-import org.terracotta.statistics.archive.Timestamped;
+import org.terracotta.statistics.archive.Sample;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -25,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * The Class StatisticImpl.
  */
-class SampledStatisticImpl<T extends Number> extends AbstractSampledStatistic<T> {
+class SampledStatisticImpl<T extends Serializable> extends AbstractSampledStatistic<T> {
 
   private final LatencyImpl latency;
 
@@ -38,12 +39,11 @@ class SampledStatisticImpl<T extends Number> extends AbstractSampledStatistic<T>
    * @param historyPeriod   the history period
    * @param historyTimeUnit the history time unit
    */
-  public SampledStatisticImpl(LatencyImpl latency, ValueStatistic<T> value, ScheduledExecutorService executor, int historySize, long historyPeriod, TimeUnit historyTimeUnit, StatisticType type) {
-    super(value, executor, historySize, historyPeriod, historyTimeUnit, type);
+  public SampledStatisticImpl(LatencyImpl latency, ValueStatistic<T> value, ScheduledExecutorService executor, int historySize, long historyPeriod, TimeUnit historyTimeUnit) {
+    super(value, executor, historySize, historyPeriod, historyTimeUnit);
     this.latency = latency;
   }
 
-  @Override
   public boolean active() {
     return latency.active();
   }
@@ -55,13 +55,13 @@ class SampledStatisticImpl<T extends Number> extends AbstractSampledStatistic<T>
   }
 
   @Override
-  public List<Timestamped<T>> history() {
+  public List<Sample<T>> history() {
     latency.touch();
     return super.history();
   }
 
   @Override
-  public List<Timestamped<T>> history(long since) {
+  public List<Sample<T>> history(long since) {
     latency.touch();
     return super.history(since);
   }

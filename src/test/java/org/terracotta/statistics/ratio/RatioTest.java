@@ -19,7 +19,7 @@ import org.junit.After;
 import org.junit.Test;
 import org.terracotta.context.extended.OperationStatisticDescriptor;
 import org.terracotta.context.extended.StatisticsRegistry;
-import org.terracotta.statistics.archive.Timestamped;
+import org.terracotta.statistics.archive.Sample;
 
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -63,7 +63,7 @@ public class RatioTest {
         allOf(TierOperationOutcomes.GetOutcome.class));
 
     // trigger computation
-    List<? extends Timestamped<? extends Number>> list = statisticsRegistry.findSampledStatistic("OnHeap:HitRatio").history();
+    List<? extends Sample<?>> list = statisticsRegistry.findSampledStatistic("OnHeap:HitRatio").history();
     System.out.println("triggered task scheduling: " + list.size() + " samples");
     long since = System.currentTimeMillis();
 
@@ -89,8 +89,8 @@ public class RatioTest {
       list = statisticsRegistry.findSampledStatistic("OnHeap:HitRatio").history(since);
       System.out.println(list.size() + " samples since " + since);
       since = System.currentTimeMillis();
-      for (Timestamped<? extends Number> timestamped : list) {
-        System.out.println(timestamped.getTimestamp() + " - " + timestamped.getSample());
+      for (Sample<?> sample : list) {
+        System.out.println(sample.getTimestamp() + " - " + sample.getSample());
       }
       try {
         Thread.sleep(1000);

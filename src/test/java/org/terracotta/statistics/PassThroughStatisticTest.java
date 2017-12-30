@@ -22,7 +22,6 @@ import org.terracotta.context.query.Query;
 
 import java.util.Collections;
 import java.util.Set;
-import java.util.concurrent.Callable;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertFalse;
@@ -32,6 +31,8 @@ import static org.terracotta.context.query.Matchers.attributes;
 import static org.terracotta.context.query.Matchers.context;
 import static org.terracotta.context.query.Matchers.hasAttribute;
 import static org.terracotta.context.query.QueryBuilder.queryBuilder;
+import static org.terracotta.statistics.extended.StatisticType.COUNTER;
+import static org.terracotta.statistics.extended.StatisticType.GAUGE;
 
 /**
  *
@@ -39,12 +40,10 @@ import static org.terracotta.context.query.QueryBuilder.queryBuilder;
  */
 public class PassThroughStatisticTest {
 
-  private Callable<Number> callable = () -> 12;
-
   @Test
   public void testClean() {
     StatisticsManager.createPassThroughStatistic(this, "mystat",
-        Collections.emptySet(), callable);
+        Collections.emptySet(), COUNTER, () -> 12);
 
     assertTrue(PassThroughStatistic.hasStatisticsFor(this));
 
@@ -72,7 +71,9 @@ public class PassThroughStatisticTest {
     ValueStatistic<Number> barStat = extractThis(bar);
 
     assertThat(fooStat.value(), equalTo(42));
+    assertThat(fooStat.type(), equalTo(COUNTER));
     assertThat(barStat.value(), equalTo(42L));
+    assertThat(barStat.type(), equalTo(GAUGE));
   }
 
   @SuppressWarnings("unchecked")
@@ -83,7 +84,7 @@ public class PassThroughStatisticTest {
   @Test(expected = IllegalArgumentException.class)
   public void testAnnotationBasedStatFailsWithParameter() {
     new StatisticsManager().root(new Object() {
-      @Statistic(name = "foo")
+      @Statistic(name = "foo", type = COUNTER)
       public Integer foo(String haha) {
         return 42;
       }
@@ -98,7 +99,7 @@ public class PassThroughStatisticTest {
   @Test(expected = IllegalArgumentException.class)
   public void testAnnotationBasedStatFailsWithIncorrectReturn() {
     new StatisticsManager().root(new Object() {
-      @Statistic(name = "foo")
+      @Statistic(name = "foo", type = COUNTER)
       public String foo() {
         return "42";
       }
@@ -107,19 +108,19 @@ public class PassThroughStatisticTest {
 
   static class Foo {
 
-    @Statistic(name = "foostat")
+    @Statistic(name = "foostat", type = COUNTER)
     public Integer foo() {
       return 42;
     }
 
-    @Statistic(name = "barstat")
+    @Statistic(name = "barstat", type = GAUGE)
     public long bar() {
       return 42L;
     }
   }
   
   static class FooStatic {
-    @Statistic(name = "foo")
+    @Statistic(name = "foo", type = COUNTER)
     public static Integer foo() {
       return 42;
     }

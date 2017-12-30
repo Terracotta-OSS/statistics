@@ -15,6 +15,7 @@
  */
 package org.terracotta.statistics.archive;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
@@ -29,6 +30,9 @@ import org.terracotta.statistics.ConstantValueStatistic;
 import static org.hamcrest.collection.IsCollectionWithSize.*;
 import static org.hamcrest.number.OrderingComparison.*;
 import static org.junit.Assert.assertThat;
+import static org.terracotta.statistics.SuppliedValueStatistic.supply;
+import static org.terracotta.statistics.extended.StatisticType.COUNTER;
+import static org.terracotta.statistics.extended.StatisticType.GAUGE;
 import static org.terracotta.util.RetryAssert.assertBy;
 
 /**
@@ -39,9 +43,9 @@ public class StatisticSamplerTest {
   
   @Test
   public void testUnstartedSampler() throws InterruptedException {
-    StatisticSampler<Integer> sampler = new StatisticSampler<Integer>(1L, TimeUnit.NANOSECONDS, () -> {
+    StatisticSampler<Integer> sampler = new StatisticSampler<>(1L, TimeUnit.NANOSECONDS, supply(COUNTER, () -> {
       throw new AssertionError();
-    }, SampleSink.devNull());
+    }), SampleSink.devNull());
     
     sampler.shutdown();
   }
@@ -51,7 +55,7 @@ public class StatisticSamplerTest {
     ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     try {
       StatisticSampler<Integer> sampler = new StatisticSampler<>(executor, 1L, TimeUnit.NANOSECONDS, ConstantValueStatistic
-          .instance(42), SampleSink.devNull());
+          .instance(COUNTER, 42), SampleSink.devNull());
       sampler.shutdown();
     } finally {
       executor.shutdown();
@@ -61,9 +65,9 @@ public class StatisticSamplerTest {
   @Test
   public void testLongPeriodSampler() throws InterruptedException {
     StatisticArchive<Integer> archive = new StatisticArchive<>(1);
-    StatisticSampler<Integer> sampler = new StatisticSampler<>(1L, TimeUnit.HOURS, () -> {
+    StatisticSampler<Integer> sampler = new StatisticSampler<>(1L, TimeUnit.HOURS, supply(COUNTER, () -> {
       throw new AssertionError();
-    }, archive);
+    }), archive);
     try {
       sampler.start();
       TimeUnit.SECONDS.sleep(1);
@@ -76,7 +80,7 @@ public class StatisticSamplerTest {
   @Test
   public void testShortPeriodSampler() throws InterruptedException {
     StatisticArchive<Integer> archive = new StatisticArchive<>(20);
-    StatisticSampler<Integer> sampler = new StatisticSampler<>(100L, TimeUnit.MILLISECONDS, ConstantValueStatistic.instance(42), archive);
+    StatisticSampler<Integer> sampler = new StatisticSampler<>(100L, TimeUnit.MILLISECONDS, ConstantValueStatistic.instance(GAUGE, 42), archive);
     try {
       sampler.start();
       TimeUnit.SECONDS.sleep(1);
@@ -89,7 +93,7 @@ public class StatisticSamplerTest {
   @Test
   public void testStoppingAndStartingSampler() throws InterruptedException {
     StatisticArchive<Integer> archive = new StatisticArchive<>(20);
-    StatisticSampler<Integer> sampler = new StatisticSampler<>(200L, TimeUnit.MILLISECONDS, ConstantValueStatistic.instance(42), archive);
+    StatisticSampler<Integer> sampler = new StatisticSampler<>(200L, TimeUnit.MILLISECONDS, ConstantValueStatistic.instance(GAUGE, 42), archive);
     try {
       sampler.start();
       assertBy(1, TimeUnit.SECONDS, contentsOf(archive), hasSize(1));
@@ -104,7 +108,7 @@ public class StatisticSamplerTest {
     }
   }
   
-  static <T> Callable<List<Timestamped<T>>> contentsOf(final StatisticArchive<T> archive) {
+  static <T extends Serializable> Callable<List<Sample<T>>> contentsOf(final StatisticArchive<T> archive) {
     return archive::getArchive;
   }
   

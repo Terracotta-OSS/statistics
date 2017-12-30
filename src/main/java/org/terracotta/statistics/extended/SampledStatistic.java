@@ -15,43 +15,30 @@
  */
 package org.terracotta.statistics.extended;
 
-import org.terracotta.statistics.archive.Timestamped;
+import org.terracotta.statistics.ValueStatistic;
+import org.terracotta.statistics.archive.Sample;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * @author Ludovic Orban
  */
-public interface SampledStatistic<T extends Number> {
+public interface SampledStatistic<T extends Serializable> extends ValueStatistic<T> {
 
   /**
-   * Active.
-   *
-   * @return true, if successful
-   */
-  boolean active();
-
-  /**
-   * Value.
-   *
-   * @return the t
-   */
-  T value();
-
-  /**
-   * History.
+   * The history of values
    *
    * @return the list
    */
-  List<Timestamped<T>> history();
+  List<Sample<T>> history();
 
   /**
-   * History, from a given time in ms
+   * The history of values, since a given time in ms
    *
    * @param since starting point of history in ms
    * @return the list
    */
-  List<Timestamped<T>> history(long since);
+  List<Sample<T>> history(long since);
 
-  StatisticType type();
 }

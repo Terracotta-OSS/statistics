@@ -22,10 +22,8 @@ public enum StatisticType {
 
   COUNTER,
   RATE,
-  LATENCY_MIN,
-  LATENCY_MAX,
-  LATENCY_AVG,
   RATIO,
-  SIZE
+  GAUGE,
+  TABLE
 
 }

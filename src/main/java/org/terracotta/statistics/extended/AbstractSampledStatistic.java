@@ -16,8 +16,9 @@
 package org.terracotta.statistics.extended;
 
 import org.terracotta.statistics.ValueStatistic;
-import org.terracotta.statistics.archive.Timestamped;
+import org.terracotta.statistics.archive.Sample;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -28,7 +29,7 @@ import java.util.concurrent.TimeUnit;
  * @param <T> the generic type
  * @author cdennis
  */
-abstract class AbstractSampledStatistic<T extends Number> implements SampledStatistic<T> {
+abstract class AbstractSampledStatistic<T extends Serializable> implements SampledStatistic<T> {
 
   /**
    * The source.
@@ -39,7 +40,6 @@ abstract class AbstractSampledStatistic<T extends Number> implements SampledStat
    * The history.
    */
   private final StatisticHistory<T> history;
-  private final StatisticType type;
 
   /**
    * Instantiates a new abstract statistic.
@@ -47,11 +47,9 @@ abstract class AbstractSampledStatistic<T extends Number> implements SampledStat
    * @param historySize     the history size
    * @param historyPeriod   the history period
    * @param historyTimeUnit the history time unit
-   * @param type type of statistic sampled
    */
-  AbstractSampledStatistic(ValueStatistic<T> source, ScheduledExecutorService executor, int historySize, long historyPeriod, TimeUnit historyTimeUnit, StatisticType type) {
+  AbstractSampledStatistic(ValueStatistic<T> source, ScheduledExecutorService executor, int historySize, long historyPeriod, TimeUnit historyTimeUnit) {
     this.source = source;
-    this.type = type;
     this.history = new StatisticHistory<>(source, executor, historySize, historyPeriod, historyTimeUnit);
   }
 
@@ -67,18 +65,18 @@ abstract class AbstractSampledStatistic<T extends Number> implements SampledStat
    * {@inheritDoc}
    */
   @Override
-  public List<Timestamped<T>> history() {
+  public List<Sample<T>> history() {
     return history.history();
   }
 
   @Override
-  public List<Timestamped<T>> history(long since) {
+  public List<Sample<T>> history(long since) {
     return history.history(since);
   }
 
   @Override
   public StatisticType type() {
-    return type;
+    return source.type();
   }
 
   /**

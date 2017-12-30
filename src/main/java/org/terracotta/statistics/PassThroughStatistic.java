@@ -15,28 +15,29 @@
  */
 package org.terracotta.statistics;
 
+import org.terracotta.context.WeakIdentityHashMap;
+import org.terracotta.context.annotations.ContextAttribute;
+import org.terracotta.statistics.extended.StatisticType;
+
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.terracotta.context.WeakIdentityHashMap;
-import org.terracotta.context.annotations.ContextAttribute;
-
 @ContextAttribute(value="this")
-class PassThroughStatistic<T extends Number> implements ValueStatistic<T> {
+class PassThroughStatistic<T extends Serializable> implements ValueStatistic<T> {
 
-  private static final WeakIdentityHashMap<Object, Collection<PassThroughStatistic<?>>> BINDING = new WeakIdentityHashMap<>();
+  private static final WeakIdentityHashMap<Object, Collection<PassThroughStatistic<? extends Serializable>>> BINDING = new WeakIdentityHashMap<>();
   
-  private static void bindStatistic(PassThroughStatistic<?> stat, Object to) {
-    Collection<PassThroughStatistic<?>> collection = BINDING.get(to);
+  private static <T extends Serializable> void bindStatistic(PassThroughStatistic<T> stat, Object to) {
+    Collection<PassThroughStatistic<? extends Serializable>> collection = BINDING.get(to);
     if (collection == null) {
       collection = new CopyOnWriteArrayList<>();
-      Collection<PassThroughStatistic<?>> racer = BINDING.putIfAbsent(to, collection);
+      Collection<PassThroughStatistic<? extends Serializable>> racer = BINDING.putIfAbsent(to, collection);
       if (racer != null) {
         collection = racer;
       }
@@ -55,22 +56,25 @@ class PassThroughStatistic<T extends Number> implements ValueStatistic<T> {
   @ContextAttribute("name") public final String name;
   @ContextAttribute("tags") public final Set<String> tags;
   @ContextAttribute("properties") public final Map<String, Object> properties;
-  private final Callable<T> source;
-  
-  public PassThroughStatistic(Object context, String name, Set<String> tags, Map<String, ? extends Object> properties, Callable<T> source) {
+  @ContextAttribute("type") public final StatisticType type;
+  private final ValueStatistic<T> source;
+
+  public PassThroughStatistic(Object context, String name, Set<String> tags, Map<String, ? extends Object> properties, ValueStatistic<T> source) {
     this.name = name;
     this.tags = Collections.unmodifiableSet(new HashSet<>(tags));
     this.properties = Collections.unmodifiableMap(new HashMap<String, Object>(properties));
     this.source = source;
+    this.type = source.type();
     bindStatistic(this, context);
   }
 
   @Override
   public T value() {
-    try {
-      return source.call();
-    } catch (Exception ex) {
-      throw new RuntimeException(ex);
-    }
+    return source.value();
+  }
+
+  @Override
+  public StatisticType type() {
+    return type;
   }
 }

@@ -25,6 +25,9 @@ import java.util.Set;
 import org.terracotta.context.annotations.ContextAttribute;
 import org.terracotta.statistics.observer.ChainedOperationObserver;
 
+import static org.terracotta.statistics.SuppliedValueStatistic.supply;
+import static org.terracotta.statistics.extended.StatisticType.COUNTER;
+
 /**
  *
  * @author cdennis
@@ -53,22 +56,6 @@ public abstract class AbstractOperationStatistic<T extends Enum<T>> extends Abst
   @Override
   public Class<T> type() {
     return type;
-  }
-  
-  /**
-   * Return a {@link ValueStatistic} returning the count for the given result.
-   * 
-   * @param result the result of interest 
-   * @return a {@code ValueStatistic} instance
-   */
-  @Override
-  public ValueStatistic<Long> statistic(final T result) {
-    return () -> count(result);
-  }
-
-  @Override
-  public ValueStatistic<Long> statistic(final Set<T> results) {
-    return () -> sum(results);
   }
   
   @Override
