@@ -15,39 +15,38 @@
  */
 package org.terracotta.context.query;
 
+import org.terracotta.context.ContextElement;
+import org.terracotta.context.TreeNode;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.terracotta.context.ContextElement;
-import org.terracotta.context.TreeNode;
-
 /**
- *
  * @author cdennis
  */
 public class QueryTestUtils {
-  
-  public static  TreeNode createTreeNode(Class identifier) {
+
+  public static TreeNode createTreeNode(Class identifier) {
     return createTreeNode(identifier, Collections.emptyMap());
   }
-  
-  public static  TreeNode createTreeNode(Class identifier, Map<String, Object> attributes) {
+
+  public static TreeNode createTreeNode(Class identifier, Map<String, Object> attributes) {
     return createTreeNode(identifier, attributes, Collections.emptySet());
   }
-  
-  public static  TreeNode createTreeNode(Class identifier, Set<TreeNode> children) {
+
+  public static TreeNode createTreeNode(Class identifier, Set<TreeNode> children) {
     return createTreeNode(identifier, Collections.emptyMap(), children);
   }
-  
-  public static  TreeNode createTreeNode(Class identifier, Map<String, Object> attributes, Set<TreeNode> children) {
+
+  public static TreeNode createTreeNode(Class identifier, Map<String, Object> attributes, Set<TreeNode> children) {
     return new ImmutableTreeNode(children, new ImmutableContextElement(identifier, attributes));
   }
-  
+
   static class ImmutableTreeNode implements TreeNode {
-    
+
     private final Set<? extends TreeNode> children;
     private final ContextElement context;
 
@@ -75,7 +74,7 @@ public class QueryTestUtils {
     public ContextElement getContext() {
       return context;
     }
-    
+
     @Override
     public String toString() {
       return context.toString();
@@ -91,7 +90,7 @@ public class QueryTestUtils {
       throw new UnsupportedOperationException("Not supported yet.");
     }
   }
-  
+
   static class ImmutableContextElement implements ContextElement {
 
     private final Class identifier;
@@ -111,7 +110,7 @@ public class QueryTestUtils {
     public Map<String, Object> attributes() {
       return attributes;
     }
-    
+
     @Override
     public String toString() {
       if (attributes.isEmpty()) {
@@ -121,15 +120,24 @@ public class QueryTestUtils {
       }
     }
   }
-  
+
   public static class A {}
+
   public static class B {}
+
   public static class C {}
+
   public static class D {}
+
   public static class E {}
+
   public static class F {}
+
   public static class G {}
+
   public static class H {}
+
   public static class I {}
+
   public static class J {}
 }

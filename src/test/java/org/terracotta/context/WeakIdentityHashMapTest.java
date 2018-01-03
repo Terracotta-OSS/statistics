@@ -15,32 +15,32 @@
  */
 package org.terracotta.context;
 
+import org.junit.Test;
+
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.util.LinkedList;
 import java.util.Queue;
-import org.junit.Test;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 
 /**
- *
  * @author cdennis
  */
 public class WeakIdentityHashMapTest {
-  
+
   @Test
   public void testEnqueuedReferenceIsRemoved() {
     Queue<Reference<String>> references = new LinkedList<>();
     WeakIdentityHashMap<String, String> map = createRefTrackingWeakIdentityHashMap(references);
-    
+
     assertThat(map.putIfAbsent("test", "test"), nullValue());
     assertThat(map.get("test"), is("test"));
-    
+
     references.remove().enqueue();
-    
+
     assertThat(map.get("test"), nullValue());
   }
 
@@ -48,13 +48,13 @@ public class WeakIdentityHashMapTest {
   public void testEnqueuedCleanableReferenceIsRemovedAndCleaned() {
     Queue<Reference<String>> references = new LinkedList<>();
     WeakIdentityHashMap<String, DummyCleanable> map = createRefTrackingWeakIdentityHashMap(references);
-    
+
     DummyCleanable value = new DummyCleanable();
     assertThat(map.putIfAbsent("test", value), nullValue());
     assertThat(map.get("test"), is(value));
-    
+
     references.remove().enqueue();
-    
+
     assertThat(map.get("test"), nullValue());
     assertThat(value.isClean(), is(true));
   }
@@ -88,7 +88,7 @@ public class WeakIdentityHashMapTest {
   static class DummyCleanable implements WeakIdentityHashMap.Cleanable {
 
     private boolean cleaned = false;
-    
+
     @Override
     public void clean() {
       cleaned = true;

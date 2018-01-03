@@ -17,15 +17,15 @@ package org.terracotta.statistics.registry;
 
 import org.terracotta.context.ContextManager;
 import org.terracotta.context.TreeNode;
-import org.terracotta.statistics.SampledStatistic;
 import org.terracotta.context.query.Matcher;
 import org.terracotta.context.query.Matchers;
 import org.terracotta.statistics.OperationStatistic;
+import org.terracotta.statistics.Sample;
+import org.terracotta.statistics.SampledStatistic;
 import org.terracotta.statistics.StatisticType;
 import org.terracotta.statistics.Table;
 import org.terracotta.statistics.Time;
 import org.terracotta.statistics.ValueStatistic;
-import org.terracotta.statistics.Sample;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -46,11 +46,11 @@ import static org.terracotta.context.query.Matchers.hasAttribute;
 import static org.terracotta.context.query.Matchers.identifier;
 import static org.terracotta.context.query.Matchers.subclassOf;
 import static org.terracotta.context.query.QueryBuilder.queryBuilder;
+import static org.terracotta.statistics.SampledStatisticAdapter.sample;
 import static org.terracotta.statistics.SuppliedValueStatistic.counter;
 import static org.terracotta.statistics.SuppliedValueStatistic.gauge;
 import static org.terracotta.statistics.SuppliedValueStatistic.supply;
 import static org.terracotta.statistics.SuppliedValueStatistic.table;
-import static org.terracotta.statistics.SampledStatisticAdapter.sample;
 
 /**
  * This class replaces the previous {@link StatisticRegistry}

@@ -20,7 +20,7 @@ import java.lang.reflect.Field;
 abstract class FieldAttributeGetter<T> implements AttributeGetter<T> {
 
   private final Field field;
-  
+
   FieldAttributeGetter(Field field) {
     field.setAccessible(true);
     this.field = field;

@@ -15,6 +15,9 @@
  */
 package org.terracotta.statistics.archive;
 
+import org.terracotta.statistics.Sample;
+import org.terracotta.statistics.ValueStatistic;
+
 import java.io.Serializable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -22,13 +25,9 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
-import org.terracotta.statistics.Sample;
-import org.terracotta.statistics.ValueStatistic;
-
 import static org.terracotta.statistics.Time.absoluteTime;
 
 /**
- *
  * @author cdennis
  */
 public class StatisticSampler<T extends Serializable> {
@@ -36,14 +35,14 @@ public class StatisticSampler<T extends Serializable> {
   private final boolean exclusiveExecutor;
   private final ScheduledExecutorService executor;
   private final SamplingTask<T> task;
-  
+
   private ScheduledFuture<?> currentExecution;
-  private long period;  
-  
+  private long period;
+
   public StatisticSampler(long time, TimeUnit unit, ValueStatistic<T> statistic, SampleSink<Sample<T>> sink) {
     this(null, time, unit, statistic, sink);
   }
-  
+
   public StatisticSampler(ScheduledExecutorService executor, long time, TimeUnit unit, ValueStatistic<T> statistic, SampleSink<Sample<T>> sink) {
     if (executor == null) {
       this.exclusiveExecutor = true;
@@ -55,7 +54,7 @@ public class StatisticSampler<T extends Serializable> {
     this.period = unit.toNanos(time);
     this.task = new SamplingTask<>(statistic, sink);
   }
-  
+
   public synchronized void setPeriod(long time, TimeUnit unit) {
     this.period = unit.toNanos(time);
     if (currentExecution != null && !currentExecution.isDone()) {
@@ -79,34 +78,34 @@ public class StatisticSampler<T extends Serializable> {
       currentExecution.cancel(false);
     }
   }
-  
+
   public synchronized void shutdown() throws InterruptedException {
     if (exclusiveExecutor) {
-        executor.shutdown();
-        if (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
-          throw new IllegalStateException("Exclusive ScheduledExecutorService failed to terminate promptly");
-        }
+      executor.shutdown();
+      if (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
+        throw new IllegalStateException("Exclusive ScheduledExecutorService failed to terminate promptly");
+      }
     } else {
       throw new IllegalStateException("ScheduledExecutorService was supplied externally - it must be shutdown directly");
     }
   }
-  
+
   static class SamplingTask<T extends Serializable> implements Runnable {
 
     private final ValueStatistic<T> statistic;
     private final SampleSink<Sample<T>> sink;
-    
+
     SamplingTask(ValueStatistic<T> statistic, SampleSink<Sample<T>> sink) {
       this.statistic = statistic;
       this.sink = sink;
     }
-    
+
     @Override
     public void run() {
       sink.accept(new Sample<>(absoluteTime(), statistic.value()));
     }
   }
-  
+
   static class SamplerThreadFactory implements ThreadFactory {
 
     @Override

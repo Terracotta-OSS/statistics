@@ -15,29 +15,29 @@
  */
 package org.terracotta.statistics.strawman;
 
+import org.terracotta.context.annotations.ContextAttribute;
+
 import java.util.ArrayList;
 import java.util.Collection;
-
-import org.terracotta.context.annotations.ContextAttribute;
 
 import static org.terracotta.statistics.StatisticsManager.associate;
 import static org.terracotta.statistics.StatisticsManager.dissociate;
 
 public class CacheManager {
-  
+
   @ContextAttribute("name") private final String name;
-  
+
   private final Collection<Cache> caches = new ArrayList<>();
-  
+
   public CacheManager(String name) {
     this.name = name;
   }
-  
+
   public void addCache(Cache cache) {
     caches.add(cache);
     associate(this).withChild(cache);
   }
-  
+
   public void removeCache(Cache cache) {
     caches.remove(cache);
     dissociate(this).fromChild(cache);

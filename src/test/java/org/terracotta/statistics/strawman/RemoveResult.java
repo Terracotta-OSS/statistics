@@ -15,6 +15,6 @@
  */
 package org.terracotta.statistics.strawman;
 
-public   enum RemoveResult {
+public enum RemoveResult {
   SUCCESS, FAIL
 }

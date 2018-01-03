@@ -33,10 +33,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.METHOD, ElementType.TYPE})
 public @interface ContextAttribute {
-  
+
   /**
    * The name with which this attribute should be associated.
-   * 
+   *
    * @return the attribute name
    */
   String value();

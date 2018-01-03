@@ -16,6 +16,6 @@
 package org.terracotta.context.extractor;
 
 interface AttributeGetter<T> {
-  
+
   T get();
 }

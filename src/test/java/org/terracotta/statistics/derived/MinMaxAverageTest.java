@@ -17,20 +17,19 @@ package org.terracotta.statistics.derived;
 
 import org.junit.Test;
 
-import static org.hamcrest.core.Is.*;
-import static org.hamcrest.core.IsNull.*;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 
 /**
- *
  * @author cdennis
  */
 public class MinMaxAverageTest {
-  
+
   @Test
   public void testMinimumBehavior() {
     MinMaxAverage stats = new MinMaxAverage();
-    
+
     assertThat(stats.min(), nullValue());
     stats.event(0, 100L);
     assertThat(stats.min(), is(100L));
@@ -51,7 +50,7 @@ public class MinMaxAverageTest {
   @Test
   public void testMaximumBehavior() {
     MinMaxAverage stats = new MinMaxAverage();
-    
+
     assertThat(stats.max(), nullValue());
     stats.event(0, -100L);
     assertThat(stats.max(), is(-100L));

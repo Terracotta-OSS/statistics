@@ -24,7 +24,6 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 
 /**
- *
  * @author cdennis
  */
 public class StatisticArchiveTest {
@@ -44,7 +43,7 @@ public class StatisticArchiveTest {
     StatisticArchive<String> archive = new StatisticArchive<>(2);
     assertThat(archive.getArchive(), IsEmptyCollection.empty());
   }
-  
+
   @Test
   @SuppressWarnings("unchecked")
   public void testOccupiedArchive() {

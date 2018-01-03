@@ -18,7 +18,7 @@ package org.terracotta.statistics;
 import java.io.Serializable;
 
 public interface ValueStatistic<T extends Serializable> {
-  
+
   /**
    * @return The statistic type
    */

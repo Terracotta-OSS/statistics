@@ -35,10 +35,8 @@ public final class StatisticBuilder {
   /**
    * Operation.
    *
-   * @param <T>
-   *          the generic type
-   * @param type
-   *          the type
+   * @param <T>  the generic type
+   * @param type the type
    * @return the operation statistic builder
    */
   public static <T extends Enum<T>> OperationStatisticBuilder<T> operation(Class<T> type) {
@@ -48,20 +46,20 @@ public final class StatisticBuilder {
   /**
    * The Class OperationStatisticBuilder.
    *
-   * @param <T>
-   *          the generic type
+   * @param <T> the generic type
    */
   public static class OperationStatisticBuilder<T extends Enum<T>> extends
       AbstractStatisticBuilder<OperationStatisticBuilder<T>> {
 
-    /** The type. */
+    /**
+     * The type.
+     */
     private final Class<T> type;
 
     /**
      * Instantiates a new operation statistic builder.
      *
-     * @param type
-     *          the type
+     * @param type the type
      */
     public OperationStatisticBuilder(Class<T> type) {
       this.type = type;
@@ -84,28 +82,34 @@ public final class StatisticBuilder {
   /**
    * The Class AbstractStatisticBuilder.
    *
-   * @param <T>
-   *          the generic type
+   * @param <T> the generic type
    */
   static class AbstractStatisticBuilder<T extends AbstractStatisticBuilder> {
 
-    /** The tags. */
+    /**
+     * The tags.
+     */
     protected final Set<String> tags = new HashSet<>();
 
-    /** The properties. */
+    /**
+     * The properties.
+     */
     protected final Map<String, Object> properties = new HashMap<>();
 
-    /** The context. */
-    protected Object            context;
+    /**
+     * The context.
+     */
+    protected Object context;
 
-    /** The name. */
-    protected String            name;
+    /**
+     * The name.
+     */
+    protected String name;
 
     /**
      * Of.
      *
-     * @param of
-     *          the of
+     * @param of the of
      * @return the builder
      */
     @SuppressWarnings("unchecked")
@@ -121,8 +125,7 @@ public final class StatisticBuilder {
     /**
      * Named.
      *
-     * @param name
-     *          the name
+     * @param name the name
      * @return the builder
      */
     @SuppressWarnings("unchecked")
@@ -138,8 +141,7 @@ public final class StatisticBuilder {
     /**
      * Tag.
      *
-     * @param tags
-     *          the tags
+     * @param tags the tags
      * @return the builder
      */
     @SuppressWarnings("unchecked")
@@ -151,10 +153,8 @@ public final class StatisticBuilder {
     /**
      * Tag.
      *
-     * @param key
-     *          the property key
-     * @param value
-     *          the property value
+     * @param key   the property key
+     * @param value the property value
      * @return the builder
      */
     @SuppressWarnings("unchecked")

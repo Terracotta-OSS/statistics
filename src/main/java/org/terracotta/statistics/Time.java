@@ -19,7 +19,7 @@ package org.terracotta.statistics;
  * This class contains the static time-sources used within the framework.
  */
 public final class Time {
-  
+
   private static volatile TimeSource TIME_SOURCE = new TimeSource() {
 
     @Override
@@ -41,27 +41,27 @@ public final class Time {
    * Returns a timestamp in nanoseconds with an arbitrary origin suitable for
    * timing purposes.
    * <p>
-   * This contract is non-coincidentally reminiscent of 
+   * This contract is non-coincidentally reminiscent of
    * {@link System#nanoTime()}.
-   * 
+   *
    * @return a time in nanoseconds
    */
   public static long time() {
     return TIME_SOURCE.time();
   }
-  
+
   /**
    * Returns a timestamp in milliseconds whose origin is at the Unix Epoch.
    * <p>
-   * This contract is non-coincidentally reminiscent of 
+   * This contract is non-coincidentally reminiscent of
    * {@link System#currentTimeMillis()}.
-   * 
+   *
    * @return a Unix timestamp
    */
   public static long absoluteTime() {
     return TIME_SOURCE.absoluteTime();
   }
-  
+
   public interface TimeSource {
     long time();
 

@@ -35,7 +35,6 @@ import static org.terracotta.statistics.StatisticType.COUNTER;
 import static org.terracotta.statistics.StatisticType.GAUGE;
 
 /**
- *
  * @author cdennis
  */
 public class PassThroughStatisticTest {
@@ -78,7 +77,7 @@ public class PassThroughStatisticTest {
 
   @SuppressWarnings("unchecked")
   private ValueStatistic<Number> extractThis(TreeNode foo) {
-    return (ValueStatistic<Number>)foo.getContext().attributes().get("this");
+    return (ValueStatistic<Number>) foo.getContext().attributes().get("this");
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -95,7 +94,7 @@ public class PassThroughStatisticTest {
   public void testAnnotationBasedStatFailsIfStatic() {
     new StatisticsManager().root(new FooStatic());
   }
-  
+
   @Test(expected = IllegalArgumentException.class)
   public void testAnnotationBasedStatFailsWithIncorrectReturn() {
     new StatisticsManager().root(new Object() {
@@ -118,7 +117,7 @@ public class PassThroughStatisticTest {
       return 42L;
     }
   }
-  
+
   static class FooStatic {
     @Statistic(name = "foo", type = COUNTER)
     public static Integer foo() {

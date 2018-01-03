@@ -34,11 +34,11 @@ import static org.terracotta.context.query.Matchers.subclassOf;
 import static org.terracotta.context.query.QueryBuilder.queryBuilder;
 
 public final class Strawman {
-  
+
   public static void main(String[] args) {
     CacheManager manager = new CacheManager("manager-one");
     Cache<String, String> cache = new Cache<>("cache-one");
-    
+
     manager.addCache(cache);
 
     StatisticsManager stats = new StatisticsManager();
@@ -55,12 +55,12 @@ public final class Strawman {
     MinMaxAverage hitLatencyStats = new MinMaxAverage();
     hitLatency.addDerivedStatistic(hitLatencyStats);
     getStatistic.addDerivedStatistic(hitLatency);
-    
+
     cache.get("foo");
     System.err.println("HITS        : " + getStatistic.count(GetResult.HIT));
     System.err.println("MISSES      : " + getStatistic.count(GetResult.MISS));
     System.err.println("HIT LATENCY : " + hitLatencyStats.mean());
-    
+
     cache.put("foo", "bar");
     cache.get("foo");
     System.err.println("HITS        : " + getStatistic.count(GetResult.HIT));
@@ -68,12 +68,12 @@ public final class Strawman {
     System.err.println("HIT LATENCY : " + hitLatencyStats.mean());
 
     hitLatency.addDerivedStatistic((time, parameters) -> System.out.println("Event Latency : " + parameters[0]));
-    
+
     cache.get("foo");
     System.err.println("HITS        : " + getStatistic.count(GetResult.HIT));
     System.err.println("MISSES      : " + getStatistic.count(GetResult.MISS));
     System.err.println("HIT LATENCY : " + hitLatencyStats.mean());
-    
+
     getStatistic.removeDerivedStatistic(hitLatency);
 
     cache.get("foo");
@@ -81,11 +81,11 @@ public final class Strawman {
     System.err.println("MISSES      : " + getStatistic.count(GetResult.MISS));
     System.err.println("HIT LATENCY : " + hitLatencyStats.mean());
   }
-  
+
   public static String dumpTree(TreeNode node) {
     return dumpSubtree(0, node);
   }
-  
+
   public static String dumpSubtree(int indent, TreeNode node) {
     char[] indentChars = new char[indent];
     Arrays.fill(indentChars, ' ');

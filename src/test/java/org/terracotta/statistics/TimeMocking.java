@@ -19,12 +19,13 @@ import java.lang.reflect.Field;
 import java.util.Stack;
 
 /**
- *
  * @author cdennis
  */
 public class TimeMocking {
-  
+
+  public static final Stack<Time.TimeSource> SOURCES = new Stack<>();
   private static final Field TIME_SOURCE_FIELD;
+
   static {
     try {
       TIME_SOURCE_FIELD = Time.class.getDeclaredField("TIME_SOURCE");
@@ -33,9 +34,7 @@ public class TimeMocking {
       throw new AssertionError(ex);
     }
   }
-  
-  public static final Stack<Time.TimeSource> SOURCES = new Stack<>();
-  
+
   public synchronized static <T extends Time.TimeSource> T push(T source) {
     try {
       SOURCES.push((Time.TimeSource) TIME_SOURCE_FIELD.get(null));
@@ -45,7 +44,7 @@ public class TimeMocking {
     }
     return source;
   }
-  
+
   public synchronized static Time.TimeSource pop() {
     try {
       Time.TimeSource popped = (Time.TimeSource) TIME_SOURCE_FIELD.get(null);

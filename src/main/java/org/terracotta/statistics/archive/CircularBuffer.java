@@ -18,11 +18,10 @@ package org.terracotta.statistics.archive;
 import java.util.Arrays;
 
 /**
- *
  * @author cdennis
  */
 public class CircularBuffer<E> {
-  
+
   private final E[] buffer;
   private int writeIndex;
   private int size;
@@ -31,11 +30,11 @@ public class CircularBuffer<E> {
   public CircularBuffer(int size) {
     this.buffer = (E[]) new Object[size];
   }
-  
+
   public int capacity() {
     return buffer.length;
   }
-  
+
   public synchronized E insert(E object) {
     E old = buffer[writeIndex];
     buffer[writeIndex] = object;

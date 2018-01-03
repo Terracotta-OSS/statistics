@@ -15,15 +15,15 @@
  */
 package org.terracotta.context.query;
 
-import java.util.Set;
-
 import org.terracotta.context.TreeNode;
+
+import java.util.Set;
 
 class ChainedQuery implements Query {
 
   private final Query current;
   private final Query previous;
-  
+
   public ChainedQuery(Query previous, Query current) {
     this.previous = previous;
     this.current = current;

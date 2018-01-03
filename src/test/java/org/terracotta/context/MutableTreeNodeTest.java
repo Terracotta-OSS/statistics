@@ -18,34 +18,34 @@ package org.terracotta.context;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.hamcrest.collection.IsIterableContainingInOrder;
 import org.junit.Test;
+
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertThat;
 
 /**
- *
  * @author cdennis
  */
 public class MutableTreeNodeTest {
- 
+
   @Test
   public void testCleanDisconnects() {
     MutableTreeNode test = new MutableTreeNode(null);
-    
+
     MutableTreeNode child = new MutableTreeNode(null);
     MutableTreeNode parent = new MutableTreeNode(null);
-    
+
     test.addChild(child);
     parent.addChild(test);
     parent.addChild(child);
-    
+
     test.clean();
-    
+
     assertThat(test.getChildren(), IsEmptyCollection.empty());
     assertThat(test.getAncestors(), IsEmptyCollection.empty());
-    
+
     assertThat(parent.getChildren(), hasSize(1));
     assertThat(parent.getChildren(), IsIterableContainingInOrder.contains(child));
-    
+
     assertThat(child.getAncestors(), hasSize(1));
     assertThat(child.getAncestors(), IsIterableContainingInOrder.contains(parent));
   }

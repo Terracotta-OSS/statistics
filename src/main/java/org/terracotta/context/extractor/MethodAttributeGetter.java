@@ -21,14 +21,14 @@ import java.lang.reflect.Method;
 abstract class MethodAttributeGetter<T> implements AttributeGetter<T> {
 
   private final Method method;
-  
+
   MethodAttributeGetter(Method method) {
     method.setAccessible(true);
     this.method = method;
   }
 
   abstract Object target();
-  
+
   @Override
   @SuppressWarnings("unchecked")
   public T get() {

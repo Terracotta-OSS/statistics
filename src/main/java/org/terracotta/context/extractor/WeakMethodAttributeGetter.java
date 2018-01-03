@@ -19,7 +19,6 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 
 /**
- *
  * @author cdennis
  */
 class WeakMethodAttributeGetter<T> extends MethodAttributeGetter<T> {
@@ -30,7 +29,7 @@ class WeakMethodAttributeGetter<T> extends MethodAttributeGetter<T> {
     super(method);
     this.targetRef = new WeakReference<>(target);
   }
-  
+
   @Override
   Object target() {
     return targetRef.get();

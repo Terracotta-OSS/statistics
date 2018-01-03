@@ -15,6 +15,9 @@
  */
 package org.terracotta.context.extractor;
 
+import org.terracotta.context.ContextElement;
+import org.terracotta.context.annotations.ContextAttribute;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -22,11 +25,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.terracotta.context.ContextElement;
-import org.terracotta.context.annotations.ContextAttribute;
-
 /**
- * Extracts context information from object instances and creates appropriate 
+ * Extracts context information from object instances and creates appropriate
  * enclosing {@link ContextElement} instances.
  */
 public final class ObjectContextExtractor {
@@ -34,14 +34,14 @@ public final class ObjectContextExtractor {
   private ObjectContextExtractor() {
     //singleton
   }
-  
+
   /**
    * Returns a {@code ContextElement} instance for the supplied object.
    * <p>
-   * The supplied object's class type is parsed for {@link ContextAttribute} 
+   * The supplied object's class type is parsed for {@link ContextAttribute}
    * annotations and the associated attributes are extracted and returned in the
    * form of a {@code ContextElement}.
-   * 
+   *
    * @param from object to extract context for
    * @return a {@code ContextElement}
    */
@@ -64,7 +64,7 @@ public final class ObjectContextExtractor {
 
   private static Map<String, AttributeGetter<Object>> extractMethodAttributes(Object from) {
     Map<String, AttributeGetter<Object>> attributes = new HashMap<>();
-    
+
     for (Method m : from.getClass().getMethods()) {
       if (m.getParameterTypes().length == 0 && m.getReturnType() != Void.TYPE) {
         ContextAttribute annotation = m.getAnnotation(ContextAttribute.class);
@@ -78,7 +78,7 @@ public final class ObjectContextExtractor {
 
   private static Map<String, AttributeGetter<Object>> extractFieldAttributes(Object from) {
     Map<String, AttributeGetter<Object>> attributes = new HashMap<>();
-    
+
     for (Class c = from.getClass(); c != null; c = c.getSuperclass()) {
       for (Field f : c.getDeclaredFields()) {
         ContextAttribute annotation = f.getAnnotation(ContextAttribute.class);
@@ -87,7 +87,7 @@ public final class ObjectContextExtractor {
         }
       }
     }
-    
+
     return attributes;
   }
 

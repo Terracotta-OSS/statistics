@@ -31,13 +31,13 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
+import static org.terracotta.statistics.SampledStatisticAdapter.sample;
 import static org.terracotta.statistics.StatisticBuilder.operation;
 import static org.terracotta.statistics.StatisticType.COUNTER;
 import static org.terracotta.statistics.StatisticType.GAUGE;
 import static org.terracotta.statistics.StatisticsManager.properties;
 import static org.terracotta.statistics.StatisticsManager.tags;
 import static org.terracotta.statistics.SuppliedValueStatistic.gauge;
-import static org.terracotta.statistics.SampledStatisticAdapter.sample;
 
 /**
  * @author Mathieu Carbou

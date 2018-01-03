@@ -15,6 +15,9 @@
  */
 package org.terracotta.statistics;
 
+import org.terracotta.context.WeakIdentityHashMap;
+import org.terracotta.context.annotations.ContextAttribute;
+
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
@@ -24,14 +27,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.terracotta.context.WeakIdentityHashMap;
-import org.terracotta.context.annotations.ContextAttribute;
-
-@ContextAttribute(value="this")
+@ContextAttribute(value = "this")
 class PassThroughStatistic<T extends Serializable> implements ValueStatistic<T> {
 
   private static final WeakIdentityHashMap<Object, Collection<PassThroughStatistic<? extends Serializable>>> BINDING = new WeakIdentityHashMap<>();
-  
+
   private static void bindStatistic(PassThroughStatistic<? extends Serializable> stat, Object to) {
     Collection<PassThroughStatistic<? extends Serializable>> collection = BINDING.get(to);
     if (collection == null) {

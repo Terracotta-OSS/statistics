@@ -94,7 +94,7 @@ public class StatisticMapperTest {
     Map<Target, Set<Source>> translation = new EnumMap<>(Target.class);
     translation.put(A, of(C));
     translation.put(B, of(D, E));
-    StatisticMapper<Source, Target  > mapper = new StatisticMapper<>(translation, statistic);
+    StatisticMapper<Source, Target> mapper = new StatisticMapper<>(translation, statistic);
 
     mapper.statistic(B);
     verify(statistic).statistic(of(D, E));
@@ -109,7 +109,7 @@ public class StatisticMapperTest {
     Map<Target, Set<Source>> translation = new EnumMap<>(Target.class);
     translation.put(A, of(C));
     translation.put(B, of(D, E));
-    StatisticMapper<Source, Target  > mapper = new StatisticMapper<>(translation, statistic);
+    StatisticMapper<Source, Target> mapper = new StatisticMapper<>(translation, statistic);
 
     mapper.statistic(of(A, B));
     verify(statistic).statistic(of(C, D, E));
@@ -121,7 +121,7 @@ public class StatisticMapperTest {
     Map<Target, Set<Source>> translation = new EnumMap<>(Target.class);
     translation.put(A, of(C));
     translation.put(B, of(D, E));
-    StatisticMapper<Source, Target  > mapper = new StatisticMapper<>(translation, statistic);
+    StatisticMapper<Source, Target> mapper = new StatisticMapper<>(translation, statistic);
 
     mapper.count(B);
     verify(statistic).sum(of(D, E));
@@ -136,7 +136,7 @@ public class StatisticMapperTest {
     Map<Target, Set<Source>> translation = new EnumMap<>(Target.class);
     translation.put(A, of(C));
     translation.put(B, of(D, E));
-    StatisticMapper<Source, Target  > mapper = new StatisticMapper<>(translation, statistic);
+    StatisticMapper<Source, Target> mapper = new StatisticMapper<>(translation, statistic);
 
     mapper.sum(of(A, B));
     verify(statistic).sum(of(C, D, E));
@@ -148,7 +148,7 @@ public class StatisticMapperTest {
     Map<Target, Set<Source>> translation = new EnumMap<>(Target.class);
     translation.put(A, of(C));
     translation.put(B, of(D, E));
-    StatisticMapper<Source, Target  > mapper = new StatisticMapper<>(translation, statistic);
+    StatisticMapper<Source, Target> mapper = new StatisticMapper<>(translation, statistic);
 
     mapper.sum();
 
@@ -165,7 +165,7 @@ public class StatisticMapperTest {
     Map<Target, Set<Source>> translation = new EnumMap<>(Target.class);
     translation.put(A, of(C));
     translation.put(B, of(D, E));
-    StatisticMapper<Source, Target  > mapper = new StatisticMapper<>(translation, statistic);
+    StatisticMapper<Source, Target> mapper = new StatisticMapper<>(translation, statistic);
 
     ChainedOperationObserver<? super Target> derived = mock(ChainedOperationObserver.class);
 
@@ -187,7 +187,7 @@ public class StatisticMapperTest {
     Map<Target, Set<Source>> translation = new EnumMap<>(Target.class);
     translation.put(A, of(C));
     translation.put(B, of(D, E));
-    StatisticMapper<Source, Target  > mapper = new StatisticMapper<>(translation, statistic);
+    StatisticMapper<Source, Target> mapper = new StatisticMapper<>(translation, statistic);
 
     ChainedOperationObserver<? super Target> derived = mock(ChainedOperationObserver.class);
 
@@ -215,7 +215,7 @@ public class StatisticMapperTest {
     Map<Target, Set<Source>> translation = new EnumMap<>(Target.class);
     translation.put(A, of(C));
     translation.put(B, of(D, E));
-    StatisticMapper<Source, Target  > mapper = new StatisticMapper<>(translation, statistic);
+    StatisticMapper<Source, Target> mapper = new StatisticMapper<>(translation, statistic);
 
     ChainedOperationObserver<? super Target> derived = mock(ChainedOperationObserver.class);
 
@@ -240,7 +240,7 @@ public class StatisticMapperTest {
     Map<Target, Set<Source>> translation = new EnumMap<>(Target.class);
     translation.put(A, of(C));
     translation.put(B, of(D, E));
-    StatisticMapper<Source, Target  > mapper = new StatisticMapper<>(translation, statistic);
+    StatisticMapper<Source, Target> mapper = new StatisticMapper<>(translation, statistic);
 
     ChainedOperationObserver<? super Target> derived = mock(ChainedOperationObserver.class);
 

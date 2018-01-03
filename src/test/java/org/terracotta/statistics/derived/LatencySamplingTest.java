@@ -15,29 +15,28 @@
  */
 package org.terracotta.statistics.derived;
 
+import org.junit.Test;
+
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.junit.Test;
-
-import static java.util.EnumSet.*;
-import static org.hamcrest.core.Is.*;
-import static org.hamcrest.number.OrderingComparison.*;
+import static java.util.EnumSet.of;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.number.OrderingComparison.greaterThanOrEqualTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 /**
- *
  * @author cdennis
  */
 public class LatencySamplingTest {
-  
+
   @Test
   public void testRateOfZeroNeverSamples() {
     LatencySampling<FooBar> latency = new LatencySampling<>(of(FooBar.FOO), 0.0f);
     latency.addDerivedStatistic((time, parameters) -> fail());
-    
+
     for (int i = 0; i < 100; i++) {
       latency.begin(0);
       latency.end(1, FooBar.FOO);
@@ -49,12 +48,12 @@ public class LatencySamplingTest {
     LatencySampling<FooBar> latency = new LatencySampling<>(of(FooBar.FOO), 1.0f);
     final AtomicInteger eventCount = new AtomicInteger();
     latency.addDerivedStatistic((time, parameters) -> eventCount.incrementAndGet());
-    
+
     for (int i = 0; i < 100; i++) {
       latency.begin(0);
       latency.end(1, FooBar.FOO);
     }
-    
+
     assertThat(eventCount.get(), is(100));
   }
 
@@ -62,20 +61,20 @@ public class LatencySamplingTest {
   public void testMismatchedResultNeverSamples() {
     LatencySampling<FooBar> latency = new LatencySampling<>(of(FooBar.FOO), 1.0f);
     latency.addDerivedStatistic((time, parameters) -> fail());
-    
+
     for (int i = 0; i < 100; i++) {
       latency.begin(0);
       latency.end(1, FooBar.BAR);
     }
   }
-  
+
   @Test
   public void testLatencyMeasuredAccurately() throws InterruptedException {
     Random random = new Random();
     LatencySampling<FooBar> latency = new LatencySampling<>(of(FooBar.FOO), 1.0f);
     final AtomicLong expected = new AtomicLong();
     latency.addDerivedStatistic((time, parameters) -> assertThat(parameters[0], greaterThanOrEqualTo(expected.get())));
-    
+
     for (int i = 0; i < 10; i++) {
       long start = random.nextLong();
       int sleep = random.nextInt(100);
@@ -83,7 +82,7 @@ public class LatencySamplingTest {
       latency.end(start + sleep, FooBar.FOO);
     }
   }
-  
+
   enum FooBar {
     FOO, BAR
   }

@@ -15,15 +15,15 @@
  */
 package org.terracotta.context.query;
 
+import org.terracotta.context.TreeNode;
+
 import java.util.HashSet;
 import java.util.Set;
-
-import org.terracotta.context.TreeNode;
 
 class Filter implements Query {
 
   private final Matcher<? super TreeNode> filter;
-  
+
   public Filter(Matcher<? super TreeNode> filter) {
     if (filter == null) {
       throw new NullPointerException("Cannot filter using a null matcher");
@@ -31,7 +31,7 @@ class Filter implements Query {
       this.filter = filter;
     }
   }
-  
+
   @Override
   public Set<TreeNode> execute(Set<TreeNode> input) {
     Set<TreeNode> output = new HashSet<>(input);

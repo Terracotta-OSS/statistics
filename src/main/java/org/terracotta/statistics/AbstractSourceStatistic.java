@@ -15,10 +15,10 @@
  */
 package org.terracotta.statistics;
 
+import org.terracotta.statistics.observer.ChainedObserver;
+
 import java.util.Collection;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import org.terracotta.statistics.observer.ChainedObserver;
 
 /**
  * An abstract {@code SourceStatistic} that handles derived statistic

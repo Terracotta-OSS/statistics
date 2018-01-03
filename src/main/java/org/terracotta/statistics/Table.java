@@ -83,5 +83,4 @@ public class Table extends TableSkeleton implements Serializable {
     <T extends Serializable> RowBuilder setStatistic(String statisticName, StatisticType type, T value);
   }
 
-
 }

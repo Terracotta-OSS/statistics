@@ -15,10 +15,10 @@
  */
 package org.terracotta.context.query;
 
+import org.terracotta.context.TreeNode;
+
 import java.util.HashSet;
 import java.util.Set;
-
-import org.terracotta.context.TreeNode;
 
 class Descendants implements Query {
 
@@ -34,7 +34,7 @@ class Descendants implements Query {
     }
     return descendants;
   }
-  
+
   @Override
   public String toString() {
     return "descendants";

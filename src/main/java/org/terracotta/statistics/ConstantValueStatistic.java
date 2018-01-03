@@ -25,13 +25,12 @@ public class ConstantValueStatistic<T extends Serializable> implements ValueStat
   public static <T extends Serializable> ConstantValueStatistic<T> constant(StatisticType type, T value) {
     return new ConstantValueStatistic<>(type, value);
   }
-  
+
   public static <T extends Serializable> ConstantValueStatistic<T> nullValue(StatisticType type) {
     return new ConstantValueStatistic<>(type, null);
   }
-  
+
   private static final long serialVersionUID = 1L;
-  
   private final T value;
   private final StatisticType type;
 

@@ -24,7 +24,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 class RootNode extends AbstractTreeNode {
 
   private final Collection<ContextListener> listeners = new CopyOnWriteArrayList<>();
-  
+
   @Override
   void addedParent(AbstractTreeNode child) {
     throw new IllegalStateException();
@@ -44,11 +44,11 @@ class RootNode extends AbstractTreeNode {
   Collection<ContextListener> getListeners() {
     return Collections.unmodifiableCollection(listeners);
   }
-  
+
   public void addListener(ContextListener listener) {
     listeners.add(listener);
   }
-  
+
   public void removeListener(ContextListener listener) {
     listeners.remove(listener);
   }

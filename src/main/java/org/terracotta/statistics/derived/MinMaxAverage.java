@@ -15,19 +15,18 @@
  */
 package org.terracotta.statistics.derived;
 
+import org.terracotta.statistics.ValueStatistic;
+import org.terracotta.statistics.observer.ChainedEventObserver;
+import org.terracotta.statistics.util.InThreadExecutor;
+
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.concurrent.atomic.LongAccumulator;
 
-import org.terracotta.statistics.ValueStatistic;
-import org.terracotta.statistics.observer.ChainedEventObserver;
-import org.terracotta.statistics.util.InThreadExecutor;
-
 import static org.terracotta.statistics.SuppliedValueStatistic.gauge;
 
 /**
- *
  * @author cdennis
  */
 public class MinMaxAverage implements ChainedEventObserver {
@@ -39,17 +38,17 @@ public class MinMaxAverage implements ChainedEventObserver {
   private final AtomicLong count = new AtomicLong(0);
 
   private final Executor executor;
-  
+
   public MinMaxAverage() {
     this(InThreadExecutor.INSTANCE);
   }
-  
+
   public MinMaxAverage(Executor executor) {
     this.executor = executor;
   }
-  
+
   @Override
-  public void event(long time, final long ... parameters) {
+  public void event(long time, final long... parameters) {
     executor.execute(() -> {
       long value = parameters[0];
       maximum.accumulate(value);
@@ -66,11 +65,11 @@ public class MinMaxAverage implements ChainedEventObserver {
       return minimum.get();
     }
   }
-  
+
   public ValueStatistic<Long> minStatistic() {
     return gauge(this::min);
   }
-  
+
   public Double mean() {
     if (count.get() == 0) {
       return null;
@@ -78,11 +77,11 @@ public class MinMaxAverage implements ChainedEventObserver {
       return summation.sum() / count.get();
     }
   }
-  
+
   public ValueStatistic<Double> meanStatistic() {
     return gauge(this::mean);
   }
-  
+
   public Long max() {
     if (count.get() == 0) {
       return null;
@@ -90,7 +89,7 @@ public class MinMaxAverage implements ChainedEventObserver {
       return maximum.get();
     }
   }
-  
+
   public ValueStatistic<Long> maxStatistic() {
     return gauge(this::max);
   }

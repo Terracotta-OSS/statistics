@@ -15,25 +15,26 @@
  */
 package org.terracotta.context;
 
-import java.util.Collection;
-import java.util.Collections;
-
 import org.hamcrest.core.IsCollectionContaining;
 import org.junit.Assert;
 import org.terracotta.context.annotations.ContextAttribute;
 import org.terracotta.context.annotations.ContextChild;
 import org.terracotta.context.annotations.ContextParent;
 
-import static org.hamcrest.core.IsSame.*;
-import static org.terracotta.context.query.Matchers.*;
-import static org.terracotta.context.query.QueryBuilder.*;
+import java.util.Collection;
+import java.util.Collections;
+
+import static org.hamcrest.core.IsSame.sameInstance;
+import static org.terracotta.context.query.Matchers.attributes;
+import static org.terracotta.context.query.Matchers.context;
+import static org.terracotta.context.query.Matchers.hasAttribute;
+import static org.terracotta.context.query.QueryBuilder.queryBuilder;
 
 /**
- *
  * @author cdennis
  */
 public final class ContextTestUtils {
-  
+
   private ContextTestUtils() {
     //static
   }
@@ -44,27 +45,29 @@ public final class ContextTestUtils {
     TreeNode childNode = manager.queryForSingleton(queryBuilder().descendants().filter(context(attributes(hasAttribute("this", child)))).build());
     Assert.assertThat((Collection<TreeNode>) parentNode.getChildren(), IsCollectionContaining.hasItem(sameInstance(childNode)));
   }
-  
+
   public static void validateNoAssociation(ContextManager manager, Object parent, Object child) {
     TreeNode parentNode = manager.queryForSingleton(queryBuilder().descendants().filter(context(attributes(hasAttribute("this", parent)))).build());
     Assert.assertTrue(queryBuilder().children().filter(context(attributes(hasAttribute("this", child)))).build().execute(Collections.singleton(parentNode)).isEmpty());
   }
 
-  @ContextAttribute("this") public static class PublicAnnotations {
+  @ContextAttribute("this")
+  public static class PublicAnnotations {
     @ContextChild
     public Object child;
-    
+
     @ContextParent
     public Object parent;
   }
-  
-  @ContextAttribute("this") public static class PrivateAnnotations {
+
+  @ContextAttribute("this")
+  public static class PrivateAnnotations {
     @ContextChild
     private Object child;
-    
+
     @ContextParent
     private Object parent;
-    
+
     public void setChild(Object child) {
       this.child = child;
     }
@@ -74,5 +77,6 @@ public final class ContextTestUtils {
     }
   }
 
-  @ContextAttribute("this") public static class NoAnnotations {}  
+  @ContextAttribute("this")
+  public static class NoAnnotations {}
 }

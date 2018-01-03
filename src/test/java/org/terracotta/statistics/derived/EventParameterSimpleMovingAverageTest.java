@@ -15,34 +15,34 @@
  */
 package org.terracotta.statistics.derived;
 
-import java.util.concurrent.TimeUnit;
-
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.terracotta.statistics.MutableTimeSource;
 import org.terracotta.statistics.Time;
 import org.terracotta.statistics.TimeMocking;
 
-import static org.hamcrest.core.Is.*;
+import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 
 public class EventParameterSimpleMovingAverageTest {
-  
+
   public static final MutableTimeSource SOURCE = TimeMocking.push(new MutableTimeSource());
-  
+
   @AfterClass
   public static void installTimeSource() {
     TimeMocking.pop();
   }
-  
+
   @Test
   public void testNoEventsAverage() {
     assertThat(new EventParameterSimpleMovingAverage(1, TimeUnit.SECONDS).average(), is(Double.NaN));
     assertThat(new EventParameterSimpleMovingAverage(1, TimeUnit.SECONDS).minimum(), nullValue());
     assertThat(new EventParameterSimpleMovingAverage(1, TimeUnit.SECONDS).maximum(), nullValue());
   }
-  
+
   @Test
   public void testSingleEventAverage() {
     EventParameterSimpleMovingAverage average = new EventParameterSimpleMovingAverage(1, TimeUnit.DAYS);
@@ -71,7 +71,7 @@ public class EventParameterSimpleMovingAverageTest {
     assertThat(average.minimum(), is(1L));
     assertThat(average.maximum(), is(3L));
   }
-  
+
   @Test
   public void testAverageMoves() throws InterruptedException {
     EventParameterSimpleMovingAverage average = new EventParameterSimpleMovingAverage(100, TimeUnit.MILLISECONDS);

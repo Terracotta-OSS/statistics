@@ -36,7 +36,7 @@ class Parent implements Query {
     }
     return output;
   }
-  
+
   @Override
   public String toString() {
     return "parent";

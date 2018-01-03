@@ -15,14 +15,14 @@
  */
 package org.terracotta.context.query;
 
-import java.util.Set;
-
 import org.terracotta.context.TreeNode;
 
+import java.util.Set;
+
 class EnsureUnique implements Query {
-  
+
   static Query INSTANCE = new EnsureUnique();
-  
+
   private EnsureUnique() {
     //singleton
   }

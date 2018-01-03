@@ -29,9 +29,9 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.terracotta.statistics.SuppliedValueStatistic.counter;
 import static org.terracotta.statistics.StatisticType.COUNTER;
 import static org.terracotta.statistics.StatisticType.GAUGE;
+import static org.terracotta.statistics.SuppliedValueStatistic.counter;
 
 public class TableStatisticTest {
 

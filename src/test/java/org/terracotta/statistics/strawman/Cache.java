@@ -15,27 +15,27 @@
  */
 package org.terracotta.statistics.strawman;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.terracotta.context.annotations.ContextAttribute;
 import org.terracotta.statistics.StatisticsManager;
 import org.terracotta.statistics.observer.OperationObserver;
 
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class Cache<K, V> {
-  
+
   private final Map<K, V> data = new ConcurrentHashMap<>();
   @ContextAttribute("name") private final String name;
 
   private final OperationObserver<PutResult> putObserver = StatisticsManager.createOperationStatistic(this, "put", Collections.emptySet(), PutResult.class);
   private final OperationObserver<RemoveResult> removeObserver = StatisticsManager.createOperationStatistic(this, "remove", Collections.emptySet(), RemoveResult.class);
   private final OperationObserver<GetResult> getObserver = StatisticsManager.createOperationStatistic(this, "get", Collections.emptySet(), GetResult.class);
-  
+
   public Cache(String name) {
     this.name = name;
   }
-  
+
   public V put(K key, V value) {
     putObserver.begin();
     V old = data.put(key, value);
@@ -46,7 +46,7 @@ public class Cache<K, V> {
     }
     return old;
   }
-  
+
   public V remove(K key) {
     removeObserver.begin();
     V removed = data.remove(key);

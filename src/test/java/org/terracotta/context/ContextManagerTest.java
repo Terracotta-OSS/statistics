@@ -18,7 +18,7 @@ package org.terracotta.context;
 import org.junit.Test;
 
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 public class ContextManagerTest {
 

@@ -15,12 +15,12 @@
  */
 package org.terracotta.context.extractor;
 
+import org.terracotta.context.ContextElement;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import org.terracotta.context.ContextElement;
 
 class LazyContextElement implements ContextElement {
 
@@ -31,7 +31,7 @@ class LazyContextElement implements ContextElement {
     this.identifier = identifier;
     this.attributes = new HashMap<>(attributes);
   }
-  
+
   @Override
   public Class identifier() {
     return identifier;
@@ -45,7 +45,7 @@ class LazyContextElement implements ContextElement {
     }
     return Collections.unmodifiableMap(realized);
   }
-  
+
   @Override
   public String toString() {
     return identifier() + " " + attributes();

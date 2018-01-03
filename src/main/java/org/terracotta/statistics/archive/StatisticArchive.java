@@ -24,7 +24,6 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- *
  * @author cdennis
  */
 public class StatisticArchive<T extends Serializable> implements SampleSink<Sample<T>> {
@@ -89,10 +88,10 @@ public class StatisticArchive<T extends Serializable> implements SampleSink<Samp
       @SuppressWarnings("unchecked")
       Sample<T>[] array = (Sample<T>[]) read.toArray(Sample[].class);
       int pos = Arrays.binarySearch(array, e, TIMESTAMPED_COMPARATOR);
-      if(pos < 0) {
+      if (pos < 0) {
         pos = -pos - 1;
       }
-      if(pos >= array.length) {
+      if (pos >= array.length) {
         return Collections.emptyList();
       } else {
         return Collections.unmodifiableList(Arrays.asList(Arrays.copyOfRange(array, pos, array.length)));

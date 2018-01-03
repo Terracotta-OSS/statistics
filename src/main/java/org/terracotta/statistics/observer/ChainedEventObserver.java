@@ -28,12 +28,12 @@ public interface ChainedEventObserver extends ChainedObserver {
    * generic type with no bounds.  So the "real" class declaration should be:
    * @{code interface EventObserver<T>}
    */
-  
+
   /**
    * Called to indicate an event happened.
-   * 
-   * @param time the time of the event
+   *
+   * @param time       the time of the event
    * @param parameters the event parameters
    */
-  void event(long time, long ... parameters);
+  void event(long time, long... parameters);
 }
