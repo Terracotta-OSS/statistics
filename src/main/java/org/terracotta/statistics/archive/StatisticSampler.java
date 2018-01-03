@@ -22,6 +22,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
+import org.terracotta.statistics.Sample;
 import org.terracotta.statistics.ValueStatistic;
 
 import static org.terracotta.statistics.Time.absoluteTime;

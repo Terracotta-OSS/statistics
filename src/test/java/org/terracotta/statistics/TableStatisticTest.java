@@ -17,8 +17,7 @@ package org.terracotta.statistics;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.terracotta.statistics.extended.StatisticRegistry;
-import org.terracotta.statistics.extended.StatisticType;
+import org.terracotta.statistics.registry.StatisticRegistry;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -31,8 +30,8 @@ import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.terracotta.statistics.SuppliedValueStatistic.counter;
-import static org.terracotta.statistics.extended.StatisticType.COUNTER;
-import static org.terracotta.statistics.extended.StatisticType.GAUGE;
+import static org.terracotta.statistics.StatisticType.COUNTER;
+import static org.terracotta.statistics.StatisticType.GAUGE;
 
 public class TableStatisticTest {
 

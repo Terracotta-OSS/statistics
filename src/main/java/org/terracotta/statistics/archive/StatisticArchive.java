@@ -15,6 +15,8 @@
  */
 package org.terracotta.statistics.archive;
 
+import org.terracotta.statistics.Sample;
+
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;

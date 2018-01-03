@@ -15,8 +15,6 @@
  */
 package org.terracotta.statistics;
 
-import org.terracotta.statistics.extended.StatisticType;
-
 import java.io.Serializable;
 
 /**

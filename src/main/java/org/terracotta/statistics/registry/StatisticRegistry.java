@@ -13,19 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terracotta.statistics.extended;
+package org.terracotta.statistics.registry;
 
 import org.terracotta.context.ContextManager;
 import org.terracotta.context.TreeNode;
-import org.terracotta.context.extended.OperationStatisticDescriptor;
-import org.terracotta.context.extended.ValueStatisticDescriptor;
+import org.terracotta.statistics.SampledStatistic;
 import org.terracotta.context.query.Matcher;
 import org.terracotta.context.query.Matchers;
 import org.terracotta.statistics.OperationStatistic;
+import org.terracotta.statistics.StatisticType;
 import org.terracotta.statistics.Table;
 import org.terracotta.statistics.Time;
 import org.terracotta.statistics.ValueStatistic;
-import org.terracotta.statistics.archive.Sample;
+import org.terracotta.statistics.Sample;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -50,7 +50,7 @@ import static org.terracotta.statistics.SuppliedValueStatistic.counter;
 import static org.terracotta.statistics.SuppliedValueStatistic.gauge;
 import static org.terracotta.statistics.SuppliedValueStatistic.supply;
 import static org.terracotta.statistics.SuppliedValueStatistic.table;
-import static org.terracotta.statistics.extended.SampledStatisticAdapter.sample;
+import static org.terracotta.statistics.SampledStatisticAdapter.sample;
 
 /**
  * This class replaces the previous {@link StatisticRegistry}
@@ -80,7 +80,7 @@ public class StatisticRegistry {
     this.timeSource = Objects.requireNonNull(timeSource);
   }
 
-  protected Map<String, SampledStatistic<? extends Serializable>> getStatistics() {
+  public Map<String, SampledStatistic<? extends Serializable>> getStatistics() {
     return statistics;
   }
 

@@ -25,14 +25,15 @@ import java.util.concurrent.TimeUnit;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.hamcrest.core.CombinableMatcher;
 import org.junit.Test;
+import org.terracotta.statistics.Sample;
 
 import static org.hamcrest.collection.IsCollectionWithSize.*;
 import static org.hamcrest.number.OrderingComparison.*;
 import static org.junit.Assert.assertThat;
 import static org.terracotta.statistics.ConstantValueStatistic.constant;
 import static org.terracotta.statistics.SuppliedValueStatistic.counter;
-import static org.terracotta.statistics.extended.StatisticType.COUNTER;
-import static org.terracotta.statistics.extended.StatisticType.GAUGE;
+import static org.terracotta.statistics.StatisticType.COUNTER;
+import static org.terracotta.statistics.StatisticType.GAUGE;
 import static org.terracotta.util.RetryAssert.assertBy;
 
 /**

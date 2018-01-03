@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terracotta.statistics.extended;
+package org.terracotta.statistics.registry;
 
-import org.terracotta.statistics.archive.Sample;
+import org.terracotta.statistics.Sample;
+import org.terracotta.statistics.StatisticType;
 
 import java.io.Serializable;
 import java.util.List;

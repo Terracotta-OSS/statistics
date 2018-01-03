@@ -31,8 +31,8 @@ import static org.terracotta.context.query.Matchers.attributes;
 import static org.terracotta.context.query.Matchers.context;
 import static org.terracotta.context.query.Matchers.hasAttribute;
 import static org.terracotta.context.query.QueryBuilder.queryBuilder;
-import static org.terracotta.statistics.extended.StatisticType.COUNTER;
-import static org.terracotta.statistics.extended.StatisticType.GAUGE;
+import static org.terracotta.statistics.StatisticType.COUNTER;
+import static org.terracotta.statistics.StatisticType.GAUGE;
 
 /**
  *

@@ -26,7 +26,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.terracotta.context.WeakIdentityHashMap;
 import org.terracotta.context.annotations.ContextAttribute;
-import org.terracotta.statistics.extended.StatisticType;
 
 @ContextAttribute(value="this")
 class PassThroughStatistic<T extends Serializable> implements ValueStatistic<T> {

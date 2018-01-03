@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terracotta.statistics.extended;
+package org.terracotta.statistics.registry;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.terracotta.context.extended.OperationStatisticDescriptor;
-import org.terracotta.context.extended.ValueStatisticDescriptor;
+import org.terracotta.statistics.StatisticType;
 import org.terracotta.statistics.StatisticsManager;
 import org.terracotta.statistics.observer.OperationObserver;
 
@@ -33,12 +32,12 @@ import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.terracotta.statistics.StatisticBuilder.operation;
+import static org.terracotta.statistics.StatisticType.COUNTER;
+import static org.terracotta.statistics.StatisticType.GAUGE;
 import static org.terracotta.statistics.StatisticsManager.properties;
 import static org.terracotta.statistics.StatisticsManager.tags;
 import static org.terracotta.statistics.SuppliedValueStatistic.gauge;
-import static org.terracotta.statistics.extended.SampledStatisticAdapter.sample;
-import static org.terracotta.statistics.extended.StatisticType.COUNTER;
-import static org.terracotta.statistics.extended.StatisticType.GAUGE;
+import static org.terracotta.statistics.SampledStatisticAdapter.sample;
 
 /**
  * @author Mathieu Carbou

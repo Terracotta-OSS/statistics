@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terracotta.statistics.archive;
+package org.terracotta.statistics;
 
 import java.io.Serializable;
 import java.time.Instant;

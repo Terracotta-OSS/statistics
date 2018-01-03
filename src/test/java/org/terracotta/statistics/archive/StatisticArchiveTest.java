@@ -17,6 +17,7 @@ package org.terracotta.statistics.archive;
 
 import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.Test;
+import org.terracotta.statistics.Sample;
 
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.hamcrest.core.IsEqual.equalTo;

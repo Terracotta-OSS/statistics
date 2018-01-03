@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.LongAdder;
 
 import org.terracotta.statistics.ValueStatistic;
 import org.terracotta.statistics.observer.ChainedEventObserver;
-import org.terracotta.statistics.extended.StatisticType;
+import org.terracotta.statistics.StatisticType;
 
 /**
  *

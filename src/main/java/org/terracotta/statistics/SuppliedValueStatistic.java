@@ -15,17 +15,15 @@
  */
 package org.terracotta.statistics;
 
-import org.terracotta.statistics.extended.StatisticType;
-
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-import static org.terracotta.statistics.extended.StatisticType.COUNTER;
-import static org.terracotta.statistics.extended.StatisticType.GAUGE;
-import static org.terracotta.statistics.extended.StatisticType.RATE;
-import static org.terracotta.statistics.extended.StatisticType.RATIO;
-import static org.terracotta.statistics.extended.StatisticType.TABLE;
+import static org.terracotta.statistics.StatisticType.COUNTER;
+import static org.terracotta.statistics.StatisticType.GAUGE;
+import static org.terracotta.statistics.StatisticType.RATE;
+import static org.terracotta.statistics.StatisticType.RATIO;
+import static org.terracotta.statistics.StatisticType.TABLE;
 
 /**
  * This class can be used to create a {@link ValueStatistic} with a specific {@link StatisticType}

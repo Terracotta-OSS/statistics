@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-package org.terracotta.statistics.extended;
-
-import org.terracotta.statistics.Time;
-import org.terracotta.statistics.ValueStatistic;
-import org.terracotta.statistics.archive.Sample;
+package org.terracotta.statistics;
 
 import java.io.Serializable;
 import java.util.Collections;

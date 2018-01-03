@@ -15,8 +15,6 @@
  */
 package org.terracotta.statistics;
 
-import org.terracotta.statistics.extended.StatisticType;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

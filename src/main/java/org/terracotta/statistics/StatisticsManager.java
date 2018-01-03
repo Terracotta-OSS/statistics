@@ -19,7 +19,6 @@ package org.terracotta.statistics;
 import org.terracotta.context.ContextElement;
 import org.terracotta.context.ContextManager;
 import org.terracotta.context.TreeNode;
-import org.terracotta.statistics.extended.StatisticType;
 import org.terracotta.statistics.observer.OperationObserver;
 
 import java.io.Serializable;
