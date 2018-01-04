@@ -21,12 +21,12 @@ package org.terracotta.statistics.observer;
  * A statistic observer presents methods used to update a statistic.  There are
  * two general classes of observer implementations:
  * <ol>
- *   <li>Initial observers are called by product code in order to record the
+ * <li>Initial observers are called by product code in order to record the
  * occurrence of a product related 'event'</li>
- *   <li>Derived observers are called by other observers with then intention of
+ * <li>Derived observers are called by other observers with then intention of
  * tracking higher order statistics.</li>
  * </ol>
  */
 public interface ChainedObserver {
-  
+
 }

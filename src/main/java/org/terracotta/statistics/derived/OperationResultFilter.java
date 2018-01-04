@@ -15,28 +15,27 @@
  */
 package org.terracotta.statistics.derived;
 
-import java.util.EnumSet;
-import java.util.Set;
-
 import org.terracotta.statistics.AbstractSourceStatistic;
 import org.terracotta.statistics.observer.ChainedEventObserver;
 import org.terracotta.statistics.observer.ChainedOperationObserver;
 
+import java.util.EnumSet;
+import java.util.Set;
+
 /**
- *
  * @author cdennis
  */
 public class OperationResultFilter<T extends Enum<T>> extends AbstractSourceStatistic<ChainedEventObserver> implements ChainedOperationObserver<T> {
 
   private final Set<T> targets;
 
-  public OperationResultFilter(Set<T> targets, ChainedEventObserver ... observers) {
+  public OperationResultFilter(Set<T> targets, ChainedEventObserver... observers) {
     this.targets = EnumSet.copyOf(targets);
     for (ChainedEventObserver observer : observers) {
       addDerivedStatistic(observer);
     }
   }
-  
+
   @Override
   public void begin(long time) {
     //no-op
@@ -52,12 +51,12 @@ public class OperationResultFilter<T extends Enum<T>> extends AbstractSourceStat
   }
 
   @Override
-  public void end(long time, T result, long ... parameters) {
+  public void end(long time, T result, long... parameters) {
     if (!derivedStatistics.isEmpty() && targets.contains(result)) {
       for (ChainedEventObserver derived : derivedStatistics) {
         derived.event(time, parameters);
       }
     }
   }
-  
+
 }

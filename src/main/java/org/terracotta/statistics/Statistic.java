@@ -21,14 +21,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- *
  * @author cdennis
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Statistic {
-  
+
   String name();
-  
+
+  StatisticType type();
+
   String[] tags() default {};
 }

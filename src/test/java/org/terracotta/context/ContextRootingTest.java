@@ -15,57 +15,56 @@
  */
 package org.terracotta.context;
 
-import java.util.Collection;
-
 import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.Test;
 import org.terracotta.context.ContextTestUtils.NoAnnotations;
 
-import static org.hamcrest.collection.IsCollectionWithSize.*;
-import static org.hamcrest.core.IsSame.*;
+import java.util.Collection;
+
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.hamcrest.core.IsSame.sameInstance;
 import static org.junit.Assert.assertThat;
-import static org.terracotta.context.query.QueryBuilder.*;
+import static org.terracotta.context.query.QueryBuilder.queryBuilder;
 
 /**
- *
  * @author cdennis
  */
 public class ContextRootingTest {
-  
+
   @Test
   public void testRootCreation() {
     ContextManager manager = new ContextManager();
-    
+
     Object root = new NoAnnotations();
     manager.root(root);
-    
+
     Collection<TreeNode> roots = manager.query(queryBuilder().children().build());
 
     assertThat(roots, hasSize(1));
     assertThat(roots.iterator().next().getContext().attributes().get("this"), sameInstance(root));
   }
-  
+
   @Test
   public void testRootRemoval() {
     ContextManager manager = new ContextManager();
-    
+
     Object root = new NoAnnotations();
     manager.root(root);
     manager.uproot(root);
-    
+
     Collection<TreeNode> roots = manager.query(queryBuilder().children().build());
 
     assertThat(roots, IsEmptyCollection.empty());
   }
-  
+
   @Test
   public void testDoubleRootCreation() {
     ContextManager manager = new ContextManager();
-    
+
     Object root = new NoAnnotations();
     manager.root(root);
     manager.root(root);
-    
+
     Collection<TreeNode> roots = manager.query(queryBuilder().children().build());
 
     assertThat(roots, hasSize(1));
@@ -75,12 +74,12 @@ public class ContextRootingTest {
   @Test
   public void testDoubleRootRemoval() {
     ContextManager manager = new ContextManager();
-    
+
     Object root = new NoAnnotations();
     manager.root(root);
     manager.root(root);
     manager.uproot(root);
-    
+
     Collection<TreeNode> roots = manager.query(queryBuilder().children().build());
 
     assertThat(roots, IsEmptyCollection.empty());

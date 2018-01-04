@@ -119,16 +119,16 @@ public class MappedOperationStatistic<S extends Enum<S>, D extends Enum<D>> impl
   @SuppressWarnings("unchecked")
   private static <S extends Enum<S>> OperationStatistic<S> findOperationStat(Object rootNode, final Class<S> statisticType, final String statName) {
     Query q = queryBuilder().descendants()
-            .filter(context(identifier(subclassOf(OperationStatistic.class))))
-            .filter(context(attributes(Matchers.allOf(
-                    hasAttribute("name", statName),
-                    hasAttribute("this", new Matcher<OperationStatistic>() {
-                      @Override
-                      protected boolean matchesSafely(OperationStatistic object) {
-                        return object.type().equals(statisticType);
-                      }
-                    })
-            )))).build();
+        .filter(context(identifier(subclassOf(OperationStatistic.class))))
+        .filter(context(attributes(Matchers.allOf(
+            hasAttribute("name", statName),
+            hasAttribute("this", new Matcher<OperationStatistic>() {
+              @Override
+              protected boolean matchesSafely(OperationStatistic object) {
+                return object.type().equals(statisticType);
+              }
+            })
+        )))).build();
 
 
     Set<TreeNode> result = q.execute(Collections.singleton(ContextManager.nodeFor(rootNode)));

@@ -17,25 +17,24 @@ package org.terracotta.statistics.archive;
 
 import org.junit.Test;
 
-import static org.hamcrest.collection.IsArrayContainingInOrder.*;
-import static org.hamcrest.collection.IsArrayWithSize.*;
-import static org.hamcrest.core.Is.*;
-import static org.hamcrest.core.IsInstanceOf.*;
-import static org.hamcrest.core.IsNull.*;
+import static org.hamcrest.collection.IsArrayContainingInOrder.arrayContaining;
+import static org.hamcrest.collection.IsArrayWithSize.emptyArray;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
+import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 
 /**
- *
  * @author cdennis
  */
 public class CircularBufferTest {
-  
+
   @Test
   public void testEmptyBuffer() {
     CircularBuffer<Object> buffer = new CircularBuffer<>(2);
     assertThat(buffer.toArray(Object[].class), emptyArray());
   }
-  
+
   @Test
   public void testSingleElementInBuffer() {
     CircularBuffer<Object> buffer = new CircularBuffer<>(2);
@@ -65,7 +64,7 @@ public class CircularBufferTest {
     assertThat(buffer.insert(object3), is(object1));
     assertThat(buffer.toArray(Object[].class), arrayContaining(object2, object3));
   }
-  
+
   @Test
   public void testGenericBuffer() {
     CircularBuffer<String> buffer = new CircularBuffer<>(2);

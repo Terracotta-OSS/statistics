@@ -15,18 +15,18 @@
  */
 package org.terracotta.context;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class WeakIdentityHashMap<K, V> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(WeakIdentityHashMap.class);
-  
+
   private final ReferenceQueue<K> referenceQueue = new ReferenceQueue<>();
   private final ConcurrentHashMap<Reference<K>, V> backing = new ConcurrentHashMap<>();
 
@@ -59,15 +59,15 @@ public class WeakIdentityHashMap<K, V> {
       }
     }
   }
-  
+
   protected Reference<K> createReference(K key, ReferenceQueue<? super K> queue) {
     return new IdentityWeakReference<>(key, queue);
   }
-  
+
   static class IdentityWeakReference<T> extends WeakReference<T> {
 
     private final int hashCode;
-    
+
     public IdentityWeakReference(T t) {
       this(t, null);
     }
@@ -77,7 +77,7 @@ public class WeakIdentityHashMap<K, V> {
       this.hashCode = System.identityHashCode(t);
     }
 
-    
+
     @Override
     public int hashCode() {
       return hashCode;
@@ -95,8 +95,9 @@ public class WeakIdentityHashMap<K, V> {
       }
     }
   }
-  
+
   public interface Cleanable {
     void clean();
   }
+
 }

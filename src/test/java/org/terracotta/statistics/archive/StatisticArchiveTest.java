@@ -16,16 +16,14 @@
 package org.terracotta.statistics.archive;
 
 import org.hamcrest.collection.IsEmptyCollection;
-import static org.hamcrest.collection.IsIterableContainingInOrder.*;
-
-import org.hamcrest.collection.IsIterableContainingInOrder;
 import org.junit.Test;
+import org.terracotta.statistics.Sample;
 
+import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 
 /**
- *
  * @author cdennis
  */
 public class StatisticArchiveTest {
@@ -33,8 +31,8 @@ public class StatisticArchiveTest {
   @Test
   public void test_since() {
     StatisticArchive<String> archive = new StatisticArchive<>(2);
-    Timestamped<String> sample1 = new Sample<>("foo", 1479819723336L);
-    Timestamped<String> sample2 = new Sample<>("bar", 1479819721336L);
+    Sample<String> sample1 = new Sample<>(1479819723336L, "foo");
+    Sample<String> sample2 = new Sample<>(1479819721336L, "bar");
     archive.accept(sample1);
     archive.accept(sample2);
     assertThat(archive.getArchive(0).size(), equalTo(2));
@@ -45,13 +43,13 @@ public class StatisticArchiveTest {
     StatisticArchive<String> archive = new StatisticArchive<>(2);
     assertThat(archive.getArchive(), IsEmptyCollection.empty());
   }
-  
+
   @Test
   @SuppressWarnings("unchecked")
   public void testOccupiedArchive() {
     StatisticArchive<String> archive = new StatisticArchive<>(2);
-    Timestamped<String> sample1 = new Sample<>("foo", 0);
-    Timestamped<String> sample2 = new Sample<>("bar", 1);
+    Sample<String> sample1 = new Sample<>(0, "foo");
+    Sample<String> sample2 = new Sample<>(1, "bar");
     archive.accept(sample1);
     archive.accept(sample2);
     assertThat(archive.getArchive(), contains(sample1, sample2));
@@ -62,32 +60,12 @@ public class StatisticArchiveTest {
   public void testArchiveOverspill() {
     StatisticArchive<String> overspill = new StatisticArchive<>(1);
     StatisticArchive<String> archive = new StatisticArchive<>(1, overspill);
-    Timestamped<String> sample1 = new Sample<>("foo", 0);
-    Timestamped<String> sample2 = new Sample<>("bar", 1);
+    Sample<String> sample1 = new Sample<>(0, "foo");
+    Sample<String> sample2 = new Sample<>(1, "bar");
     archive.accept(sample1);
     archive.accept(sample2);
     assertThat(archive.getArchive(), contains(sample2));
     assertThat(overspill.getArchive(), contains(sample1));
   }
-  
-  static class Sample<T> implements Timestamped<T> {
 
-    private final T sample;
-    private final long timestamp;
-
-    public Sample(T sample, long timestamp) {
-      this.sample = sample;
-      this.timestamp = timestamp;
-    }
-    
-    @Override
-    public T getSample() {
-      return sample;
-    }
-
-    @Override
-    public long getTimestamp() {
-      return timestamp;
-    }
-  }
 }

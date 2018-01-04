@@ -17,36 +17,39 @@ package org.terracotta.context;
 
 import org.junit.Test;
 
-import static org.terracotta.context.ContextTestUtils.*;
-import static org.terracotta.context.ContextManager.*;
+import static org.terracotta.context.ContextManager.associate;
+import static org.terracotta.context.ContextManager.dissociate;
+import static org.terracotta.context.ContextTestUtils.NoAnnotations;
+import static org.terracotta.context.ContextTestUtils.validateAssociation;
+import static org.terracotta.context.ContextTestUtils.validateNoAssociation;
 
 public class ManualContextAssociationTest {
-  
+
   @Test
   public void testAddChildAssociation() {
     Object parent = new NoAnnotations();
     Object child = new NoAnnotations();
-    
+
     associate(parent).withChild(child);
-    
+
     ContextManager manager = new ContextManager();
-    
+
     manager.root(parent);
 
     validateAssociation(manager, parent, child);
   }
-  
+
   @Test
   public void testAddParentAssociation() {
     Object parent = new NoAnnotations();
     Object child = new NoAnnotations();
-    
+
     associate(child).withParent(parent);
-    
+
     ContextManager manager = new ContextManager();
-    
+
     manager.root(parent);
-    
+
     validateAssociation(manager, parent, child);
   }
 
@@ -54,29 +57,29 @@ public class ManualContextAssociationTest {
   public void testRemoveChildAssociation() {
     Object parent = new NoAnnotations();
     Object child = new NoAnnotations();
-    
+
     associate(parent).withChild(child);
-    
+
     ContextManager manager = new ContextManager();
-    
+
     manager.root(parent);
-    
+
     dissociate(parent).fromChild(child);
 
     validateNoAssociation(manager, parent, child);
   }
-  
+
   @Test
   public void testRemoveParentAssociation() {
     Object parent = new NoAnnotations();
     Object child = new NoAnnotations();
-    
+
     associate(child).withParent(parent);
-    
+
     ContextManager manager = new ContextManager();
-    
+
     manager.root(parent);
-    
+
     dissociate(child).fromParent(parent);
 
     validateNoAssociation(manager, parent, child);

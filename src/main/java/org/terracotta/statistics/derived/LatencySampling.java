@@ -15,18 +15,17 @@
  */
 package org.terracotta.statistics.derived;
 
-import java.util.EnumSet;
-import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terracotta.statistics.AbstractSourceStatistic;
 import org.terracotta.statistics.observer.ChainedEventObserver;
 import org.terracotta.statistics.observer.ChainedOperationObserver;
 
+import java.util.EnumSet;
+import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
+
 /**
- *
  * @author cdennis
  */
 public class LatencySampling<T extends Enum<T>> extends AbstractSourceStatistic<ChainedEventObserver> implements ChainedOperationObserver<T> {
@@ -36,7 +35,7 @@ public class LatencySampling<T extends Enum<T>> extends AbstractSourceStatistic<
   private final ThreadLocal<Long> operationStartTime = new ThreadLocal<>();
   private final Set<T> targetOperations;
   private final int ceiling;
-  
+
   public LatencySampling(Set<T> targets, double sampling) {
     if (sampling > 1.0 || sampling < 0.0) {
       throw new IllegalArgumentException();
@@ -55,7 +54,7 @@ public class LatencySampling<T extends Enum<T>> extends AbstractSourceStatistic<
   @Override
   public void end(long time, T result) {
     if (targetOperations.contains(result)) {
-      Long start  = operationStartTime.get();
+      Long start = operationStartTime.get();
       if (start != null) {
         long latency = time - start;
         if (!derivedStatistics.isEmpty()) {
@@ -73,11 +72,11 @@ public class LatencySampling<T extends Enum<T>> extends AbstractSourceStatistic<
   }
 
   @Override
-  public void end(long time, T result, long ... parameters) {
+  public void end(long time, T result, long... parameters) {
     end(time, result);
   }
-  
+
   private boolean sample() {
-    return ceiling == 1.0 || ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE) < ceiling;
+    return ceiling == Integer.MAX_VALUE || ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE) < ceiling;
   }
 }

@@ -15,27 +15,27 @@
  */
 package org.terracotta.statistics;
 
+import org.terracotta.statistics.observer.ChainedOperationObserver;
+
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.LongAdder;
 
-import org.terracotta.statistics.observer.ChainedOperationObserver;
-
 /**
  * An operation observer that tracks operation result counts and can drive further derived statistics.
- * 
+ *
  * @param <T> the operation result enum type
  */
 class GeneralOperationStatistic<T extends Enum<T>> extends AbstractOperationStatistic<T> implements OperationStatistic<T> {
-  
+
   private final EnumMap<T, LongAdder> counts;
-  
+
   /**
    * Create an operation statistics for a given operation result type.
-   * 
+   *
    * @param properties a set of context properties
-   * @param type operation result type
+   * @param type       operation result type
    */
   GeneralOperationStatistic(String name, Set<String> tags, Map<String, ? extends Object> properties, Class<T> type) {
     super(name, tags, properties, type);
@@ -44,10 +44,10 @@ class GeneralOperationStatistic<T extends Enum<T>> extends AbstractOperationStat
       counts.put(t, new LongAdder());
     }
   }
-  
+
   /**
    * Return the count of operations with the given type.
-   * 
+   *
    * @param type the result type
    * @return the operation count
    */
@@ -64,7 +64,7 @@ class GeneralOperationStatistic<T extends Enum<T>> extends AbstractOperationStat
     }
     return sum;
   }
-  
+
   @Override
   public void end(T result) {
     counts.get(result).increment();
@@ -75,9 +75,9 @@ class GeneralOperationStatistic<T extends Enum<T>> extends AbstractOperationStat
       }
     }
   }
-  
+
   @Override
-  public void end(T result, long ... parameters) {
+  public void end(T result, long... parameters) {
     counts.get(result).increment();
     if (!derivedStatistics.isEmpty()) {
       long time = Time.time();
@@ -86,7 +86,7 @@ class GeneralOperationStatistic<T extends Enum<T>> extends AbstractOperationStat
       }
     }
   }
-  
+
   @Override
   public String toString() {
     return counts.toString();

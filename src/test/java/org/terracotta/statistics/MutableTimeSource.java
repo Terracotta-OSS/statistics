@@ -19,11 +19,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- *
  * @author cdennis
  */
 public class MutableTimeSource implements Time.TimeSource {
-  
+
   private final AtomicLong time = new AtomicLong();
   private final AtomicLong absoluteTime = new AtomicLong();
 
@@ -35,7 +34,7 @@ public class MutableTimeSource implements Time.TimeSource {
   public void advanceTime(long by, TimeUnit unit) {
     time.addAndGet(unit.toNanos(by));
   }
-  
+
   @Override
   public long absoluteTime() {
     return time.get();

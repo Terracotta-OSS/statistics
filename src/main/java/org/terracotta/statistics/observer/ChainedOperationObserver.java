@@ -16,14 +16,13 @@
 package org.terracotta.statistics.observer;
 
 /**
- *
  * @author cdennis
  */
-public interface ChainedOperationObserver<T extends Enum<T>> extends ChainedObserver  {
-  
+public interface ChainedOperationObserver<T extends Enum<T>> extends ChainedObserver {
+
   void begin(long time);
-  
+
   void end(long time, T result);
-  
-  void end(long time, T result, long ... parameters);
+
+  void end(long time, T result, long... parameters);
 }

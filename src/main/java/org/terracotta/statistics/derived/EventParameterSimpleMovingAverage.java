@@ -15,7 +15,9 @@
  */
 package org.terracotta.statistics.derived;
 
-import static org.terracotta.statistics.Time.time;
+import org.terracotta.statistics.StatisticType;
+import org.terracotta.statistics.ValueStatistic;
+import org.terracotta.statistics.observer.ChainedEventObserver;
 
 import java.util.Iterator;
 import java.util.Queue;
@@ -25,25 +27,25 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.LongAccumulator;
 import java.util.concurrent.atomic.LongAdder;
 
-import org.terracotta.statistics.ValueStatistic;
-import org.terracotta.statistics.observer.ChainedEventObserver;
+import static org.terracotta.statistics.StatisticType.GAUGE;
+import static org.terracotta.statistics.SuppliedValueStatistic.gauge;
+import static org.terracotta.statistics.Time.time;
 
 /**
- *
  * @author cdennis
  */
-public class EventParameterSimpleMovingAverage implements ChainedEventObserver {
+public class EventParameterSimpleMovingAverage implements ChainedEventObserver, ValueStatistic<Double> {
 
   private static final int PARTITION_COUNT = 10;
 
   private final Queue<AveragePartition> archive = new ConcurrentLinkedQueue<>();
   private final AtomicReference<AveragePartition> activePartition;
-  
+
   private volatile long windowSize;
   private volatile long partitionSize;
-  
+
   public EventParameterSimpleMovingAverage(long time, TimeUnit unit) {
-    this.windowSize  = unit.toNanos(time);
+    this.windowSize = unit.toNanos(time);
     this.partitionSize = windowSize / PARTITION_COUNT;
     this.activePartition = new AtomicReference<>(new AveragePartition(Long.MIN_VALUE, partitionSize));
   }
@@ -53,25 +55,31 @@ public class EventParameterSimpleMovingAverage implements ChainedEventObserver {
     this.partitionSize = windowSize / PARTITION_COUNT;
   }
 
+  @Override
   public Double value() {
     return average();
   }
 
+  @Override
+  public StatisticType type() {
+    return GAUGE;
+  }
+
   public ValueStatistic<Double> averageStatistic() {
-    return this::average;
+    return this;
   }
-  
+
   public ValueStatistic<Long> minimumStatistic() {
-    return this::minimum;
+    return gauge(this::minimum);
   }
-  
+
   public ValueStatistic<Long> maximumStatistic() {
-    return this::maximum;
+    return gauge(this::maximum);
   }
-  
+
   public final double average() {
     long startTime = time() - windowSize;
-    
+
     AveragePartition current = activePartition.get();
     if (current.isBefore(startTime)) {
       return Double.NaN;
@@ -93,10 +101,10 @@ public class EventParameterSimpleMovingAverage implements ChainedEventObserver {
       return ((double) average.total) / average.count;
     }
   }
-  
+
   public final Long maximum() {
     long startTime = time() - windowSize;
-    
+
     AveragePartition current = activePartition.get();
     if (current.isBefore(startTime)) {
       return null;
@@ -116,10 +124,10 @@ public class EventParameterSimpleMovingAverage implements ChainedEventObserver {
       return maximum;
     }
   }
-  
+
   public final Long minimum() {
     long startTime = time() - windowSize;
-    
+
     AveragePartition current = activePartition.get();
     if (current.isBefore(startTime)) {
       return null;
@@ -141,7 +149,7 @@ public class EventParameterSimpleMovingAverage implements ChainedEventObserver {
   }
 
   @Override
-  public void event(long time, long ... parameters) {
+  public void event(long time, long... parameters) {
     while (true) {
       AveragePartition partition = activePartition.get();
       if (partition.targetFor(time)) {
@@ -160,53 +168,53 @@ public class EventParameterSimpleMovingAverage implements ChainedEventObserver {
 
   private void archive(AveragePartition partition) {
     archive.add(partition);
-    
+
     long startTime = partition.end() - windowSize;
-    for (AveragePartition earliest = archive.peek(); earliest!=null && earliest.isBefore(startTime); earliest = archive.peek()) {
+    for (AveragePartition earliest = archive.peek(); earliest != null && earliest.isBefore(startTime); earliest = archive.peek()) {
       if (archive.remove(earliest)) {
         break;
       }
     }
   }
-  
+
   static class AveragePartition {
 
     private final LongAdder total = new LongAdder();
     private final LongAdder count = new LongAdder();
     private final LongAccumulator maximum = new LongAccumulator(Math::max, Long.MIN_VALUE);
     private final LongAccumulator minimum = new LongAccumulator(Math::min, Long.MAX_VALUE);
-    
+
     private final long start;
     private final long end;
-    
+
     public AveragePartition(long start, long length) {
       this.start = start;
       this.end = start + length;
     }
-    
+
     public boolean targetFor(long time) {
       return end > time;
     }
-    
+
     public boolean isBefore(long time) {
       return end < time;
     }
-    
+
     public long start() {
       return start;
     }
-    
+
     public long end() {
       return end;
     }
-    
+
     public void event(long parameter) {
       total.add(parameter);
       count.increment();
       maximum.accumulate(parameter);
       minimum.accumulate(parameter);
     }
-    
+
     public void aggregate(Average average) {
       average.total += total.sum();
       average.count += count.sum();
@@ -215,12 +223,12 @@ public class EventParameterSimpleMovingAverage implements ChainedEventObserver {
     public long maximum() {
       return maximum.get();
     }
-    
+
     public long minimum() {
       return minimum.get();
     }
   }
-  
+
   static class Average {
     long total;
     long count;

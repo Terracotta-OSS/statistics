@@ -13,30 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terracotta.statistics.extended;
+package org.terracotta.statistics;
 
-import java.util.Arrays;
-import java.util.EnumSet;
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author Ludovic Orban
  */
-class CountOperationImpl<T extends Enum<T>> implements CountOperation<T> {
+public interface SampledStatistic<T extends Serializable> extends ValueStatistic<T> {
 
-  private final CompoundOperation<T> compoundOperation;
+  /**
+   * The history of values
+   *
+   * @return the list
+   */
+  List<Sample<T>> history();
 
-  CountOperationImpl(CompoundOperation<T> compoundOperation) {
-    this.compoundOperation = compoundOperation;
-  }
+  /**
+   * The history of values, since a given time in ms
+   *
+   * @param since starting point of history in ms
+   * @return the list
+   */
+  List<Sample<T>> history(long since);
 
-  @Override
-  public long value(T result) {
-    return compoundOperation.component(result).count().value();
-  }
-
-  @Override
-  @SafeVarargs
-  public final long value(T... results) {
-    return compoundOperation.compound(EnumSet.copyOf(Arrays.asList(results))).count().value();
-  }
 }

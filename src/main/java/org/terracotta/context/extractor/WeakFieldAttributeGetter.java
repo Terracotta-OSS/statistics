@@ -19,13 +19,12 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 
 /**
- *
  * @author cdennis
  */
 public class WeakFieldAttributeGetter<T> extends FieldAttributeGetter<T> {
 
   private final WeakReference<Object> targetRef;
-  
+
   public WeakFieldAttributeGetter(Object target, Field field) {
     super(field);
     this.targetRef = new WeakReference<>(target);

@@ -22,21 +22,21 @@ import org.terracotta.statistics.observer.ChainedObserver;
  * <p>
  * Derived statistics can be registered and will then receive the relevant
  * observer calls to update their status.
- * 
+ *
  * @param <T> Supported derived observer type
  */
 public interface SourceStatistic<T extends ChainedObserver> {
-  
+
   /**
    * Register the given {@code Observer} to be called by this {@code SourceStatistic}
-   * 
+   *
    * @param derived statistic to be registered
    */
   void addDerivedStatistic(T derived);
-  
+
   /**
    * Remove the given registered {@code Observer} from this {@code SourceStatistic}.
-   * 
+   *
    * @param derived statistic to be removed
    */
   void removeDerivedStatistic(T derived);

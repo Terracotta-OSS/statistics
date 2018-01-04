@@ -16,11 +16,10 @@
 package org.terracotta.context;
 
 /**
- *
  * @author cdennis
  */
 public interface ContextCreationListener {
 
   void contextCreated(Object object);
-  
+
 }

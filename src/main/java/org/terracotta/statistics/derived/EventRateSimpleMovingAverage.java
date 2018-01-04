@@ -15,7 +15,9 @@
  */
 package org.terracotta.statistics.derived;
 
-import static org.terracotta.statistics.Time.time;
+import org.terracotta.statistics.StatisticType;
+import org.terracotta.statistics.ValueStatistic;
+import org.terracotta.statistics.observer.ChainedEventObserver;
 
 import java.util.Iterator;
 import java.util.Queue;
@@ -24,11 +26,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.LongAdder;
 
-import org.terracotta.statistics.ValueStatistic;
-import org.terracotta.statistics.observer.ChainedEventObserver;
+import static org.terracotta.statistics.Time.time;
 
 /**
- *
  * @author cdennis
  */
 public class EventRateSimpleMovingAverage implements ChainedEventObserver, ValueStatistic<Double> {
@@ -37,12 +37,12 @@ public class EventRateSimpleMovingAverage implements ChainedEventObserver, Value
 
   private final Queue<CounterPartition> archive = new ConcurrentLinkedQueue<>();
   private final AtomicReference<CounterPartition> activePartition;
-  
+
   private volatile long windowSize;
   private volatile long partitionSize;
-  
+
   public EventRateSimpleMovingAverage(long time, TimeUnit unit) {
-    this.windowSize  = unit.toNanos(time);
+    this.windowSize = unit.toNanos(time);
     this.partitionSize = windowSize / PARTITION_COUNT;
     this.activePartition = new AtomicReference<>(new CounterPartition(time(), partitionSize));
   }
@@ -56,11 +56,16 @@ public class EventRateSimpleMovingAverage implements ChainedEventObserver, Value
   public Double value() {
     return rateUsingSeconds();
   }
-  
+
+  @Override
+  public StatisticType type() {
+    return StatisticType.RATE;
+  }
+
   public Double rateUsingSeconds() {
     final long endTime = time();
     final long startTime = endTime - windowSize;
-    
+
     CounterPartition current = activePartition.get();
     long count;
     long actualStartTime = startTime;
@@ -81,20 +86,20 @@ public class EventRateSimpleMovingAverage implements ChainedEventObserver, Value
         count += partition.sum();
       }
     }
-    
+
     if (count == 0L) {
       return 0.0;
     } else {
       return ((double) (TimeUnit.SECONDS.toNanos(1) * count)) / (endTime - actualStartTime);
     }
   }
-  
+
   public Double rate(TimeUnit base) {
     return rateUsingSeconds() * ((double) base.toNanos(1) / TimeUnit.SECONDS.toNanos(1));
   }
-  
+
   @Override
-  public void event(long time, long ... parameters) {
+  public void event(long time, long... parameters) {
     while (true) {
       CounterPartition partition = activePartition.get();
       if (partition.targetFor(time)) {
@@ -113,37 +118,37 @@ public class EventRateSimpleMovingAverage implements ChainedEventObserver, Value
 
   private void archive(CounterPartition partition) {
     archive.add(partition);
-    
+
     long startTime = partition.end() - windowSize;
-    for (CounterPartition earliest = archive.peek(); earliest!=null && earliest.isBefore(startTime); earliest = archive.peek()) {
-         if (archive.remove(earliest)) {
-            break;
-        }
-    } 
+    for (CounterPartition earliest = archive.peek(); earliest != null && earliest.isBefore(startTime); earliest = archive.peek()) {
+      if (archive.remove(earliest)) {
+        break;
+      }
+    }
   }
-  
+
   static class CounterPartition extends LongAdder {
 
     private final long start;
     private final long end;
-    
+
     CounterPartition(long start, long length) {
       this.start = start;
       this.end = start + length;
     }
-    
+
     public boolean targetFor(long time) {
       return end > time;
     }
-    
+
     public boolean isBefore(long time) {
       return end < time;
     }
-    
+
     public long start() {
       return start;
     }
-    
+
     public long end() {
       return end;
     }

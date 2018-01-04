@@ -15,7 +15,18 @@
  */
 package org.terracotta.statistics;
 
-public interface ValueStatistic<T extends Number> {
-  
+import java.io.Serializable;
+
+public interface ValueStatistic<T extends Serializable> {
+
+  /**
+   * @return The statistic type
+   */
+  StatisticType type();
+
+  /**
+   * @return The current statistic value
+   */
   T value();
+
 }

@@ -15,12 +15,6 @@
  */
 package org.terracotta.context.query;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.hamcrest.collection.IsCollectionWithSize;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.hamcrest.core.IsEqual;
@@ -29,34 +23,41 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.terracotta.context.TreeNode;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import static org.junit.Assert.assertThat;
-import static org.terracotta.context.query.QueryBuilder.*;
-import static org.terracotta.context.query.QueryTestUtils.*;
+import static org.terracotta.context.query.QueryBuilder.queryBuilder;
+import static org.terracotta.context.query.QueryTestUtils.A;
+import static org.terracotta.context.query.QueryTestUtils.B;
+import static org.terracotta.context.query.QueryTestUtils.createTreeNode;
 
 /**
- *
  * @author cdennis
  */
 @RunWith(Parameterized.class)
 public class FilterTest {
-  
-  @Parameterized.Parameters
-  public static List<Object[]> queries() {
-    return Arrays.asList(new Object[][] {{"constructor"}, {"builder"}});
-  }
-  
+
   private final String buildHow;
-  
+
   public FilterTest(String buildHow) {
     this.buildHow = buildHow;
   }
 
-  @Test(expected=NullPointerException.class)
+  @Parameterized.Parameters
+  public static List<Object[]> queries() {
+    return Arrays.asList(new Object[][]{{"constructor"}, {"builder"}});
+  }
+
+  @Test(expected = NullPointerException.class)
   public void testNullFilterFailsOnConstruction() {
     buildQuery(null);
   }
-  
-  @Test(expected=UnsupportedOperationException.class)
+
+  @Test(expected = UnsupportedOperationException.class)
   public void testMatcherExceptionPropagates() {
     buildQuery(new Matcher<TreeNode>() {
 
@@ -66,13 +67,13 @@ public class FilterTest {
       }
     }).execute(Collections.singleton(createTreeNode(A.class)));
   }
-  
+
   @Test
   public void testAlwaysFailMatcher() {
     Set<TreeNode> input = new HashSet<>();
     input.add(createTreeNode(A.class));
     input.add(createTreeNode(B.class));
-    
+
     assertThat(buildQuery(new Matcher<TreeNode>() {
       @Override
       protected boolean matchesSafely(TreeNode object) {
@@ -80,13 +81,13 @@ public class FilterTest {
       }
     }).execute(input), IsEmptyCollection.empty());
   }
-  
+
   @Test
   public void testAlwaysPassMatcher() {
     Set<TreeNode> input = new HashSet<>();
     input.add(createTreeNode(A.class));
     input.add(createTreeNode(B.class));
-    
+
     assertThat(buildQuery(new Matcher<TreeNode>() {
 
       @Override
@@ -95,23 +96,23 @@ public class FilterTest {
       }
     }).execute(input), IsEqual.equalTo(input));
   }
-  
+
   @Test
   public void testHalfPassMatcher() {
     Set<TreeNode> input = new HashSet<>();
     input.add(createTreeNode(A.class));
     input.add(createTreeNode(B.class));
-    
+
     assertThat(buildQuery(new Matcher<TreeNode>() {
 
       private boolean match;
-      
+
       @Override
       protected boolean matchesSafely(TreeNode object) {
         return match ^= true;
       }
     }).execute(input), IsCollectionWithSize.hasSize(input.size() / 2));
-  }  
+  }
 
   private Query buildQuery(Matcher<? super TreeNode> matcher) {
     if ("constructor".equals(buildHow)) {
@@ -122,5 +123,5 @@ public class FilterTest {
       throw new AssertionError();
     }
   }
-  
+
 }

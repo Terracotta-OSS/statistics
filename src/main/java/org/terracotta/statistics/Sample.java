@@ -13,15 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terracotta.statistics.archive;
+package org.terracotta.statistics;
+
+import java.io.Serializable;
+import java.time.Instant;
 
 /**
- *
  * @author cdennis
  */
-public interface Timestamped<T> {
-  
-  T getSample();
-  
-  long getTimestamp();
+public class Sample<T extends Serializable> implements Serializable {
+
+  private static final long serialVersionUID = 1L;
+
+  private final long timestamp;
+  private final T sample;
+
+  public Sample(long timestamp, T sample) {
+    this.sample = sample;
+    this.timestamp = timestamp;
+  }
+
+  public T getSample() {
+    return sample;
+  }
+
+  public long getTimestamp() {
+    return timestamp;
+  }
+
+  @Override
+  public String toString() {
+    return getSample() + " @ " + Instant.ofEpochMilli(getTimestamp());
+  }
+
 }

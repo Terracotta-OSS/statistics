@@ -15,9 +15,9 @@
  */
 package org.terracotta.context.query;
 
-import java.util.Set;
-
 import org.terracotta.context.TreeNode;
+
+import java.util.Set;
 
 /**
  * A {@code Query} instance transforms an input node set into an output node set.
@@ -29,9 +29,9 @@ public interface Query {
 
   /**
    * Transforms the {@code input} node set in to an output node set.
-   * 
+   *
    * @param input query input node set
    * @return the output node set
    */
-  Set<TreeNode> execute(Set<TreeNode> input); 
+  Set<TreeNode> execute(Set<TreeNode> input);
 }

@@ -36,7 +36,7 @@ public class StatisticMapper<SOURCE extends Enum<SOURCE>, TARGET extends Enum<TA
   private final Map<TARGET, Set<SOURCE>> translation;
   private final Map<SOURCE, TARGET> reverseTranslation;
   private final ConcurrentMap<ChainedOperationObserver<? super TARGET>, ChainedOperationObserver<SOURCE>> derivedStats
-          = new ConcurrentHashMap<>();
+      = new ConcurrentHashMap<>();
 
   public StatisticMapper(Map<TARGET, Set<SOURCE>> translation, OperationStatistic<SOURCE> statistic) {
     Entry<TARGET, Set<SOURCE>> first = translation.entrySet().iterator().next();

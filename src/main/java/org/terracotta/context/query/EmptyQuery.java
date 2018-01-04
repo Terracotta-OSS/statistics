@@ -15,24 +15,24 @@
  */
 package org.terracotta.context.query;
 
+import org.terracotta.context.TreeNode;
+
 import java.util.Collections;
 import java.util.Set;
-
-import org.terracotta.context.TreeNode;
 
 class EmptyQuery implements Query {
 
   static final Query INSTANCE = new EmptyQuery();
-  
+
   private EmptyQuery() {
     //singleton
   }
-  
+
   @Override
   public Set<TreeNode> execute(Set<TreeNode> input) {
     return Collections.emptySet();
   }
-  
+
   @Override
   public String toString() {
     return "<empty>";

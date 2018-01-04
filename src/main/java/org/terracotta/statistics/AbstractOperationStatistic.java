@@ -15,6 +15,9 @@
  */
 package org.terracotta.statistics;
 
+import org.terracotta.context.annotations.ContextAttribute;
+import org.terracotta.statistics.observer.ChainedOperationObserver;
+
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -22,11 +25,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.terracotta.context.annotations.ContextAttribute;
-import org.terracotta.statistics.observer.ChainedOperationObserver;
-
 /**
- *
  * @author cdennis
  */
 @ContextAttribute("this")
@@ -36,12 +35,12 @@ public abstract class AbstractOperationStatistic<T extends Enum<T>> extends Abst
   @ContextAttribute("tags") public final Set<String> tags;
   @ContextAttribute("properties") public final Map<String, Object> properties;
   @ContextAttribute("type") public final Class<T> type;
-  
+
   /**
    * Create an operation statistics for a given operation result type.
-   * 
+   *
    * @param properties a set of context properties
-   * @param type operation result type
+   * @param type       operation result type
    */
   AbstractOperationStatistic(String name, Set<String> tags, Map<String, ? extends Object> properties, Class<T> type) {
     this.name = name;
@@ -49,33 +48,17 @@ public abstract class AbstractOperationStatistic<T extends Enum<T>> extends Abst
     this.properties = Collections.unmodifiableMap(new HashMap<String, Object>(properties));
     this.type = type;
   }
-  
+
   @Override
   public Class<T> type() {
     return type;
   }
-  
-  /**
-   * Return a {@link ValueStatistic} returning the count for the given result.
-   * 
-   * @param result the result of interest 
-   * @return a {@code ValueStatistic} instance
-   */
-  @Override
-  public ValueStatistic<Long> statistic(final T result) {
-    return () -> count(result);
-  }
 
-  @Override
-  public ValueStatistic<Long> statistic(final Set<T> results) {
-    return () -> sum(results);
-  }
-  
   @Override
   public long sum() {
     return sum(EnumSet.allOf(type));
   }
-  
+
   @Override
   public void begin() {
     if (!derivedStatistics.isEmpty()) {

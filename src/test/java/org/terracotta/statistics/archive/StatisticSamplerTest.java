@@ -15,55 +15,60 @@
  */
 package org.terracotta.statistics.archive;
 
+import org.hamcrest.collection.IsEmptyCollection;
+import org.hamcrest.core.CombinableMatcher;
+import org.junit.Test;
+import org.terracotta.statistics.Sample;
+
+import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.hamcrest.collection.IsEmptyCollection;
-import org.hamcrest.core.CombinableMatcher;
-import org.junit.Test;
-import org.terracotta.statistics.ConstantValueStatistic;
-
-import static org.hamcrest.collection.IsCollectionWithSize.*;
-import static org.hamcrest.number.OrderingComparison.*;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.hamcrest.number.OrderingComparison.greaterThan;
+import static org.hamcrest.number.OrderingComparison.lessThan;
 import static org.junit.Assert.assertThat;
+import static org.terracotta.statistics.ConstantValueStatistic.constant;
+import static org.terracotta.statistics.StatisticType.COUNTER;
+import static org.terracotta.statistics.StatisticType.GAUGE;
+import static org.terracotta.statistics.SuppliedValueStatistic.counter;
 import static org.terracotta.util.RetryAssert.assertBy;
 
 /**
- *
  * @author cdennis
  */
 public class StatisticSamplerTest {
-  
+
   @Test
   public void testUnstartedSampler() throws InterruptedException {
-    StatisticSampler<Integer> sampler = new StatisticSampler<Integer>(1L, TimeUnit.NANOSECONDS, () -> {
+    StatisticSampler<Integer> sampler = new StatisticSampler<>(1L, TimeUnit.NANOSECONDS, counter(() -> {
       throw new AssertionError();
-    }, SampleSink.devNull());
-    
+    }), SampleSink.devNull());
+
     sampler.shutdown();
   }
-  
+
   @Test(expected = IllegalStateException.class)
   public void testShutdownOfSharedExecutor() throws InterruptedException {
     ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     try {
-      StatisticSampler<Integer> sampler = new StatisticSampler<>(executor, 1L, TimeUnit.NANOSECONDS, ConstantValueStatistic
-          .instance(42), SampleSink.devNull());
+      StatisticSampler<Integer> sampler = new StatisticSampler<>(executor, 1L, TimeUnit.NANOSECONDS,
+          constant(COUNTER, 42), SampleSink.devNull());
       sampler.shutdown();
     } finally {
       executor.shutdown();
     }
   }
-  
+
   @Test
   public void testLongPeriodSampler() throws InterruptedException {
     StatisticArchive<Integer> archive = new StatisticArchive<>(1);
-    StatisticSampler<Integer> sampler = new StatisticSampler<>(1L, TimeUnit.HOURS, () -> {
+    StatisticSampler<Integer> sampler = new StatisticSampler<>(1L, TimeUnit.HOURS, counter(() -> {
       throw new AssertionError();
-    }, archive);
+    }), archive);
     try {
       sampler.start();
       TimeUnit.SECONDS.sleep(1);
@@ -72,11 +77,11 @@ public class StatisticSamplerTest {
       sampler.shutdown();
     }
   }
-  
+
   @Test
   public void testShortPeriodSampler() throws InterruptedException {
     StatisticArchive<Integer> archive = new StatisticArchive<>(20);
-    StatisticSampler<Integer> sampler = new StatisticSampler<>(100L, TimeUnit.MILLISECONDS, ConstantValueStatistic.instance(42), archive);
+    StatisticSampler<Integer> sampler = new StatisticSampler<>(100L, TimeUnit.MILLISECONDS, constant(GAUGE, 42), archive);
     try {
       sampler.start();
       TimeUnit.SECONDS.sleep(1);
@@ -89,7 +94,7 @@ public class StatisticSamplerTest {
   @Test
   public void testStoppingAndStartingSampler() throws InterruptedException {
     StatisticArchive<Integer> archive = new StatisticArchive<>(20);
-    StatisticSampler<Integer> sampler = new StatisticSampler<>(200L, TimeUnit.MILLISECONDS, ConstantValueStatistic.instance(42), archive);
+    StatisticSampler<Integer> sampler = new StatisticSampler<>(200L, TimeUnit.MILLISECONDS, constant(GAUGE, 42), archive);
     try {
       sampler.start();
       assertBy(1, TimeUnit.SECONDS, contentsOf(archive), hasSize(1));
@@ -103,9 +108,9 @@ public class StatisticSamplerTest {
       sampler.shutdown();
     }
   }
-  
-  static <T> Callable<List<Timestamped<T>>> contentsOf(final StatisticArchive<T> archive) {
+
+  private static <T extends Serializable> Callable<List<Sample<T>>> contentsOf(final StatisticArchive<T> archive) {
     return archive::getArchive;
   }
-  
+
 }

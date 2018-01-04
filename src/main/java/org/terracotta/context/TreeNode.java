@@ -27,21 +27,21 @@ import java.util.Set;
  * the overall context tree or trees.
  */
 public interface TreeNode extends WeakIdentityHashMap.Cleanable {
-  
+
   /**
    * Returns the immediate children of this context.
-   * 
+   *
    * @return the context children
    */
   Set<? extends TreeNode> getChildren();
-  
+
   /**
    * Returns the unique rooting path of this context element.
    * <p>
    * If this context element is not connected to a root in any ContextManager
    * instance or is rooted via multiple distinct paths then an
    * {@code IllegalStateException} will be thrown.
-   * 
+   *
    * @return the unique rooting path
    * @throws IllegalStateException if the context is not uniquely rooted
    */
@@ -49,17 +49,17 @@ public interface TreeNode extends WeakIdentityHashMap.Cleanable {
 
   /**
    * Returns the complete set of rooting paths for this context element.
-   * 
+   *
    * @return the set of rooting paths
    */
   Collection<List<? extends TreeNode>> getPaths();
 
   /**
    * Returns the context information associated with this node.
-   * 
+   *
    * @return node context information
    */
   ContextElement getContext();
-  
+
   String toTreeString();
 }
