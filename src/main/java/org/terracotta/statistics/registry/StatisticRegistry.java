@@ -20,8 +20,6 @@ import org.terracotta.context.TreeNode;
 import org.terracotta.context.query.Matcher;
 import org.terracotta.context.query.Matchers;
 import org.terracotta.statistics.OperationStatistic;
-import org.terracotta.statistics.Sample;
-import org.terracotta.statistics.SampledStatistic;
 import org.terracotta.statistics.StatisticType;
 import org.terracotta.statistics.Table;
 import org.terracotta.statistics.Time;
@@ -32,21 +30,20 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.LongSupplier;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toList;
 import static org.terracotta.context.query.Matchers.attributes;
 import static org.terracotta.context.query.Matchers.context;
 import static org.terracotta.context.query.Matchers.hasAttribute;
 import static org.terracotta.context.query.Matchers.identifier;
 import static org.terracotta.context.query.Matchers.subclassOf;
 import static org.terracotta.context.query.QueryBuilder.queryBuilder;
-import static org.terracotta.statistics.SampledStatisticAdapter.sample;
 import static org.terracotta.statistics.SuppliedValueStatistic.counter;
 import static org.terracotta.statistics.SuppliedValueStatistic.gauge;
 import static org.terracotta.statistics.SuppliedValueStatistic.supply;
@@ -68,19 +65,19 @@ import static org.terracotta.statistics.SuppliedValueStatistic.table;
 public class StatisticRegistry {
 
   private final Object contextObject;
-  private final Supplier<Long> timeSource;
-  private final Map<String, SampledStatistic<? extends Serializable>> statistics = new HashMap<>();
+  private final LongSupplier timeSource;
+  private final Map<String, ValueStatistic<? extends Serializable>> statistics = new HashMap<>();
 
   public StatisticRegistry(Object contextObject) {
     this(contextObject, Time::absoluteTime);
   }
 
-  public StatisticRegistry(Object contextObject, Supplier<Long> timeSource) {
+  public StatisticRegistry(Object contextObject, LongSupplier timeSource) {
     this.contextObject = contextObject;
     this.timeSource = Objects.requireNonNull(timeSource);
   }
 
-  public Map<String, SampledStatistic<? extends Serializable>> getStatistics() {
+  protected Map<String, ValueStatistic<? extends Serializable>> getStatistics() {
     return statistics;
   }
 
@@ -96,8 +93,11 @@ public class StatisticRegistry {
    */
   @SuppressWarnings("unchecked")
   public <T extends Serializable> Optional<Statistic<T>> queryStatistic(String fullStatisticName, long sinceMillis) {
-    return Optional.ofNullable((SampledStatistic<T>) statistics.get(fullStatisticName))
-        .map(statistic -> new Statistic<>(statistic.type(), filter(statistic.type(), statistic.history(sinceMillis))));
+    ValueStatistic<T> valueStatistic = (ValueStatistic<T>) statistics.get(fullStatisticName);
+    if (valueStatistic == null) {
+      return Optional.empty();
+    }
+    return Optional.of(Statistic.extract(valueStatistic, sinceMillis, timeSource.getAsLong()));
   }
 
   public Map<String, Statistic<? extends Serializable>> queryStatistics() {
@@ -106,9 +106,8 @@ public class StatisticRegistry {
 
   @SuppressWarnings("unchecked")
   public Map<String, Statistic<? extends Serializable>> queryStatistics(long sinceMillis) {
-    Map<String, Statistic<? extends Serializable>> stats = new HashMap<>(statistics.size());
-    statistics.forEach((name, stat) -> stats.put(name, new Statistic<>(stat.type(), filter(stat.type(), stat.history(sinceMillis)))));
-    return stats;
+    long now = timeSource.getAsLong();
+    return statistics.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> Statistic.extract(e.getValue(), sinceMillis, now)));
   }
 
   public <T extends Serializable> void registerStatistic(String fullStatName, StatisticType type, Supplier<T> accessor) {
@@ -116,10 +115,6 @@ public class StatisticRegistry {
   }
 
   public <T extends Serializable> void registerStatistic(String fullStatName, ValueStatistic<T> accessor) {
-    registerSampledStatistic(fullStatName, sample(accessor, timeSource));
-  }
-
-  public <T extends Serializable> void registerSampledStatistic(String fullStatName, SampledStatistic<T> accessor) {
     if (statistics.put(fullStatName, accessor) != null) {
       throw new IllegalArgumentException("Found duplicate statistic " + fullStatName);
     }
@@ -146,6 +141,7 @@ public class StatisticRegistry {
     registerStatistic(fullStatName, counter(accessor));
   }
 
+  @SuppressWarnings("unchecked")
   public <T extends Serializable> boolean registerStatistic(String statNameSuffix, ValueStatisticDescriptor descriptor) {
     // ignore registering through descriptors if we do not have a context object to find in the tree
     if (contextObject == null) {
@@ -184,6 +180,7 @@ public class StatisticRegistry {
     }
   }
 
+  @SuppressWarnings("unchecked")
   public <T extends Enum<T>> boolean registerStatistic(String statNameSuffix, final OperationStatisticDescriptor<T> descriptor, final EnumSet<T> outcomes) {
     // ignore registering through descriptors if we do not have a context object to find in the tree
     if (contextObject == null) {
@@ -230,13 +227,6 @@ public class StatisticRegistry {
         return object.containsAll(tags);
       }
     });
-  }
-
-  private <T extends Serializable> List<Sample<T>> filter(StatisticType type, List<Sample<T>> history) {
-    return history.stream()
-        // we generally not accept null values for statistics - it means that is not available right now
-        .filter(s -> s.getSample() != null)
-        .collect(toList());
   }
 
 }

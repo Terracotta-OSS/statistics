@@ -60,24 +60,11 @@ public class StatisticRegistryTest {
 
     registry.registerCounter("Cache:Hits", () -> 1L);
     registry.registerGauge("Cache:OffHeapMemoryUsed", () -> 1024L);
-    registry.registerSampledStatistic("Cache:GetLatencies", sample(gauge(() -> 100L)));
+    registry.registerStatistic("Cache:GetLatencies", sample(gauge(() -> 100L)));
     registry.registerStatistic("Cache:PutLatencies", gauge(() -> 200L));
     registry.registerStatistic("Cache:ClearLatencies", GAUGE, () -> 300L);
     assertThat(registry.registerStatistic("AllocatedMemory", ValueStatisticDescriptor.descriptor("allocatedMemory", "tier", "OffHeapResource")), is(true));
     assertThat(registry.registerStatistic("TimeUnit", OperationStatisticDescriptor.descriptor("timeUnit", singleton("axis"), TimeUnit.class), EnumSet.allOf(TimeUnit.class)), is(true));
-  }
-
-  @Test
-  public void getStatistics() throws Exception {
-    assertThat(registry.getStatistics().keySet(), hasItems(
-        "Cache:Hits",
-        "Cache:OffHeapMemoryUsed",
-        "Cache:GetLatencies",
-        "Cache:PutLatencies",
-        "Cache:ClearLatencies",
-        "OffHeapResource:AllocatedMemory",
-        "Axis:TimeUnit"));
-    assertThat(registry.getStatistics().size(), equalTo(7));
   }
 
   @Test
