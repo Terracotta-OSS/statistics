@@ -16,11 +16,16 @@
 package org.terracotta.statistics.registry;
 
 import org.terracotta.statistics.Sample;
+import org.terracotta.statistics.SampledStatistic;
 import org.terracotta.statistics.StatisticType;
+import org.terracotta.statistics.ValueStatistic;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author Mathieu Carbou
@@ -31,6 +36,14 @@ public class Statistic<T extends Serializable> implements Serializable {
 
   private final StatisticType type;
   private final List<Sample<T>> samples;
+
+  public Statistic(StatisticType type) {
+    this(type, Collections.emptyList());
+  }
+
+  public Statistic(StatisticType type, Sample<T> sample) {
+    this(type, Collections.singletonList(sample));
+  }
 
   public Statistic(StatisticType type, List<Sample<T>> samples) {
     this.type = type;
@@ -60,4 +73,26 @@ public class Statistic<T extends Serializable> implements Serializable {
         ", samples=" + samples +
         '}';
   }
+
+  static <T extends Serializable> Statistic<T> extract(ValueStatistic<T> valueStatistic, long sinceMillis, long now) {
+    // sample stats
+    if (valueStatistic instanceof SampledStatistic) {
+      return new Statistic<>(
+          valueStatistic.type(),
+          ((SampledStatistic<T>) valueStatistic).history(sinceMillis)
+              .stream()
+              .filter(s -> s.getSample() != null) // we generally not accept null values for statistics - it means that it is not available right now
+              .collect(toList()));
+    }
+    // single-value history ?
+    if (sinceMillis <= now) {
+      T value = valueStatistic.value();
+      if (value != null) {
+        return new Statistic<>(valueStatistic.type(), new Sample<>(now, value));
+      }
+    }
+    // empty history
+    return new Statistic<>(valueStatistic.type());
+  }
+
 }

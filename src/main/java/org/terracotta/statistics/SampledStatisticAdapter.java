@@ -20,17 +20,17 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Supplier;
+import java.util.function.LongSupplier;
 
 /**
  * @author Mathieu Carbou
  */
 public class SampledStatisticAdapter<T extends Serializable> implements SampledStatistic<T> {
 
-  private final Supplier<Long> timeSource;
+  private final LongSupplier timeSource;
   private final ValueStatistic<T> statistic;
 
-  private SampledStatisticAdapter(ValueStatistic<T> statistic, Supplier<Long> timeSource) {
+  private SampledStatisticAdapter(ValueStatistic<T> statistic, LongSupplier timeSource) {
     this.statistic = Objects.requireNonNull(statistic);
     this.timeSource = Objects.requireNonNull(timeSource);
   }
@@ -42,12 +42,12 @@ public class SampledStatisticAdapter<T extends Serializable> implements SampledS
 
   @Override
   public List<Sample<T>> history() {
-    return Collections.singletonList(new Sample<>(timeSource.get(), statistic.value()));
+    return Collections.singletonList(new Sample<>(timeSource.getAsLong(), statistic.value()));
   }
 
   @Override
   public List<Sample<T>> history(long since) {
-    long now = timeSource.get();
+    long now = timeSource.getAsLong();
     return since <= now ? Collections.singletonList(new Sample<>(now, statistic.value())) : Collections.emptyList();
   }
 
@@ -56,7 +56,7 @@ public class SampledStatisticAdapter<T extends Serializable> implements SampledS
     return statistic.type();
   }
 
-  public static <T extends Serializable> SampledStatistic<T> sample(ValueStatistic<T> accessor, Supplier<Long> timeSource) {
+  public static <T extends Serializable> SampledStatistic<T> sample(ValueStatistic<T> accessor, LongSupplier timeSource) {
     return new SampledStatisticAdapter<>(accessor, timeSource);
   }
 
