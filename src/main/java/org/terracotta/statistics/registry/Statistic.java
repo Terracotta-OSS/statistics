@@ -62,8 +62,12 @@ public class Statistic<T extends Serializable> implements Serializable {
     return samples;
   }
 
-  public Optional<T> getLatestSample() {
-    return samples.isEmpty() ? Optional.empty() : Optional.of(samples.get(samples.size() - 1).getSample());
+  public Optional<T> getLatestSampleValue() {
+    return getLatestSample().map(Sample::getSample);
+  }
+
+  public Optional<Sample<T>> getLatestSample() {
+    return samples.isEmpty() ? Optional.empty() : Optional.of(samples.get(samples.size() - 1));
   }
 
   @Override

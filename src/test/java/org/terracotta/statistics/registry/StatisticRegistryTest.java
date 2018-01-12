@@ -74,7 +74,7 @@ public class StatisticRegistryTest {
     assertThat(statistic.getSamples().size(), equalTo(1));
     assertThat(statistic.isEmpty(), is(false));
     assertThat(statistic.getType(), equalTo(COUNTER));
-    assertThat(statistic.getLatestSample().get(), equalTo(0L));
+    assertThat(statistic.getLatestSampleValue().get(), equalTo(0L));
   }
 
   @Test
@@ -92,7 +92,7 @@ public class StatisticRegistryTest {
     for (Statistic<? extends Serializable> statistic : statistics.values()) {
       assertThat(statistic.getSamples().size(), equalTo(1));
       assertThat(statistic.isEmpty(), is(false));
-      assertThat(statistic.getLatestSample().isPresent(), is(true));
+      assertThat(statistic.getLatestSampleValue().isPresent(), is(true));
     }
   }
 
