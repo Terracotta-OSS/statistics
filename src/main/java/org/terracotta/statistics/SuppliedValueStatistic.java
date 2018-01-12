@@ -17,6 +17,9 @@ package org.terracotta.statistics;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 import static org.terracotta.statistics.StatisticType.COUNTER;
@@ -55,6 +58,34 @@ public class SuppliedValueStatistic<T extends Serializable> implements ValueStat
 
   public static <T extends Table> ValueStatistic<T> table(Supplier<T> supplier) {
     return supply(TABLE, supplier);
+  }
+
+  public static <T extends Serializable> ValueStatistic<T> memoize(long delay, TimeUnit unit, ValueStatistic<T> valueStatistic) {
+    return new ValueStatistic<T>() {
+
+      long delayNs = TimeUnit.NANOSECONDS.convert(delay, unit);
+      AtomicReference<T> memoized = new AtomicReference<>();
+      AtomicLong expiration = new AtomicLong();
+
+      @Override
+      public StatisticType type() {
+        return valueStatistic.type();
+      }
+
+      @Override
+      public T value() {
+        long now = System.nanoTime();
+        long exp = expiration.get();
+        if (now >= exp && expiration.compareAndSet(exp, now + delayNs)) {
+          T current = memoized.get();
+          T newValue = valueStatistic.value();
+          if (memoized.compareAndSet(current, newValue)) {
+            return newValue;
+          }
+        }
+        return memoized.get();
+      }
+    };
   }
 
   private final Supplier<T> supplier;
