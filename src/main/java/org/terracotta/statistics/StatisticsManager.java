@@ -36,7 +36,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.terracotta.statistics.SuppliedValueStatistic.supply;
+import static org.terracotta.statistics.ValueStatistics.supply;
 
 public class StatisticsManager extends ContextManager {
 

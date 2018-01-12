@@ -23,8 +23,8 @@ import static java.lang.Thread.sleep;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
-import static org.terracotta.statistics.SuppliedValueStatistic.gauge;
-import static org.terracotta.statistics.SuppliedValueStatistic.memoize;
+import static org.terracotta.statistics.ValueStatistics.gauge;
+import static org.terracotta.statistics.ValueStatistics.memoize;
 
 /**
  * @author Mathieu Carbou

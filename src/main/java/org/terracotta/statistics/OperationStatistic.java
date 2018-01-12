@@ -20,7 +20,7 @@ import org.terracotta.statistics.observer.OperationObserver;
 
 import java.util.Set;
 
-import static org.terracotta.statistics.SuppliedValueStatistic.counter;
+import static org.terracotta.statistics.ValueStatistics.counter;
 
 /**
  * @author cdennis

@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.concurrent.atomic.LongAccumulator;
 
-import static org.terracotta.statistics.SuppliedValueStatistic.gauge;
+import static org.terracotta.statistics.ValueStatistics.gauge;
 
 /**
  * @author cdennis

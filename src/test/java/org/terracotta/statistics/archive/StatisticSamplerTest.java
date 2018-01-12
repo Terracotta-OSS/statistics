@@ -31,10 +31,10 @@ import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
 import static org.hamcrest.number.OrderingComparison.lessThan;
 import static org.junit.Assert.assertThat;
-import static org.terracotta.statistics.ConstantValueStatistic.constant;
+import static org.terracotta.statistics.ValueStatistics.constant;
 import static org.terracotta.statistics.StatisticType.COUNTER;
 import static org.terracotta.statistics.StatisticType.GAUGE;
-import static org.terracotta.statistics.SuppliedValueStatistic.counter;
+import static org.terracotta.statistics.ValueStatistics.counter;
 import static org.terracotta.util.RetryAssert.assertBy;
 
 /**

@@ -22,7 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.terracotta.statistics.ConstantValueStatistic.constant;
+import static org.terracotta.statistics.ValueStatistics.constant;
 
 /**
  * @author Mathieu Carbou
