@@ -51,7 +51,7 @@ public class TableStatisticTest {
 
     registry.registerStatistic("Database:TopQueries", statistic);
 
-    Table table = registry.<Table>queryStatistic("Database:TopQueries").get().getLatestSample().get();
+    Table table = registry.<Table>queryStatistic("Database:TopQueries").get().getLatestSampleValue().get();
     assertThat(table.getRowCount(), equalTo(2));
     assertTable(table);
   }
@@ -74,7 +74,7 @@ public class TableStatisticTest {
           .build();
     });
 
-    Table table = registry.<Table>queryStatistic("Database:TopQueries").get().getLatestSample().get();
+    Table table = registry.<Table>queryStatistic("Database:TopQueries").get().getLatestSampleValue().get();
     assertThat(table.getRowCount(), equalTo(2));
     assertTable(table);
 
