@@ -36,62 +36,10 @@ import static org.terracotta.statistics.StatisticType.TABLE;
  */
 public class SuppliedValueStatistic<T extends Serializable> implements ValueStatistic<T> {
 
-  public static <T extends Serializable> ValueStatistic<T> supply(StatisticType type, Supplier<T> supplier) {
-    return new SuppliedValueStatistic<>(type, supplier);
-  }
-
-  public static <T extends Number> ValueStatistic<T> gauge(Supplier<T> supplier) {
-    return supply(GAUGE, supplier);
-  }
-
-  public static <T extends Number> ValueStatistic<T> counter(Supplier<T> supplier) {
-    return supply(COUNTER, supplier);
-  }
-
-  public static <T extends Number> ValueStatistic<T> rate(Supplier<T> supplier) {
-    return supply(RATE, supplier);
-  }
-
-  public static <T extends Number> ValueStatistic<T> ratio(Supplier<T> supplier) {
-    return supply(RATIO, supplier);
-  }
-
-  public static <T extends Table> ValueStatistic<T> table(Supplier<T> supplier) {
-    return supply(TABLE, supplier);
-  }
-
-  public static <T extends Serializable> ValueStatistic<T> memoize(long delay, TimeUnit unit, ValueStatistic<T> valueStatistic) {
-    return new ValueStatistic<T>() {
-
-      long delayNs = TimeUnit.NANOSECONDS.convert(delay, unit);
-      AtomicReference<T> memoized = new AtomicReference<>();
-      AtomicLong expiration = new AtomicLong();
-
-      @Override
-      public StatisticType type() {
-        return valueStatistic.type();
-      }
-
-      @Override
-      public T value() {
-        long now = System.nanoTime();
-        long exp = expiration.get();
-        if (now >= exp && expiration.compareAndSet(exp, now + delayNs)) {
-          T current = memoized.get();
-          T newValue = valueStatistic.value();
-          if (memoized.compareAndSet(current, newValue)) {
-            return newValue;
-          }
-        }
-        return memoized.get();
-      }
-    };
-  }
-
   private final Supplier<T> supplier;
   private final StatisticType type;
 
-  private SuppliedValueStatistic(StatisticType type, Supplier<T> supplier) {
+  public SuppliedValueStatistic(StatisticType type, Supplier<T> supplier) {
     this.type = Objects.requireNonNull(type);
     this.supplier = Objects.requireNonNull(supplier);
   }

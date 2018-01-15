@@ -37,7 +37,7 @@ import static org.terracotta.statistics.StatisticType.COUNTER;
 import static org.terracotta.statistics.StatisticType.GAUGE;
 import static org.terracotta.statistics.StatisticsManager.properties;
 import static org.terracotta.statistics.StatisticsManager.tags;
-import static org.terracotta.statistics.SuppliedValueStatistic.gauge;
+import static org.terracotta.statistics.ValueStatistics.gauge;
 
 /**
  * @author Mathieu Carbou

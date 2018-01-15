@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.LongAccumulator;
 import java.util.concurrent.atomic.LongAdder;
 
 import static org.terracotta.statistics.StatisticType.GAUGE;
-import static org.terracotta.statistics.SuppliedValueStatistic.gauge;
+import static org.terracotta.statistics.ValueStatistics.gauge;
 import static org.terracotta.statistics.Time.time;
 
 /**

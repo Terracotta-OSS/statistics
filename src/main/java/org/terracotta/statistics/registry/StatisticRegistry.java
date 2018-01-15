@@ -44,10 +44,10 @@ import static org.terracotta.context.query.Matchers.hasAttribute;
 import static org.terracotta.context.query.Matchers.identifier;
 import static org.terracotta.context.query.Matchers.subclassOf;
 import static org.terracotta.context.query.QueryBuilder.queryBuilder;
-import static org.terracotta.statistics.SuppliedValueStatistic.counter;
-import static org.terracotta.statistics.SuppliedValueStatistic.gauge;
-import static org.terracotta.statistics.SuppliedValueStatistic.supply;
-import static org.terracotta.statistics.SuppliedValueStatistic.table;
+import static org.terracotta.statistics.ValueStatistics.counter;
+import static org.terracotta.statistics.ValueStatistics.gauge;
+import static org.terracotta.statistics.ValueStatistics.supply;
+import static org.terracotta.statistics.ValueStatistics.table;
 
 /**
  * This class replaces the previous {@link StatisticRegistry}

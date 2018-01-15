@@ -22,19 +22,11 @@ import java.io.Serializable;
  */
 public class ConstantValueStatistic<T extends Serializable> implements ValueStatistic<T>, Serializable {
 
-  public static <T extends Serializable> ConstantValueStatistic<T> constant(StatisticType type, T value) {
-    return new ConstantValueStatistic<>(type, value);
-  }
-
-  public static <T extends Serializable> ConstantValueStatistic<T> nullValue(StatisticType type) {
-    return new ConstantValueStatistic<>(type, null);
-  }
-
   private static final long serialVersionUID = 1L;
   private final T value;
   private final StatisticType type;
 
-  private ConstantValueStatistic(StatisticType type, T value) {
+  public ConstantValueStatistic(StatisticType type, T value) {
     this.value = value;
     this.type = type;
   }
