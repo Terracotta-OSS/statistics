@@ -42,7 +42,7 @@ public class MemoizingValueStatistic<T extends Serializable> implements ValueSta
 
   @Override
   public T value() {
-    long now = System.nanoTime();
+    long now = Time.time();
     long exp = expiration.get();
     if (now >= exp && expiration.compareAndSet(exp, now + delayNs)) {
       memoized.set(delegate.value());

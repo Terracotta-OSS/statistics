@@ -15,8 +15,6 @@
  */
 package org.terracotta.statistics;
 
-import org.terracotta.statistics.observer.ChainedOperationObserver;
-
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Set;
@@ -24,6 +22,8 @@ import java.util.concurrent.atomic.LongAdder;
 
 /**
  * An operation observer that tracks operation result counts and can drive further derived statistics.
+ * <p>
+ * {@link #begin()} and {@link #end(Enum)} must be called from the same thread so that latency can be computed.
  *
  * @param <T> the operation result enum type
  */
@@ -68,23 +68,7 @@ class GeneralOperationStatistic<T extends Enum<T>> extends AbstractOperationStat
   @Override
   public void end(T result) {
     counts.get(result).increment();
-    if (!derivedStatistics.isEmpty()) {
-      long time = Time.time();
-      for (ChainedOperationObserver<? super T> observer : derivedStatistics) {
-        observer.end(time, result);
-      }
-    }
-  }
-
-  @Override
-  public void end(T result, long... parameters) {
-    counts.get(result).increment();
-    if (!derivedStatistics.isEmpty()) {
-      long time = Time.time();
-      for (ChainedOperationObserver<? super T> observer : derivedStatistics) {
-        observer.end(time, result, parameters);
-      }
-    }
+    super.end(result);
   }
 
   @Override

@@ -26,8 +26,6 @@ package org.terracotta.statistics.observer;
  *   LAND, CRASH;
  * }
  * </pre>
- * Operations also have an associated parameter the use of which is left up to
- * the implementors of both the producer and consumer of events.
  *
  * @param <T> Enum type representing the possible operations 'results'
  */
@@ -39,17 +37,10 @@ public interface OperationObserver<T extends Enum<T>> {
   void begin();
 
   /**
-   * Called immediately after the operation completes with no interesting parameters.
+   * Called immediately after the operation completes with no interesting parameters, and with the same thread the called {{@link #begin()}} before.
    *
    * @param result the operation result
    */
   void end(T result);
 
-  /**
-   * Called immediately after the operation completes.
-   *
-   * @param result     the operation result
-   * @param parameters the operation parameters
-   */
-  void end(T result, long... parameters);
 }

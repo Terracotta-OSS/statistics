@@ -15,8 +15,6 @@
  */
 package org.terracotta.statistics.derived;
 
-import org.terracotta.statistics.StatisticType;
-import org.terracotta.statistics.ValueStatistic;
 import org.terracotta.statistics.observer.ChainedEventObserver;
 
 import java.util.Iterator;
@@ -27,14 +25,12 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.LongAccumulator;
 import java.util.concurrent.atomic.LongAdder;
 
-import static org.terracotta.statistics.StatisticType.GAUGE;
-import static org.terracotta.statistics.ValueStatistics.gauge;
 import static org.terracotta.statistics.Time.time;
 
 /**
  * @author cdennis
  */
-public class EventParameterSimpleMovingAverage implements ChainedEventObserver, ValueStatistic<Double> {
+public class LatencySimpleMovingAverage implements ChainedEventObserver, LatencyStatistic {
 
   private static final int PARTITION_COUNT = 10;
 
@@ -44,7 +40,7 @@ public class EventParameterSimpleMovingAverage implements ChainedEventObserver, 
   private volatile long windowSize;
   private volatile long partitionSize;
 
-  public EventParameterSimpleMovingAverage(long time, TimeUnit unit) {
+  public LatencySimpleMovingAverage(long time, TimeUnit unit) {
     this.windowSize = unit.toNanos(time);
     this.partitionSize = windowSize / PARTITION_COUNT;
     this.activePartition = new AtomicReference<>(new AveragePartition(Long.MIN_VALUE, partitionSize));
@@ -56,28 +52,7 @@ public class EventParameterSimpleMovingAverage implements ChainedEventObserver, 
   }
 
   @Override
-  public Double value() {
-    return average();
-  }
-
-  @Override
-  public StatisticType type() {
-    return GAUGE;
-  }
-
-  public ValueStatistic<Double> averageStatistic() {
-    return this;
-  }
-
-  public ValueStatistic<Long> minimumStatistic() {
-    return gauge(this::minimum);
-  }
-
-  public ValueStatistic<Long> maximumStatistic() {
-    return gauge(this::maximum);
-  }
-
-  public final double average() {
+  public final Double average() {
     long startTime = time() - windowSize;
 
     AveragePartition current = activePartition.get();
@@ -102,6 +77,7 @@ public class EventParameterSimpleMovingAverage implements ChainedEventObserver, 
     }
   }
 
+  @Override
   public final Long maximum() {
     long startTime = time() - windowSize;
 
@@ -125,6 +101,7 @@ public class EventParameterSimpleMovingAverage implements ChainedEventObserver, 
     }
   }
 
+  @Override
   public final Long minimum() {
     long startTime = time() - windowSize;
 
@@ -149,17 +126,17 @@ public class EventParameterSimpleMovingAverage implements ChainedEventObserver, 
   }
 
   @Override
-  public void event(long time, long... parameters) {
+  public void event(long time, long latency) {
     while (true) {
       AveragePartition partition = activePartition.get();
       if (partition.targetFor(time)) {
-        partition.event(parameters[0]);
+        partition.event(latency);
         return;
       } else {
         AveragePartition newPartition = new AveragePartition(time, partitionSize);
         if (activePartition.compareAndSet(partition, newPartition)) {
           archive(partition);
-          newPartition.event(parameters[0]);
+          newPartition.event(latency);
           return;
         }
       }

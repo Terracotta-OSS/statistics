@@ -20,8 +20,8 @@ import org.terracotta.context.query.Matchers;
 import org.terracotta.context.query.Query;
 import org.terracotta.statistics.OperationStatistic;
 import org.terracotta.statistics.StatisticsManager;
-import org.terracotta.statistics.derived.LatencySampling;
-import org.terracotta.statistics.derived.MinMaxAverage;
+import org.terracotta.statistics.derived.LatencyMinMaxAverage;
+import org.terracotta.statistics.derived.OperationResultSampler;
 
 import java.util.Arrays;
 
@@ -51,35 +51,35 @@ public final class Strawman {
 
     @SuppressWarnings("unchecked")
     OperationStatistic<GetResult> getStatistic = (OperationStatistic<GetResult>) getStatisticNode.getContext().attributes().get("this");
-    LatencySampling<GetResult> hitLatency = new LatencySampling<>(of(GetResult.HIT), 1.0f);
-    MinMaxAverage hitLatencyStats = new MinMaxAverage();
+    OperationResultSampler<GetResult> hitLatency = new OperationResultSampler<>(of(GetResult.HIT), 1.0f);
+    LatencyMinMaxAverage hitLatencyStats = new LatencyMinMaxAverage();
     hitLatency.addDerivedStatistic(hitLatencyStats);
     getStatistic.addDerivedStatistic(hitLatency);
 
     cache.get("foo");
     System.err.println("HITS        : " + getStatistic.count(GetResult.HIT));
     System.err.println("MISSES      : " + getStatistic.count(GetResult.MISS));
-    System.err.println("HIT LATENCY : " + hitLatencyStats.mean());
+    System.err.println("HIT LATENCY : " + hitLatencyStats.average());
 
     cache.put("foo", "bar");
     cache.get("foo");
     System.err.println("HITS        : " + getStatistic.count(GetResult.HIT));
     System.err.println("MISSES      : " + getStatistic.count(GetResult.MISS));
-    System.err.println("HIT LATENCY : " + hitLatencyStats.mean());
+    System.err.println("HIT LATENCY : " + hitLatencyStats.average());
 
-    hitLatency.addDerivedStatistic((time, parameters) -> System.out.println("Event Latency : " + parameters[0]));
+    hitLatency.addDerivedStatistic((time, latency) -> System.out.println("Event Latency : " + latency));
 
     cache.get("foo");
     System.err.println("HITS        : " + getStatistic.count(GetResult.HIT));
     System.err.println("MISSES      : " + getStatistic.count(GetResult.MISS));
-    System.err.println("HIT LATENCY : " + hitLatencyStats.mean());
+    System.err.println("HIT LATENCY : " + hitLatencyStats.average());
 
     getStatistic.removeDerivedStatistic(hitLatency);
 
     cache.get("foo");
     System.err.println("HITS        : " + getStatistic.count(GetResult.HIT));
     System.err.println("MISSES      : " + getStatistic.count(GetResult.MISS));
-    System.err.println("HIT LATENCY : " + hitLatencyStats.mean());
+    System.err.println("HIT LATENCY : " + hitLatencyStats.average());
   }
 
   public static String dumpTree(TreeNode node) {

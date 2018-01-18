@@ -22,18 +22,12 @@ package org.terracotta.statistics.observer;
  * the implementors of both the producer and consumer of events.
  */
 public interface ChainedEventObserver extends ChainedObserver {
-  
-  /*
-   * The parameter argument is really a constrained and collapsed to primitive
-   * generic type with no bounds.  So the "real" class declaration should be:
-   * @{code interface EventObserver<T>}
-   */
 
   /**
    * Called to indicate an event happened.
    *
-   * @param time       the time of the event
-   * @param parameters the event parameters
+   * @param time    the time at event completion
+   * @param latency the event latency
    */
-  void event(long time, long... parameters);
+  void event(long time, long latency);
 }
