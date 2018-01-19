@@ -111,11 +111,6 @@ public class MappedOperationStatistic<S extends Enum<S>, D extends Enum<D>> impl
     mapper.end(result);
   }
 
-  @Override
-  public void end(D result, long... parameters) {
-    mapper.end(result, parameters);
-  }
-
   @SuppressWarnings("unchecked")
   private static <S extends Enum<S>> OperationStatistic<S> findOperationStat(Object rootNode, final Class<S> statisticType, final String statName) {
     Query q = queryBuilder().descendants()

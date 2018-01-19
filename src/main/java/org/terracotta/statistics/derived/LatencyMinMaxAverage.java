@@ -15,7 +15,6 @@
  */
 package org.terracotta.statistics.derived;
 
-import org.terracotta.statistics.ValueStatistic;
 import org.terracotta.statistics.observer.ChainedEventObserver;
 import org.terracotta.statistics.util.InThreadExecutor;
 
@@ -24,12 +23,10 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.concurrent.atomic.LongAccumulator;
 
-import static org.terracotta.statistics.ValueStatistics.gauge;
-
 /**
  * @author cdennis
  */
-public class MinMaxAverage implements ChainedEventObserver {
+public class LatencyMinMaxAverage implements ChainedEventObserver, LatencyStatistic {
 
   private final LongAccumulator maximum = new LongAccumulator(Math::max, Long.MIN_VALUE);
   private final LongAccumulator minimum = new LongAccumulator(Math::min, Long.MAX_VALUE);
@@ -39,26 +36,26 @@ public class MinMaxAverage implements ChainedEventObserver {
 
   private final Executor executor;
 
-  public MinMaxAverage() {
+  public LatencyMinMaxAverage() {
     this(InThreadExecutor.INSTANCE);
   }
 
-  public MinMaxAverage(Executor executor) {
+  public LatencyMinMaxAverage(Executor executor) {
     this.executor = executor;
   }
 
   @Override
-  public void event(long time, final long... parameters) {
+  public void event(long time, final long latency) {
     executor.execute(() -> {
-      long value = parameters[0];
-      maximum.accumulate(value);
-      minimum.accumulate(value);
-      summation.add(value);
+      maximum.accumulate(latency);
+      minimum.accumulate(latency);
+      summation.add(latency);
       count.incrementAndGet();
     });
   }
 
-  public Long min() {
+  @Override
+  public Long minimum() {
     if (count.get() == 0) {
       return null;
     } else {
@@ -66,11 +63,8 @@ public class MinMaxAverage implements ChainedEventObserver {
     }
   }
 
-  public ValueStatistic<Long> minStatistic() {
-    return gauge(this::min);
-  }
-
-  public Double mean() {
+  @Override
+  public Double average() {
     if (count.get() == 0) {
       return null;
     } else {
@@ -78,11 +72,8 @@ public class MinMaxAverage implements ChainedEventObserver {
     }
   }
 
-  public ValueStatistic<Double> meanStatistic() {
-    return gauge(this::mean);
-  }
-
-  public Long max() {
+  @Override
+  public Long maximum() {
     if (count.get() == 0) {
       return null;
     } else {
@@ -90,7 +81,4 @@ public class MinMaxAverage implements ChainedEventObserver {
     }
   }
 
-  public ValueStatistic<Long> maxStatistic() {
-    return gauge(this::max);
-  }
 }

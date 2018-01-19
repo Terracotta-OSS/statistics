@@ -114,7 +114,7 @@ public class EventRateSimpleMovingAverageTest {
     EventRateSimpleMovingAverage stat = new EventRateSimpleMovingAverage(1, TimeUnit.SECONDS);
     for (long cycles = 0; cycles < 3; cycles++) {
       SOURCE.advanceTime(100, TimeUnit.MILLISECONDS);
-      stat.event(Time.time());
+      stat.event(Time.time(), 0);
       for (long after = 0; after <= 1000; after += 1) {
         assertThat(stat.rateUsingSeconds(), lessThanOrEqualTo(1.0));
         SOURCE.advanceTime(1, TimeUnit.MILLISECONDS);

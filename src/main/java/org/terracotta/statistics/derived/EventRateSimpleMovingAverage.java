@@ -99,7 +99,7 @@ public class EventRateSimpleMovingAverage implements ChainedEventObserver, Value
   }
 
   @Override
-  public void event(long time, long... parameters) {
+  public void event(long time, long latency) {
     while (true) {
       CounterPartition partition = activePartition.get();
       if (partition.targetFor(time)) {

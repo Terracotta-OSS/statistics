@@ -27,7 +27,7 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 
-public class EventParameterSimpleMovingAverageTest {
+public class LatencySimpleMovingAverageTest {
 
   public static final MutableTimeSource SOURCE = TimeMocking.push(new MutableTimeSource());
 
@@ -38,14 +38,14 @@ public class EventParameterSimpleMovingAverageTest {
 
   @Test
   public void testNoEventsAverage() {
-    assertThat(new EventParameterSimpleMovingAverage(1, TimeUnit.SECONDS).average(), is(Double.NaN));
-    assertThat(new EventParameterSimpleMovingAverage(1, TimeUnit.SECONDS).minimum(), nullValue());
-    assertThat(new EventParameterSimpleMovingAverage(1, TimeUnit.SECONDS).maximum(), nullValue());
+    assertThat(new LatencySimpleMovingAverage(1, TimeUnit.SECONDS).average(), is(Double.NaN));
+    assertThat(new LatencySimpleMovingAverage(1, TimeUnit.SECONDS).minimum(), nullValue());
+    assertThat(new LatencySimpleMovingAverage(1, TimeUnit.SECONDS).maximum(), nullValue());
   }
 
   @Test
   public void testSingleEventAverage() {
-    EventParameterSimpleMovingAverage average = new EventParameterSimpleMovingAverage(1, TimeUnit.DAYS);
+    LatencySimpleMovingAverage average = new LatencySimpleMovingAverage(1, TimeUnit.DAYS);
     average.event(Time.time(), 1L);
     assertThat(average.average(), is(1.0));
     assertThat(average.minimum(), is(1L));
@@ -54,7 +54,7 @@ public class EventParameterSimpleMovingAverageTest {
 
   @Test
   public void testExpiredEventAverage() throws InterruptedException {
-    EventParameterSimpleMovingAverage average = new EventParameterSimpleMovingAverage(100, TimeUnit.MILLISECONDS);
+    LatencySimpleMovingAverage average = new LatencySimpleMovingAverage(100, TimeUnit.MILLISECONDS);
     average.event(Time.time(), 1L);
     SOURCE.advanceTime(300, TimeUnit.MILLISECONDS);
     assertThat(average.average(), is(Double.NaN));
@@ -64,7 +64,7 @@ public class EventParameterSimpleMovingAverageTest {
 
   @Test
   public void testDoubleEventAverage() {
-    EventParameterSimpleMovingAverage average = new EventParameterSimpleMovingAverage(1, TimeUnit.DAYS);
+    LatencySimpleMovingAverage average = new LatencySimpleMovingAverage(1, TimeUnit.DAYS);
     average.event(Time.time(), 1L);
     average.event(Time.time(), 3L);
     assertThat(average.average(), is(2.0));
@@ -74,7 +74,7 @@ public class EventParameterSimpleMovingAverageTest {
 
   @Test
   public void testAverageMoves() throws InterruptedException {
-    EventParameterSimpleMovingAverage average = new EventParameterSimpleMovingAverage(100, TimeUnit.MILLISECONDS);
+    LatencySimpleMovingAverage average = new LatencySimpleMovingAverage(100, TimeUnit.MILLISECONDS);
     average.event(Time.time(), 1L);
     SOURCE.advanceTime(50, TimeUnit.MILLISECONDS);
     assertThat(average.average(), is(1.0));

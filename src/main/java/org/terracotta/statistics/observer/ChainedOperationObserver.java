@@ -22,7 +22,6 @@ public interface ChainedOperationObserver<T extends Enum<T>> extends ChainedObse
 
   void begin(long time);
 
-  void end(long time, T result);
+  void end(long time, long latency, T result);
 
-  void end(long time, T result, long... parameters);
 }

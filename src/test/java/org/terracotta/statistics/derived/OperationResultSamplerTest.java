@@ -30,28 +30,28 @@ import static org.junit.Assert.fail;
 /**
  * @author cdennis
  */
-public class LatencySamplingTest {
+public class OperationResultSamplerTest {
 
   @Test
   public void testRateOfZeroNeverSamples() {
-    LatencySampling<FooBar> latency = new LatencySampling<>(of(FooBar.FOO), 0.0f);
-    latency.addDerivedStatistic((time, parameters) -> fail());
+    OperationResultSampler<FooBar> sampler = new OperationResultSampler<>(of(FooBar.FOO), 0.0f);
+    sampler.addDerivedStatistic((time, slatency) -> fail());
 
     for (int i = 0; i < 100; i++) {
-      latency.begin(0);
-      latency.end(1, FooBar.FOO);
+      sampler.begin(0);
+      sampler.end(1, 0, FooBar.FOO);
     }
   }
 
   @Test
   public void testRateOfOneAlwaysSamples() {
-    LatencySampling<FooBar> latency = new LatencySampling<>(of(FooBar.FOO), 1.0f);
+    OperationResultSampler<FooBar> sampler = new OperationResultSampler<>(of(FooBar.FOO), 1.0f);
     final AtomicInteger eventCount = new AtomicInteger();
-    latency.addDerivedStatistic((time, parameters) -> eventCount.incrementAndGet());
+    sampler.addDerivedStatistic((time, latency) -> eventCount.incrementAndGet());
 
     for (int i = 0; i < 100; i++) {
-      latency.begin(0);
-      latency.end(1, FooBar.FOO);
+      sampler.begin(0);
+      sampler.end(1, 0, FooBar.FOO);
     }
 
     assertThat(eventCount.get(), is(100));
@@ -59,27 +59,27 @@ public class LatencySamplingTest {
 
   @Test
   public void testMismatchedResultNeverSamples() {
-    LatencySampling<FooBar> latency = new LatencySampling<>(of(FooBar.FOO), 1.0f);
-    latency.addDerivedStatistic((time, parameters) -> fail());
+    OperationResultSampler<FooBar> sampler = new OperationResultSampler<>(of(FooBar.FOO), 1.0f);
+    sampler.addDerivedStatistic((time, latency) -> fail());
 
     for (int i = 0; i < 100; i++) {
-      latency.begin(0);
-      latency.end(1, FooBar.BAR);
+      sampler.begin(0);
+      sampler.end(1, 0, FooBar.BAR);
     }
   }
 
   @Test
   public void testLatencyMeasuredAccurately() throws InterruptedException {
     Random random = new Random();
-    LatencySampling<FooBar> latency = new LatencySampling<>(of(FooBar.FOO), 1.0f);
+    OperationResultSampler<FooBar> sampler = new OperationResultSampler<>(of(FooBar.FOO), 1.0f);
     final AtomicLong expected = new AtomicLong();
-    latency.addDerivedStatistic((time, parameters) -> assertThat(parameters[0], greaterThanOrEqualTo(expected.get())));
+    sampler.addDerivedStatistic((time, latency) -> assertThat(latency, greaterThanOrEqualTo(expected.get())));
 
     for (int i = 0; i < 10; i++) {
       long start = random.nextLong();
       int sleep = random.nextInt(100);
-      latency.begin(start);
-      latency.end(start + sleep, FooBar.FOO);
+      sampler.begin(start);
+      sampler.end(start + sleep, 0, FooBar.FOO);
     }
   }
 

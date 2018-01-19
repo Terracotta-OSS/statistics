@@ -195,42 +195,14 @@ public class StatisticMapperTest {
 
     ChainedOperationObserver<Source> wrapper = wrapperCapture.getValue();
 
-    wrapper.end(43L, E);
-    verify(derived).end(43L, B);
+    wrapper.end(43L, 0, E);
+    verify(derived).end(43L, 0, B);
 
-    wrapper.end(44L, C);
-    verify(derived).end(44L, A);
+    wrapper.end(44L, 0, C);
+    verify(derived).end(44L, 0, A);
 
-    wrapper.end(45L, D);
-    verify(derived).end(45L, B);
-  }
-
-  @Test
-  public void testDerivedStatisticEndWithParametersDelegation() {
-    ArgumentCaptor<ChainedOperationObserver> wrapperCapture = ArgumentCaptor.forClass(ChainedOperationObserver.class);
-
-    OperationStatistic<Source> statistic = mock(OperationStatistic.class);
-    doNothing().when(statistic).addDerivedStatistic(wrapperCapture.capture());
-
-    Map<Target, Set<Source>> translation = new EnumMap<>(Target.class);
-    translation.put(A, of(C));
-    translation.put(B, of(D, E));
-    StatisticMapper<Source, Target> mapper = new StatisticMapper<>(translation, statistic);
-
-    ChainedOperationObserver<? super Target> derived = mock(ChainedOperationObserver.class);
-
-    mapper.addDerivedStatistic(derived);
-
-    ChainedOperationObserver<Source> wrapper = wrapperCapture.getValue();
-
-    wrapper.end(43L, E, 1L, 2L);
-    verify(derived).end(43L, B, 1L, 2L);
-
-    wrapper.end(44L, C, 2L, 1L);
-    verify(derived).end(44L, A, 2L, 1L);
-
-    wrapper.end(45L, D, 3L, 4L);
-    verify(derived).end(45L, B, 3L, 4L);
+    wrapper.end(45L, 0, D);
+    verify(derived).end(45L, 0, B);
   }
 
   @Test

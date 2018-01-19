@@ -122,13 +122,8 @@ public class StatisticMapper<SOURCE extends Enum<SOURCE>, TARGET extends Enum<TA
       }
 
       @Override
-      public void end(long time, SOURCE result) {
-        derived.end(time, reverseTranslation.get(result));
-      }
-
-      @Override
-      public void end(long time, SOURCE result, long... parameters) {
-        derived.end(time, reverseTranslation.get(result), parameters);
+      public void end(long time, long latency, SOURCE result) {
+        derived.end(time, latency, reverseTranslation.get(result));
       }
     };
     if (derivedStats.putIfAbsent(derived, translator) == null) {
@@ -154,8 +149,4 @@ public class StatisticMapper<SOURCE extends Enum<SOURCE>, TARGET extends Enum<TA
     throw new UnsupportedOperationException();
   }
 
-  @Override
-  public void end(TARGET result, long... parameters) {
-    throw new UnsupportedOperationException();
-  }
 }

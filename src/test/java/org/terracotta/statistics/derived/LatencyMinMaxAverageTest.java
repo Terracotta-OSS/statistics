@@ -24,61 +24,61 @@ import static org.junit.Assert.assertThat;
 /**
  * @author cdennis
  */
-public class MinMaxAverageTest {
+public class LatencyMinMaxAverageTest {
 
   @Test
   public void testMinimumBehavior() {
-    MinMaxAverage stats = new MinMaxAverage();
+    LatencyMinMaxAverage stats = new LatencyMinMaxAverage();
 
-    assertThat(stats.min(), nullValue());
+    assertThat(stats.minimum(), nullValue());
     stats.event(0, 100L);
-    assertThat(stats.min(), is(100L));
+    assertThat(stats.minimum(), is(100L));
     stats.event(0, 200L);
-    assertThat(stats.min(), is(100L));
+    assertThat(stats.minimum(), is(100L));
     stats.event(0, 99L);
-    assertThat(stats.min(), is(99L));
+    assertThat(stats.minimum(), is(99L));
     stats.event(0, 0L);
-    assertThat(stats.min(), is(0L));
+    assertThat(stats.minimum(), is(0L));
     stats.event(0, -1L);
-    assertThat(stats.min(), is(-1L));
+    assertThat(stats.minimum(), is(-1L));
     stats.event(0, 1L);
-    assertThat(stats.min(), is(-1L));
+    assertThat(stats.minimum(), is(-1L));
     stats.event(0, Long.MIN_VALUE);
-    assertThat(stats.min(), is(Long.MIN_VALUE));
+    assertThat(stats.minimum(), is(Long.MIN_VALUE));
   }
 
   @Test
   public void testMaximumBehavior() {
-    MinMaxAverage stats = new MinMaxAverage();
+    LatencyMinMaxAverage stats = new LatencyMinMaxAverage();
 
-    assertThat(stats.max(), nullValue());
+    assertThat(stats.maximum(), nullValue());
     stats.event(0, -100L);
-    assertThat(stats.max(), is(-100L));
+    assertThat(stats.maximum(), is(-100L));
     stats.event(0, -200L);
-    assertThat(stats.max(), is(-100L));
+    assertThat(stats.maximum(), is(-100L));
     stats.event(0, -99L);
-    assertThat(stats.max(), is(-99L));
+    assertThat(stats.maximum(), is(-99L));
     stats.event(0, 0L);
-    assertThat(stats.max(), is(0L));
+    assertThat(stats.maximum(), is(0L));
     stats.event(0, 1L);
-    assertThat(stats.max(), is(1L));
+    assertThat(stats.maximum(), is(1L));
     stats.event(0, -1L);
-    assertThat(stats.max(), is(1L));
+    assertThat(stats.maximum(), is(1L));
     stats.event(0, Long.MAX_VALUE);
-    assertThat(stats.max(), is(Long.MAX_VALUE));
+    assertThat(stats.maximum(), is(Long.MAX_VALUE));
   }
 
   @Test
   public void testAverageBehavior() {
-    MinMaxAverage stats = new MinMaxAverage();
+    LatencyMinMaxAverage stats = new LatencyMinMaxAverage();
 
-    assertThat(stats.mean(), nullValue());
+    assertThat(stats.average(), nullValue());
     stats.event(0, 1L);
-    assertThat(stats.mean(), is(1.0));
+    assertThat(stats.average(), is(1.0));
     stats.event(0, 3L);
-    assertThat(stats.mean(), is(2.0));
+    assertThat(stats.average(), is(2.0));
     stats.event(0, 0L);
     stats.event(0, 0L);
-    assertThat(stats.mean(), is(1.0));
+    assertThat(stats.average(), is(1.0));
   }
 }

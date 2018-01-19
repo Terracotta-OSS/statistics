@@ -15,39 +15,36 @@
  */
 package org.terracotta.statistics.derived;
 
-import org.terracotta.statistics.AbstractSourceStatistic;
 import org.terracotta.statistics.observer.ChainedEventObserver;
-import org.terracotta.statistics.observer.ChainedOperationObserver;
 
-import java.util.EnumSet;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * @author cdennis
  */
-public class OperationResultFilter<T extends Enum<T>> extends AbstractSourceStatistic<ChainedEventObserver> implements ChainedOperationObserver<T> {
+public class OperationResultSampler<T extends Enum<T>> extends OperationResultFilter<T> {
 
-  protected final Set<T> targets;
+  private final int ceiling;
 
-  public OperationResultFilter(Set<T> targets, ChainedEventObserver... observers) {
-    this.targets = EnumSet.copyOf(targets);
-    for (ChainedEventObserver observer : observers) {
-      addDerivedStatistic(observer);
+  public OperationResultSampler(Set<T> targets, double sampling, ChainedEventObserver... observers) {
+    super(targets, observers);
+    if (sampling > 1.0 || sampling < 0.0) {
+      throw new IllegalArgumentException("Sampling must be between 0.0 and 1.0");
     }
-  }
-
-  @Override
-  public void begin(long time) {
-    //no-op
+    this.ceiling = (int) (Integer.MAX_VALUE * sampling);
   }
 
   @Override
   public void end(long time, long latency, T result) {
-    if (!derivedStatistics.isEmpty() && targets.contains(result)) {
+    if (!derivedStatistics.isEmpty() && targets.contains(result) && sample()) {
       for (ChainedEventObserver derived : derivedStatistics) {
         derived.event(time, latency);
       }
     }
   }
 
+  private boolean sample() {
+    return ceiling == Integer.MAX_VALUE || ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE) < ceiling;
+  }
 }

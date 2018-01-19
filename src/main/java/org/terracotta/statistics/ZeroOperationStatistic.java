@@ -71,8 +71,4 @@ public class ZeroOperationStatistic<T extends Enum<T>> implements OperationStati
 
   }
 
-  @Override
-  public void end(T result, long... parameters) {
-
-  }
 }

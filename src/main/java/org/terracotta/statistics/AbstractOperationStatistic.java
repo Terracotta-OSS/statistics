@@ -27,6 +27,7 @@ import java.util.Set;
 
 /**
  * @author cdennis
+ * @implNote {@link #begin()} and {@link #end(Enum)} must be called from the same thread so that latency can be computed.
  */
 @ContextAttribute("this")
 public abstract class AbstractOperationStatistic<T extends Enum<T>> extends AbstractSourceStatistic<ChainedOperationObserver<? super T>> implements OperationStatistic<T> {
@@ -35,6 +36,8 @@ public abstract class AbstractOperationStatistic<T extends Enum<T>> extends Abst
   @ContextAttribute("tags") public final Set<String> tags;
   @ContextAttribute("properties") public final Map<String, Object> properties;
   @ContextAttribute("type") public final Class<T> type;
+
+  private final ThreadLocal<Long> operationStartTime = new ThreadLocal<>();
 
   /**
    * Create an operation statistics for a given operation result type.
@@ -63,9 +66,22 @@ public abstract class AbstractOperationStatistic<T extends Enum<T>> extends Abst
   public void begin() {
     if (!derivedStatistics.isEmpty()) {
       long time = Time.time();
+      operationStartTime.set(time);
       for (ChainedOperationObserver<? super T> observer : derivedStatistics) {
         observer.begin(time);
       }
     }
   }
+
+  @Override
+  public void end(T result) {
+    if (!derivedStatistics.isEmpty()) {
+      long time = Time.time();
+      long latency = time - operationStartTime.get();
+      for (ChainedOperationObserver<? super T> observer : derivedStatistics) {
+        observer.end(time, latency, result);
+      }
+    }
+  }
+
 }
