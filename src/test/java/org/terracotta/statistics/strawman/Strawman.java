@@ -20,8 +20,8 @@ import org.terracotta.context.query.Matchers;
 import org.terracotta.context.query.Query;
 import org.terracotta.statistics.OperationStatistic;
 import org.terracotta.statistics.StatisticsManager;
-import org.terracotta.statistics.derived.LatencyMinMaxAverage;
 import org.terracotta.statistics.derived.OperationResultSampler;
+import org.terracotta.statistics.derived.latency.LatencyAccumulator;
 
 import java.util.Arrays;
 
@@ -52,7 +52,7 @@ public final class Strawman {
     @SuppressWarnings("unchecked")
     OperationStatistic<GetResult> getStatistic = (OperationStatistic<GetResult>) getStatisticNode.getContext().attributes().get("this");
     OperationResultSampler<GetResult> hitLatency = new OperationResultSampler<>(of(GetResult.HIT), 1.0f);
-    LatencyMinMaxAverage hitLatencyStats = new LatencyMinMaxAverage();
+    LatencyAccumulator hitLatencyStats = LatencyAccumulator.empty();
     hitLatency.addDerivedStatistic(hitLatencyStats);
     getStatistic.addDerivedStatistic(hitLatency);
 

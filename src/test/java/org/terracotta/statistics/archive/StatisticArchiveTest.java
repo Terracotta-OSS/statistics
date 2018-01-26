@@ -33,8 +33,8 @@ public class StatisticArchiveTest {
     StatisticArchive<String> archive = new StatisticArchive<>(2);
     Sample<String> sample1 = new Sample<>(1479819723336L, "foo");
     Sample<String> sample2 = new Sample<>(1479819721336L, "bar");
-    archive.accept(sample1);
-    archive.accept(sample2);
+    archive.add(sample1);
+    archive.add(sample2);
     assertThat(archive.getArchive(0).size(), equalTo(2));
   }
 
@@ -50,8 +50,8 @@ public class StatisticArchiveTest {
     StatisticArchive<String> archive = new StatisticArchive<>(2);
     Sample<String> sample1 = new Sample<>(0, "foo");
     Sample<String> sample2 = new Sample<>(1, "bar");
-    archive.accept(sample1);
-    archive.accept(sample2);
+    archive.add(sample1);
+    archive.add(sample2);
     assertThat(archive.getArchive(), contains(sample1, sample2));
   }
 
@@ -59,11 +59,11 @@ public class StatisticArchiveTest {
   @SuppressWarnings("unchecked")
   public void testArchiveOverspill() {
     StatisticArchive<String> overspill = new StatisticArchive<>(1);
-    StatisticArchive<String> archive = new StatisticArchive<>(1, overspill);
+    StatisticArchive<String> archive = new StatisticArchive<>(1, overspill::add);
     Sample<String> sample1 = new Sample<>(0, "foo");
     Sample<String> sample2 = new Sample<>(1, "bar");
-    archive.accept(sample1);
-    archive.accept(sample2);
+    archive.add(sample1);
+    archive.add(sample2);
     assertThat(archive.getArchive(), contains(sample2));
     assertThat(overspill.getArchive(), contains(sample1));
   }

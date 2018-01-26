@@ -13,23 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terracotta.statistics.derived;
+package org.terracotta.statistics.derived.latency;
 
+import org.terracotta.statistics.derived.OperationResultSampler;
 import org.terracotta.statistics.observer.ChainedOperationObserver;
 
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author cdennis
+ * @author Mathieu Carbou
  */
 public class Jsr107LatencyMonitor<T extends Enum<T>> implements ChainedOperationObserver<T>, LatencyStatistic {
 
   private final OperationResultSampler<T> sampling;
-  private volatile LatencyMinMaxAverage statistic;
+  private final AtomicReference<LatencyAccumulator> statistic = new AtomicReference<>(LatencyAccumulator.empty());
 
-  public Jsr107LatencyMonitor(Set<T> targets) {
-    this.statistic = new LatencyMinMaxAverage();
-    this.sampling = new OperationResultSampler<>(targets, 1.0, statistic);
+  public Jsr107LatencyMonitor(Set<T> targets, double sampling) {
+    this.sampling = new OperationResultSampler<>(targets, sampling, (time, latency) -> statistic.get().accumulate(latency));
   }
 
   @Override
@@ -42,40 +44,36 @@ public class Jsr107LatencyMonitor<T extends Enum<T>> implements ChainedOperation
     sampling.end(time, latency, result);
   }
 
-  @Override
-  public Long minimum() {return statistic.minimum();}
-
-  @Override
-  public Long maximum() {return statistic.maximum();}
-
   /**
    * @return The average in microseconds or 0 if it does not exist yet
    */
   @Override
-  public Double average() {
-    return jsr107Average();
-  }
-
-  /**
-   * @return The average in microseconds or 0 if it does not exist yet
-   */
-  public double jsr107Average() {
-    Double value = statistic.average();
-    if (value == null) {
+  public double average() {
+    LatencyAccumulator accumulator = statistic.get();
+    long count = accumulator.count();
+    if (count == 0) {
       //Someone involved with 107 can't do math
-      return 0d;  /**
-       * @return The average in microseconds or 0 if it does not exist yet
-       */
+      return 0d;
     } else {
       //We use nanoseconds, 107 uses microseconds
-      return value / 1000f;
+      return accumulator.total() / 1_000.0 / count;
     }
   }
 
+  @Override
+  public Long minimum() {
+    LatencyAccumulator accumulator = statistic.get();
+    return accumulator.isEmpty() ? 0L : accumulator.minimum() / 1_000L;
+  }
+
+  @Override
+  public Long maximum() {
+    LatencyAccumulator accumulator = statistic.get();
+    return accumulator.isEmpty() ? 0L : accumulator.maximum() / 1_000L;
+  }
+
   public synchronized void clear() {
-    sampling.removeDerivedStatistic(statistic);
-    statistic = new LatencyMinMaxAverage();
-    sampling.addDerivedStatistic(statistic);
+    statistic.set(LatencyAccumulator.empty());
   }
 
 }

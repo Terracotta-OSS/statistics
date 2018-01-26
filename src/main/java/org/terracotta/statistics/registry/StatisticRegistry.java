@@ -22,7 +22,6 @@ import org.terracotta.context.query.Matchers;
 import org.terracotta.statistics.OperationStatistic;
 import org.terracotta.statistics.StatisticType;
 import org.terracotta.statistics.Table;
-import org.terracotta.statistics.Time;
 import org.terracotta.statistics.ValueStatistic;
 
 import java.io.Serializable;
@@ -67,10 +66,6 @@ public class StatisticRegistry {
   private final Object contextObject;
   private final LongSupplier timeSource;
   private final Map<String, ValueStatistic<? extends Serializable>> statistics = new HashMap<>();
-
-  public StatisticRegistry(Object contextObject) {
-    this(contextObject, Time::absoluteTime);
-  }
 
   public StatisticRegistry(Object contextObject, LongSupplier timeSource) {
     this.contextObject = contextObject;
