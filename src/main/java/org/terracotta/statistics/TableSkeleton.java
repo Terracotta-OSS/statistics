@@ -40,6 +40,10 @@ public abstract class TableSkeleton implements Serializable {
     Arrays.sort(this.innerStatisticNames);
   }
 
+  public boolean isEmpty() {
+    return statistics.isEmpty();
+  }
+
   public int getRowCount() {
     return statistics.size();
   }
