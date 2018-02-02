@@ -18,6 +18,7 @@ package org.terracotta.statistics.registry;
 import org.terracotta.statistics.Sample;
 import org.terracotta.statistics.SampledStatistic;
 import org.terracotta.statistics.StatisticType;
+import org.terracotta.statistics.Table;
 import org.terracotta.statistics.ValueStatistic;
 
 import java.io.Serializable;
@@ -85,18 +86,24 @@ public class Statistic<T extends Serializable> implements Serializable {
           valueStatistic.type(),
           ((SampledStatistic<T>) valueStatistic).history(sinceMillis)
               .stream()
-              .filter(s -> s.getSample() != null) // we generally not accept null values for statistics - it means that it is not available right now
+              .filter(s -> accepted(s.getSample()))
               .collect(toList()));
     }
     // single-value history ?
     if (sinceMillis <= now) {
       T value = valueStatistic.value();
-      if (value != null) {
+      if (accepted(value)) {
         return new Statistic<>(valueStatistic.type(), new Sample<>(now, value));
       }
     }
     // empty history
     return new Statistic<>(valueStatistic.type());
+  }
+
+  private static <T extends Serializable> boolean accepted(T sample) {
+    // we do not accept null values for statistics - it means that it is not available right now
+    // we do not accept empty tables
+    return sample != null && !(sample instanceof Table && ((Table) sample).isEmpty());
   }
 
 }

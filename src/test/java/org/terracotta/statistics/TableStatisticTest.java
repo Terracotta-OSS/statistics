@@ -17,9 +17,11 @@ package org.terracotta.statistics;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.terracotta.statistics.registry.Statistic;
 import org.terracotta.statistics.registry.StatisticRegistry;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -54,6 +56,26 @@ public class TableStatisticTest {
     Table table = registry.<Table>queryStatistic("Database:TopQueries").get().getLatestSampleValue().get();
     assertThat(table.getRowCount(), equalTo(2));
     assertTable(table);
+  }
+
+  @Test
+  public void test_no_sample_when_table_empty() throws Exception {
+    StatisticRegistry registry = new StatisticRegistry(this, Time::absoluteTime);
+
+    // fetching the live stats
+    Map<String, Map<String, Supplier<Number>>> liveDbStats = Collections.emptyMap();
+
+    // create a "live" table statistic
+    ValueStatistic<Table> statistic = TableValueStatistic.newBuilder("total-exec-count", "total-failed-count")
+        .withRows(liveDbStats.keySet(), (queryId, rowBuilder) -> rowBuilder
+            .registerStatistic("total-exec-count", counter(liveDbStats.get(queryId).get("total-exec-count")))
+            .registerStatistic("total-failed-count", counter(liveDbStats.get(queryId).get("total-failed-count"))))
+        .build();
+
+    registry.registerStatistic("Database:TopQueries", statistic);
+
+    Statistic<Table> tableStatistic = registry.<Table>queryStatistic("Database:TopQueries").get();
+    assertThat(tableStatistic.isEmpty(), is(true));
   }
 
   @Test
