@@ -47,7 +47,8 @@ public class MaximumLatencyHistory implements ChainedEventObserver, SampledStati
   private final Queue<LatencyPeriodAccumulator> archive;
   private final long windowSizeNs;
   private final Consumer<LatencyPeriodAccumulator> sink;
-  private final long drift;
+  private final LongSupplier timeSupplier;
+  private volatile long drift;
 
   public MaximumLatencyHistory(int historySize, long windowSize, TimeUnit windowSizeUnit, LongSupplier timeSupplier) {
     this(historySize, windowSize, windowSizeUnit, timeSupplier, accumulator -> {});
@@ -63,6 +64,7 @@ public class MaximumLatencyHistory implements ChainedEventObserver, SampledStati
     this.archive = new ArrayBlockingQueue<>(historySize);
     this.windowSizeNs = TimeUnit.NANOSECONDS.convert(windowSize, windowSizeUnit);
     this.sink = sink;
+    this.timeSupplier = timeSupplier;
     this.drift = Time.time() - timeSupplier.getAsLong() * 1_000_000;
   }
 
@@ -75,6 +77,9 @@ public class MaximumLatencyHistory implements ChainedEventObserver, SampledStati
       }
       LatencyPeriodAccumulator newAccumulator = new LatencyPeriodAccumulator(timeNs, windowSizeNs, latencyNs);
       if (latestAccumulator.compareAndSet(accumulator, newAccumulator)) {
+        // The difference between system time and nano time needs to be recomputed
+        // in case the computer went to sleep. In this case, the system time advance but not the nano time.
+        this.drift = Time.time() - timeSupplier.getAsLong() * 1_000_000;
         // Insertion will in theory be in order because for whole duration of the new window, 
         // there cannot be another thread that will try to insert at the same time.
         insert(newAccumulator);
@@ -99,13 +104,17 @@ public class MaximumLatencyHistory implements ChainedEventObserver, SampledStati
 
   @Override
   public List<Sample<Long>> history() {
+    long drift = this.drift;
     return archive.stream()
-        .map(acumulator -> new Sample<>((acumulator.start() - drift) / 1_000_000, acumulator.maximum()))
+        .map(acumulator -> {
+          return new Sample<>((acumulator.start() - drift) / 1_000_000, acumulator.maximum());
+        })
         .collect(Collectors.toList());
   }
 
   @Override
   public List<Sample<Long>> history(long sinceMillis) {
+    long drift = this.drift;
     long sinceNs = sinceMillis * 1_000_000 + drift;
     return archive.stream()
         .filter(acumulator -> acumulator.start() >= sinceNs)
