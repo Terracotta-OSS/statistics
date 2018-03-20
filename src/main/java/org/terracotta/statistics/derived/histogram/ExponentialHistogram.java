@@ -90,13 +90,14 @@ public class ExponentialHistogram {
         time++;
       }
       long[] bBoxes = makeBoxes(time, count);
-      long bLast = 1L << ((bBoxes.length / mergeThreshold) - 1);
+      long bLast = 1L << (((bBoxes.length - mergeThreshold + 1) / mergeThreshold) - 1);
       merge(bBoxes, bLast, count);
     }
   }
 
   private long[] makeBoxes(long time, long count) {
-    int[] canonical = lCanonical(mergeThreshold - 1, count);
+    int[] canonical = tailedLCanonical(mergeThreshold - 1, count);
+
 
     long[] boxes = new long[min_l(canonical.length)];
     Arrays.fill(boxes, MIN_VALUE);
@@ -110,7 +111,17 @@ public class ExponentialHistogram {
     return boxes;
   }
 
-  public static int[] lCanonical(int l, long count) {
+  private static int[] tailedLCanonical(int l, long count) {
+    if (count < l) {
+      return new int[]{(int) count};
+    } else {
+      int[] form = lCanonical(l, count - l);
+      form[0] += l;
+      return form;
+    }
+  }
+
+  private static int[] lCanonical(int l, long count) {
     long num = count + l;
     long denom = l + 1;
     int j = numberOfTrailingZeros(highestOneBit(num / denom));
@@ -259,11 +270,15 @@ public class ExponentialHistogram {
   }
 
   private int min_l(int logSize) {
-    return (logSize * mergeThreshold);
+    if (logSize == 0) {
+      return 0;
+    } else {
+      return ((logSize + 1) * mergeThreshold) - 1;
+    }
   }
   
   private int max_l(int logSize) {
-    return ((logSize + 1) * mergeThreshold);
+    return ((logSize + 2) * mergeThreshold) - 1;
   }
   
   public boolean isEmpty() {
