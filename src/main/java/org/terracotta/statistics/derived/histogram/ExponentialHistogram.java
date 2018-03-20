@@ -85,6 +85,10 @@ public class ExponentialHistogram {
     } else if (count == 0) {
       return;
     } else {
+      if (time == MIN_VALUE) {
+        //MIN_VALUE means a box is unused so we avoid it
+        time++;
+      }
       long[] bBoxes = makeBoxes(time, count);
       long bLast = 1L << ((bBoxes.length / mergeThreshold) - 1);
       merge(bBoxes, bLast, count);
@@ -194,11 +198,13 @@ public class ExponentialHistogram {
   }
   
   public void insert(long time) {
+    if (time == MIN_VALUE) {
+      time++;
+    }
     insert_l(0, time);
   }
 
   private void insert_l(int initialLogSize, long time) {
-    long threshold = time - window;
     total += (1L << initialLogSize);
     for (int logSize = initialLogSize; ; logSize++) {
       ensureCapacity(logSize);
@@ -210,18 +216,18 @@ public class ExponentialHistogram {
         insertIndex = max_l(logSize) - 1;
       }
       insert[logSize] = insertIndex;
-      
-      if (previous > threshold) {
-        //no space available - time to merge
-        time = boxes[insertIndex];
-        boxes[insertIndex] = MIN_VALUE;
-      } else if (previous == MIN_VALUE) {
+
+      if (previous == MIN_VALUE) {
         //previous unoccupied
         long finalSize = 1L << logSize;
         if (finalSize > last) {
           last = finalSize;
         }
         return;
+      } else if ((time - previous) < window) {
+        //no space available - time to merge
+        time = boxes[insertIndex];
+        boxes[insertIndex] = MIN_VALUE;
       } else {
         //previous aged out - decrement size
         total -= 1L << logSize;
@@ -231,13 +237,12 @@ public class ExponentialHistogram {
   }
   
   public void expire(long time) {
-    long threshold = time - window;
     for (int logSize = (Long.SIZE - 1) - numberOfLeadingZeros(last); logSize >= 0; logSize--) {
       boolean live = false;
       for (int i = min_l(logSize); i < max_l(logSize); i++) {
         long end = boxes[i];
         if (end != MIN_VALUE) {
-          if (end <= threshold) {
+          if ((time - end) >= window) {
             total -= 1L << logSize;
             boxes[i] = MIN_VALUE;
           } else {
