@@ -46,7 +46,7 @@ public class ExponentialHistogram {
   private long last;
 
   public ExponentialHistogram(float epsilon, long window) {
-    this((int) (Math.ceil(Math.ceil(1 / epsilon) / 2) + 1), window, 0);
+    this((int) (Math.ceil(Math.ceil(1.0 / epsilon) / 2) + 1), window, 0);
   }
   
   private ExponentialHistogram(int mergeThreshold, long window, int initialSize) {
@@ -86,7 +86,7 @@ public class ExponentialHistogram {
       return;
     } else {
       long[] bBoxes = makeBoxes(time, count);
-      long bLast = 1 << ((bBoxes.length / mergeThreshold) - 1);
+      long bLast = 1L << ((bBoxes.length / mergeThreshold) - 1);
       merge(bBoxes, bLast, count);
     }
   }
@@ -111,16 +111,16 @@ public class ExponentialHistogram {
     long denom = l + 1;
     int j = numberOfTrailingZeros(highestOneBit(num / denom));
 
-    int offset = (int) (num - (denom << j));
-    int prefixRep = offset & ((1 << j) - 1);
+    long offset = (num - (denom << j));
+    long prefixRep = offset & ((1L << j) - 1);
 
     int[] canonical = new int[j + 1];
 
     for (int i = 0; i < j; i++) {
-      canonical[i] = l + ((prefixRep >>> i) & 1);
+      canonical[i] = l + (int) (((prefixRep >>> i) & 1));
     }
 
-    canonical[j] = ((offset >>> j) + 1);
+    canonical[j] = (int) ((offset >>> j) + 1);
 
     return canonical;
   }
@@ -199,7 +199,7 @@ public class ExponentialHistogram {
 
   private void insert_l(int initialLogSize, long time) {
     long threshold = time - window;
-    total += (1 << initialLogSize);
+    total += (1L << initialLogSize);
     for (int logSize = initialLogSize; ; logSize++) {
       ensureCapacity(logSize);
       
@@ -224,7 +224,7 @@ public class ExponentialHistogram {
         return;
       } else {
         //previous aged out - decrement size
-        total -= 1 << logSize;
+        total -= 1L << logSize;
         return;
       }
     }
@@ -238,7 +238,7 @@ public class ExponentialHistogram {
         long end = boxes[i];
         if (end != MIN_VALUE) {
           if (end <= threshold) {
-            total -= 1 << logSize;
+            total -= 1L << logSize;
             boxes[i] = MIN_VALUE;
           } else {
             live = true;
@@ -345,13 +345,13 @@ public class ExponentialHistogram {
       for (int i = insert[logSize] + 1; i < max_l(logSize); i++) {
         long time = boxes[i];
         if (time != MIN_VALUE) {
-          sb.append("[").append(1 << logSize).append("@").append(time).append("], ");
+          sb.append("[").append(1L << logSize).append("@").append(time).append("], ");
         }
       }
       for (int i = min_l(logSize); i < insert[logSize] + 1; i++) {
         long time = boxes[i];
         if (time != MIN_VALUE) {
-          sb.append("[").append(1 << logSize).append("@").append(time).append("], ");
+          sb.append("[").append(1L << logSize).append("@").append(time).append("], ");
         }
       }
     }

@@ -27,7 +27,7 @@ import java.util.Random;
  * Fast and Accurate Computation of Equi-Depth Histograms over Data Streams</a>.
  */
 public class ExponentialHistogramTest {
-  
+
   @Test
   public void testPerformance() {
     ExponentialHistogram eh = new ExponentialHistogram(0.7f, 7100);
@@ -52,11 +52,12 @@ public class ExponentialHistogramTest {
     inject(eh, 1, 55);
     assertThat(eh.count(), is(30L));
     assertThat(eh.toString(), is("count = 30 : [1@55], [1@53], [2@51], [2@48], [4@43], [4@39], [8@34], [16@25]"));
-    
+
     eh.insert(58);
     eh.expire(58);
     assertThat(eh.count(), is(31L));
-    assertThat(eh.toString(), is("count = 31 : [1@58], [2@55], [4@51], [8@43], [8@34], [16@25]"));;
+    assertThat(eh.toString(), is("count = 31 : [1@58], [2@55], [4@51], [8@43], [8@34], [16@25]"));
+    ;
 
     eh.insert(60);
     eh.expire(60);
@@ -74,7 +75,7 @@ public class ExponentialHistogramTest {
     inject(ehl, 1, 55);
     assertThat(ehl.count(), is(10L));
     assertThat(ehl.toString(), is("count = 10 : [1@55], [1@53], [2@52], [4@48], [4@39]"));
-    
+
     ExponentialHistogram ehr = new ExponentialHistogram(0.5f, Long.MAX_VALUE);
     inject(ehr, 4, 13);
     inject(ehr, 4, 25);
@@ -85,12 +86,12 @@ public class ExponentialHistogramTest {
     inject(ehr, 1, 58);
     assertThat(ehr.count(), is(11L));
     assertThat(ehr.toString(), is("count = 11 : [1@58], [2@56], [4@32], [8@25]"));
-    
+
     ehl.merge(ehr);
     assertThat(ehl.count(), is(23L));
     assertThat(ehl.toString(), is("count = 23 : [1@58], [2@56], [4@55], [4@48], [8@39], [8@25]"));
   }
-  
+
   @Test
   public void testBulkInsertion() {
     ExponentialHistogram ehA = new ExponentialHistogram(0.1f, Long.MAX_VALUE);
@@ -112,6 +113,33 @@ public class ExponentialHistogramTest {
     } catch (Throwable t) {
       System.out.println("Failed Seed : " + seed);
       throw t;
+    }
+  }
+
+  @Test
+  public void testReallyBulkInsertion() {
+    long seed = System.nanoTime();
+    Random rndm = new Random(seed);
+
+    float accuracy = (rndm.nextFloat() / 2) + 0.1f;
+    int window = rndm.nextInt(500) + 10;
+
+    ExponentialHistogram eh = new ExponentialHistogram(accuracy, window);
+
+    try {
+      final int max = 1000;
+      long total = 0;
+      for (int i = 0; i < max; i++) {
+        long count = rndm.nextLong() & ((1L << 48) - 1);
+        if (max - i <= window) {
+          total += count;
+        }
+        eh.insert(i, count);
+      }
+      eh.expire(999);
+      assertThat((double) eh.count(), closeTo(total, accuracy * total));
+    } catch (Throwable t) {
+      throw new AssertionError("Failed seed : " + seed, t);
     }
   }
 
