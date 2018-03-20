@@ -15,21 +15,25 @@
  */
 package org.terracotta.statistics.derived.histogram;
 
+import java.util.Arrays;
+
 import static java.lang.Long.MIN_VALUE;
+import static java.lang.Long.highestOneBit;
 import static java.lang.Long.numberOfLeadingZeros;
+import static java.lang.Long.numberOfTrailingZeros;
 import static java.lang.Math.max;
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOf;
 import static java.util.Arrays.fill;
 
+/**
+ * An implementation of the Exponential Histogram sketch as outline by Datar et al.
+ *
+ * @see <a href="http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.24.7941">
+ *   Maintaining Stream Statistics over Sliding Windows</a>
+ */
 public class ExponentialHistogram {
   
-  /*
-   * TODO: The original paper on this data structure doesn't (by my reading) say
-   * anything about different merge thresholds for the 1-size boxes.  Need to
-   * figure out if this is an error in the BASH/BSBH paper, or is an important
-   * correction from the EH one.
-   */
   private static final long[] EMPTY_LONG_ARRAY = new long[0];
   
   private final int mergeThreshold;
@@ -52,12 +56,15 @@ public class ExponentialHistogram {
   }
   
   public void merge(ExponentialHistogram b) {
-    long[] aBoxes = this.boxes;
-    long[] bBoxes = b.boxes;
+    merge(b.boxes, b.last, b.total);
+  }
 
-    int logLast = (Long.SIZE - 1) - numberOfLeadingZeros(last | b.last);
+  private void merge(long[] bBoxes, long bLast, long bTotal) {
+    long[] aBoxes = this.boxes;
+
+    int logLast = (Long.SIZE - 1) - numberOfLeadingZeros(last | bLast);
     initializeArrays(logLast);
-    this.total += b.total;
+    this.total += bTotal;
     
     long[] overflow = EMPTY_LONG_ARRAY;
     for (int logSize = 0; logSize <= logLast; logSize++) {
@@ -70,6 +77,52 @@ public class ExponentialHistogram {
       logSize++;
     }
     last = 1L << (logSize - 1);
+  }
+
+  public void insert(long time, long count) {
+    if (count < 0) {
+      throw new IllegalArgumentException("negative count");
+    } else if (count == 0) {
+      return;
+    } else {
+      long[] bBoxes = makeBoxes(time, count);
+      long bLast = 1 << ((bBoxes.length / mergeThreshold) - 1);
+      merge(bBoxes, bLast, count);
+    }
+  }
+
+  private long[] makeBoxes(long time, long count) {
+    int[] canonical = lCanonical(mergeThreshold - 1, count);
+
+    long[] boxes = new long[min_l(canonical.length)];
+    Arrays.fill(boxes, MIN_VALUE);
+
+    for (int i = 0; i < canonical.length; i++) {
+      int min = min_l(i);
+      for (int a = min; a < min + canonical[i]; a++) {
+        boxes[a] = time;
+      }
+    }
+    return boxes;
+  }
+
+  public static int[] lCanonical(int l, long count) {
+    long num = count + l;
+    long denom = l + 1;
+    int j = numberOfTrailingZeros(highestOneBit(num / denom));
+
+    int offset = (int) (num - (denom << j));
+    int prefixRep = offset & ((1 << j) - 1);
+
+    int[] canonical = new int[j + 1];
+
+    for (int i = 0; i < j; i++) {
+      canonical[i] = l + ((prefixRep >>> i) & 1);
+    }
+
+    canonical[j] = ((offset >>> j) + 1);
+
+    return canonical;
   }
 
   private long[] insert(int logSize, long[] values) {
@@ -201,15 +254,11 @@ public class ExponentialHistogram {
   }
 
   private int min_l(int logSize) {
-    if (logSize == 0) {
-      return 0;
-    } else {
-      return (logSize * mergeThreshold) + 1;
-    }
+    return (logSize * mergeThreshold);
   }
   
   private int max_l(int logSize) {
-    return ((logSize + 1) * mergeThreshold) + 1;
+    return ((logSize + 1) * mergeThreshold);
   }
   
   public boolean isEmpty() {
