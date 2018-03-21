@@ -35,7 +35,8 @@ import static java.util.Arrays.fill;
 public class ExponentialHistogram {
   
   private static final long[] EMPTY_LONG_ARRAY = new long[0];
-  
+
+  private final float epsilon;
   private final int mergeThreshold;
   private final long window;
   
@@ -46,10 +47,11 @@ public class ExponentialHistogram {
   private long last;
 
   public ExponentialHistogram(float epsilon, long window) {
-    this((int) (Math.ceil(Math.ceil(1.0 / epsilon) / 2) + 1), window, 0);
+    this(epsilon, (int) (Math.ceil(Math.ceil(1.0 / epsilon) / 2) + 1), window, 0);
   }
-  
-  private ExponentialHistogram(int mergeThreshold, long window, int initialSize) {
+
+  private ExponentialHistogram(float epsilon, int mergeThreshold, long window, int initialSize) {
+    this.epsilon = epsilon;
     this.mergeThreshold = mergeThreshold;
     this.window = window;
     initializeArrays(initialSize);
@@ -294,7 +296,7 @@ public class ExponentialHistogram {
     int[] originalInsert = insert;
 
     int logLast = (Long.SIZE - 1) - numberOfLeadingZeros(last);
-    ExponentialHistogram other = new ExponentialHistogram(mergeThreshold, window, logLast - 1);
+    ExponentialHistogram other = new ExponentialHistogram(epsilon, mergeThreshold, window, logLast - 1);
     initializeArrays(logLast - 1);
     this.total = 0;
     this.last = 0;
@@ -421,5 +423,9 @@ public class ExponentialHistogram {
       }
     }
     return 0;
+  }
+
+  public float epsilon() {
+    return epsilon;
   }
 }

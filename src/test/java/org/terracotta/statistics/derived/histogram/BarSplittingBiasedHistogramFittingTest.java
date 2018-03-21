@@ -15,28 +15,30 @@
  */
 package org.terracotta.statistics.derived.histogram;
 
-import java.util.Arrays;
-import java.util.Random;
-
+import org.apache.commons.math3.fitting.AbstractCurveFitter;
 import org.apache.commons.math3.fitting.GaussianCurveFitter;
 import org.apache.commons.math3.fitting.PolynomialCurveFitter;
-import org.apache.commons.math3.fitting.WeightedObservedPoints;
+import org.apache.commons.math3.fitting.WeightedObservedPoint;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import static org.hamcrest.collection.IsArrayContainingInOrder.arrayContaining;
-import static org.hamcrest.core.IsInstanceOf.any;
+import java.util.Arrays;
+import java.util.Random;
+
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toList;
 import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.junit.Assert.assertThat;
 
 @RunWith(Parameterized.class)
-public class BarSplittingBiasedHistogramTest {
+public class BarSplittingBiasedHistogramFittingTest {
 
   private static final double ERROR_THRESHOLD = 10;
 
+  private final long seed;
   private final float bias;
   private final int bars;
 
@@ -44,33 +46,35 @@ public class BarSplittingBiasedHistogramTest {
   private final double widthError;
   private final double centroidError;
 
-  @Parameterized.Parameters(name = "{index}: bias={0}, bars={1}")
+  @Parameterized.Parameters(name = "{index}: seed={0}, bias={1}, bars={2}")
   public static Iterable<Object[]> data() {
-    // bias, bars, slope-error, centroid-error, width-error
+    Random rndm = new Random();
+    // seed, bias, bars, slope-error, centroid-error, width-error
     return Arrays.asList(new Object[][] {
-            {0.01f, 20, 0.00205, 0.0153, 0.0121},
-            {0.01f, 100, 0.00202, 0.00551, 0.00479},
-            {0.01f, 1000, 0.00248, 0.00509, 0.00497},
+            {rndm.nextLong(), 0.01f, 20, 0.00205, 0.0153, 0.0121},
+            {rndm.nextLong(), 0.01f, 100, 0.00202, 0.00551, 0.00479},
+            {rndm.nextLong(), 0.01f, 1000, 0.00248, 0.00509, 0.00497},
 
-            {0.1f, 20, 0.00137, 0.00710, 0.00746},
-            {0.1f, 100, 0.00130, 0.00511, 0.00510},
-            {0.1f, 1000, 0.00134, 0.00480, 0.00509},
+            {rndm.nextLong(), 0.1f, 20, 0.00137, 0.00710, 0.00746},
+            {rndm.nextLong(), 0.1f, 100, 0.00130, 0.00511, 0.00510},
+            {rndm.nextLong(), 0.1f, 1000, 0.00134, 0.00480, 0.00509},
 
-            {1f, 20, 0.00118, 0.00557, 0.00703},
-            {1f, 100, 0.00110, 0.00508, 0.00532},
-            {1f, 1000, 0.00102, 0.00497, 0.00531},
+            {rndm.nextLong(), 1f, 20, 0.00118, 0.00557, 0.00703},
+            {rndm.nextLong(), 1f, 100, 0.00110, 0.00508, 0.00532},
+            {rndm.nextLong(), 1f, 1000, 0.00102, 0.00497, 0.00531},
 
-            {10f, 20, 0.00134, 0.00712, 0.00797},
-            {10f, 100, 0.00124, 0.00499, 0.00500},
-            {10f, 1000, 0.00131, 0.00499, 0.00512},
+            {rndm.nextLong(), 10f, 20, 0.00134, 0.00712, 0.00797},
+            {rndm.nextLong(), 10f, 100, 0.00124, 0.00499, 0.00500},
+            {rndm.nextLong(), 10f, 1000, 0.00131, 0.00499, 0.00512},
 
-            {100f, 20, 0.00193, 0.0151, 0.0123},
-            {100f, 100, 0.00199, 0.00527, 0.00471},
-            {100f, 1000, 0.00253, 0.00506, 0.00473},
+            {rndm.nextLong(), 100f, 20, 0.00193, 0.0151, 0.0123},
+            {rndm.nextLong(), 100f, 100, 0.00199, 0.00527, 0.00471},
+            {rndm.nextLong(), 100f, 1000, 0.00253, 0.00506, 0.00473},
     });
   }
 
-  public BarSplittingBiasedHistogramTest(float biasRange, int bars, double slopeError, double centroidError, double widthError) {
+  public BarSplittingBiasedHistogramFittingTest(long seed, float biasRange, int bars, double slopeError, double centroidError, double widthError) {
+    this.seed = seed;
     this.bias = (float) Math.pow(biasRange, 1.0 / bars);
     this.bars = bars;
 
@@ -91,12 +95,8 @@ public class BarSplittingBiasedHistogramTest {
 
   @Test
   public void testHistogramOfFlatDistribution() {
-    long seed = System.nanoTime();
-    try {
-      assertThat(asDouble(flatHistogramFit(seed)), arrayContaining(any(Double.class), closeTo(0.0, slopeError * ERROR_THRESHOLD)));
-    } catch (Throwable t) {
-      throw (AssertionError) new AssertionError("Seed: " + seed).initCause(t);
-    }
+    double[] parameters = flatHistogramFit(seed);
+    assertThat("slope", parameters[1], closeTo(0.0, slopeError * ERROR_THRESHOLD));
   }
 
   private double[] flatHistogramFit(long seed) {
@@ -109,11 +109,7 @@ public class BarSplittingBiasedHistogramTest {
       bsbh.event(rndm.nextDouble() * range, i);
     }
 
-    WeightedObservedPoints points = new WeightedObservedPoints();
-    for (Histogram.Bucket<Double> b : bsbh.getBuckets()) {
-      points.add((b.maximum() + b.minimum()) / 2.0, b.count() / (b.maximum() - b.minimum()));
-    }
-    return PolynomialCurveFitter.create(1).fit(points.toList());
+    return fit(bsbh, PolynomialCurveFitter.create(1));
   }
 
   @Test
@@ -132,12 +128,9 @@ public class BarSplittingBiasedHistogramTest {
 
   @Test
   public void testHistogramOfGaussianDistribution() {
-    long seed = System.nanoTime();
-    try {
-      assertThat(asDouble(gaussianHistogramFit(seed)), arrayContaining(any(Double.class), closeTo(0, centroidError * ERROR_THRESHOLD), closeTo(1, widthError * ERROR_THRESHOLD)));
-    } catch (Throwable t) {
-      throw (AssertionError) new AssertionError("Seed: " + seed).initCause(t);
-    }
+    double[] parameters = gaussianHistogramFit(seed);
+    assertThat("centroid", parameters[1], closeTo(0, centroidError * ERROR_THRESHOLD));
+    assertThat("width", parameters[2], closeTo(1, widthError * ERROR_THRESHOLD));
   }
 
   private double[] gaussianHistogramFit(long seed) {
@@ -147,22 +140,14 @@ public class BarSplittingBiasedHistogramTest {
 
     for (int i = 0; i < 100000; i++) {
       bsbh.event(rndm.nextGaussian(), i);
-
     }
 
-    WeightedObservedPoints points = new WeightedObservedPoints();
-    for (Histogram.Bucket<Double> b : bsbh.getBuckets()) {
-      points.add((b.maximum() + b.minimum()) / 2.0, b.count() / (b.maximum() - b.minimum()));
-    }
-    return GaussianCurveFitter.create().fit(points.toList());
+    return fit(bsbh, GaussianCurveFitter.create());
   }
 
-  private static Double[] asDouble(double[] input) {
-    Double[] output = new Double[input.length];
-    for (int i = 0; i < output.length; i++) {
-      output[i] = input[i];
-    }
-    return output;
+  public static double[] fit(BarSplittingBiasedHistogram histogram, AbstractCurveFitter fitter) {
+    return histogram.getBuckets().stream()
+        .map(b -> new WeightedObservedPoint(1.0, (b.maximum() + b.minimum()) / 2.0, b.count() / (b.maximum() - b.minimum())))
+        .collect(collectingAndThen(toList(), fitter::fit));
   }
-
 }

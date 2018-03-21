@@ -15,10 +15,11 @@
  */
 package org.terracotta.statistics.derived.histogram;
 
-import static java.lang.Math.nextUp;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import static java.lang.Math.nextUp;
 
 public class BarSplittingBiasedHistogram implements Histogram<Double> {
   
@@ -104,11 +105,28 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
 
   public double[] getQuantileBounds(double quantile) {
     double threshold = quantile * size();
-    long count = 0;
-    for (Bar b : bars) {
-      count += b.count();
-      if (count >= threshold) {
-        return new double[] {b.minimum(), b.maximum()};
+
+    double lowCount = 0;
+    double highCount = 0;
+
+    for (Iterator<Bar> it = bars.iterator(); it.hasNext(); ) {
+      Bar b = it.next();
+      lowCount += b.count() * (1.0 - b.epsilon());
+      highCount += b.count() * (1.0 + b.epsilon());
+
+      if (highCount >= threshold) {
+        double lowerBound = b.minimum();
+        while (true) {
+          if (lowCount >= threshold) {
+            return new double[] {lowerBound, b.maximum()};
+          } else if (it.hasNext()) {
+            b = it.next();
+            lowCount += b.count() * (1.0 - b.epsilon());
+          } else {
+            break;
+          }
+        }
+        return new double[] {lowerBound, b.maximum()};
       }
     }
     throw new AssertionError();
@@ -246,6 +264,10 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
     
     public double maximum() {
       return maximum;
+    }
+
+    public double epsilon() {
+      return eh.epsilon();
     }
   }
   
