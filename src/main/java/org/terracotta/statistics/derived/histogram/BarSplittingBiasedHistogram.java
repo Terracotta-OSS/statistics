@@ -25,6 +25,13 @@ import static java.lang.Math.nextUp;
 import static java.util.Comparator.comparingDouble;
 import static java.util.stream.Stream.of;
 
+/**
+ * An implementation of the histogram algorithm described in:
+ * 'Fast Computation of Approximate Biased Histograms on Sliding Windows over Data Streams' [H. Mousavi &amp; C. Zaniolo]
+ *
+ * @see <a href="http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.407.3977">
+ *   Fast Computation of Approximate Biased Histograms on Sliding Windows over Data Streams</a>
+ */
 public class BarSplittingBiasedHistogram implements Histogram<Double> {
   private static final double DEFAULT_MAX_COEFFICIENT = 1.7;
   private static final double DEFAULT_PHI = 0.7;
@@ -41,6 +48,27 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
   
   private long size;
 
+  /**
+   * Create a histogram maintained over a sliding time window.
+   * <p>
+   *   The constructed histogram is:
+   * </p>
+   * <ul>
+   *   <li>maintained over {@code window} sliding window</li>
+   *   <li>consists of {@code bucketCount} buckets</li>
+   *   <li>where {@code b1.size() ~= b0.size * phi}</li>
+   *   <li>with each bucket internally composed of {@code expansionFactor} bars</li>
+   *   <li>with each bar maintaining a count accurate with a fractional error of {@code barEpsilon}</li>
+   *   <li>where bars are split when there size exceeds {@code maxCoefficient} of their target size</li>
+   * </ul>
+   *
+   * @param maxCoefficient relative split threshold
+   * @param phi histogram bucket bias factor
+   * @param expansionFactor number of bars per bucket
+   * @param bucketCount number of buckets
+   * @param barEpsilon bar count relative error
+   * @param window sliding window size
+   */
   public BarSplittingBiasedHistogram(double maxCoefficient, double phi, int expansionFactor, int bucketCount, double barEpsilon, long window) {
     this.bucketCount = bucketCount;
     this.barCount = bucketCount * expansionFactor;
@@ -64,14 +92,49 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
     }
   }
 
+  /**
+   * Create a histogram maintained over a sliding time window.
+   * <p>
+   *   The constructed histogram is:
+   * </p>
+   * <ul>
+   *   <li>maintained over {@code window} sliding window</li>
+   *   <li>consists of {@code bucketCount} buckets</li>
+   *   <li>where {@code b1.size() ~= b0.size * 0.7}</li>
+   * </ul>
+   *
+   * @param bucketCount number of buckets
+   * @param window sliding window size
+   */
   public BarSplittingBiasedHistogram(int bucketCount, long window) {
     this(DEFAULT_MAX_COEFFICIENT, DEFAULT_PHI, DEFAULT_EXPANSION_FACTOR, bucketCount, DEFAULT_EXP_HISTOGRAM_EPSILON, window);
   }
 
+  /**
+   * Create a histogram maintained over a sliding time window.
+   * <p>
+   *   The constructed histogram is:
+   * </p>
+   * <ul>
+   *   <li>maintained over {@code window} sliding window</li>
+   *   <li>consists of {@code bucketCount} buckets</li>
+   *   <li>where {@code b1.size() ~= b0.size * phi}</li>
+   * </ul>
+   *
+   * @param phi histogram bucket bias factor
+   * @param bucketCount number of buckets
+   * @param window sliding window size
+   */
   public BarSplittingBiasedHistogram(double phi, int bucketCount, long window) {
     this(DEFAULT_MAX_COEFFICIENT, phi, DEFAULT_EXPANSION_FACTOR, bucketCount, DEFAULT_EXP_HISTOGRAM_EPSILON, window);
   }
-  
+
+  /**
+   * Record an event of the given {@code value} occuring at he given {@code time}
+   *
+   * @param value event value
+   * @param time event time
+   */
   public void event(double value, long time) {
     int barIndex = getBarIndex(value);
     Bar bar = bars.get(barIndex);
@@ -84,11 +147,22 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
     }
   }
 
+  /**
+   * Expire old events from all buckets.
+   *
+   * @param time current timestamp
+   */
+  public void expire(long time) {
+    for (Bar b : bars) {
+      b.expire(time);
+    }
+  }
+
   @Override
   public String toString() {
     return bars.toString();
   }
-  
+
   @Override
   public List<Histogram.Bucket<Double>> getBuckets() {
     List<Histogram.Bucket<Double>> buckets = new ArrayList<Histogram.Bucket<Double>>(bucketCount);
@@ -116,12 +190,17 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
     return buckets;
   }
 
-  public double[] getQuantileBounds(double quantile) {
-    return of(evaluateQuantileFromMin(quantile), evaluateQuantileFromMax(quantile))
-        .min(comparingDouble(bounds -> bounds[1] - bounds[0])).get();
+  @Override
+  public Double[] getQuantileBounds(double quantile) {
+    if (quantile > 1.0 || quantile < 0.0) {
+      throw new IllegalArgumentException("Invalid quantile requested: " + quantile);
+    } else {
+      return of(evaluateQuantileFromMin(quantile), evaluateQuantileFromMax(quantile))
+          .min(comparingDouble(bounds -> bounds[1] - bounds[0])).get();
+    }
   }
 
-  private double[] evaluateQuantileFromMax(double quantile) {
+  private Double[] evaluateQuantileFromMax(double quantile) {
     double threshold = (1.0 - quantile) * size();
 
     double lowCount = 0;
@@ -138,13 +217,13 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
           b = it.previous();
           lowCount += b.count() * (1.0 - b.epsilon());
         }
-        return new double[] {b.minimum(), upperBound};
+        return new Double[] {b.minimum(), upperBound};
       }
     }
     throw new AssertionError();
   }
 
-  private double[] evaluateQuantileFromMin(double quantile) {
+  private Double[] evaluateQuantileFromMin(double quantile) {
     double threshold = quantile * size();
 
     double lowCount = 0;
@@ -161,7 +240,7 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
           b = it.next();
           lowCount += b.count() * (1.0 - b.epsilon());
         }
-        return new double[] {lowerBound, b.maximum()};
+        return new Double[] {lowerBound, b.maximum()};
       }
     }
     throw new AssertionError();
@@ -236,13 +315,13 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
     return size;
   }
 
-  static class Bar {
+  private static final class Bar {
     
     private final ExponentialHistogram eh;
     private double minimum = Double.POSITIVE_INFINITY;
     private double maximum = Double.NEGATIVE_INFINITY;
 
-    public Bar(double epsilon, long window) {
+    Bar(double epsilon, long window) {
       this.eh = new ExponentialHistogram(epsilon, window);
     }
 
@@ -252,7 +331,7 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
       this.maximum = maximum;
     }
 
-    public void insert(double value, long time) {
+    void insert(double value, long time) {
       if (value < minimum) {
         minimum = value;
       }
@@ -262,15 +341,11 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
       eh.insert(time);
     }
 
-    public void expire(long time) {
+    void expire(long time) {
       eh.expire(time);
     }
 
-    public boolean isEmpty() {
-      return eh.isEmpty();
-    }
-    
-    public long count() {
+    long count() {
       return eh.count();
     }
 
@@ -279,7 +354,7 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
       return "[" + minimum + " --" + count() + "-> " + maximum + "]";
     }
 
-    public Bar split(double ratio) {
+    Bar split(double ratio) {
       ExponentialHistogram split = eh.split(ratio);
       double upperMinimum = minimum + ((maximum - minimum) * ratio);
       double upperMaximum = maximum;
@@ -288,20 +363,20 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
       return new Bar(split, upperMinimum, upperMaximum);
     }
 
-    public void merge(Bar higher) {
+    void merge(Bar higher) {
       eh.merge(higher.eh);
       maximum = higher.maximum;
     }
 
-    public double minimum() {
+    double minimum() {
       return minimum;
     }
 
-    public double maximum() {
+    double maximum() {
       return maximum;
     }
 
-    public double epsilon() {
+    double epsilon() {
       return eh.epsilon();
     }
   }
