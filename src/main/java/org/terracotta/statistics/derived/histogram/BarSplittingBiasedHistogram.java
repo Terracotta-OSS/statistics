@@ -26,10 +26,10 @@ import static java.util.Comparator.comparingDouble;
 import static java.util.stream.Stream.of;
 
 public class BarSplittingBiasedHistogram implements Histogram<Double> {
-  private static final float DEFAULT_MAX_COEFFICIENT = 1.7f;
-  private static final float DEFAULT_PHI = 0.7f;
+  private static final double DEFAULT_MAX_COEFFICIENT = 1.7;
+  private static final double DEFAULT_PHI = 0.7;
   private static final int DEFAULT_EXPANSION_FACTOR = 7;
-  private static final float DEFAULT_EXP_HISTOGRAM_EPSILON = 0.01f;
+  private static final double DEFAULT_EXP_HISTOGRAM_EPSILON = 0.01;
 
   private final int barCount;
   private final int bucketCount;
@@ -41,7 +41,7 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
   
   private long size;
 
-  public BarSplittingBiasedHistogram(double maxCoefficient, double phi, int expansionFactor, int bucketCount, float barEpsilon, long window) {
+  public BarSplittingBiasedHistogram(double maxCoefficient, double phi, int expansionFactor, int bucketCount, double barEpsilon, long window) {
     this.bucketCount = bucketCount;
     this.barCount = bucketCount * expansionFactor;
     
@@ -53,7 +53,7 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
      * Using L'Hôpital: lim_(x->1) f(x)/g(x) = lim_(x->1)(f'(x))/(g'(x))
      * So: lim_(phi->1) (1-phi)/(1-phi^n) = lim_(phi->1) 1/n
      */
-    this.alphaPhi = (phi == 1.0f) ? 1.0 / bucketCount : (1 - phi) / (1 - Math.pow(phi, bucketCount));
+    this.alphaPhi = (phi == 1.0) ? 1.0 / bucketCount : (1 - phi) / (1 - Math.pow(phi, bucketCount));
 
     double rho = Math.pow(phi, 1.0 / expansionFactor);
     double alphaRho = (rho == 1.0f) ? 1.0 / barCount : (1 - rho) / (1 - Math.pow(rho, barCount));
@@ -242,7 +242,7 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
     private double minimum = Double.POSITIVE_INFINITY;
     private double maximum = Double.NEGATIVE_INFINITY;
 
-    public Bar(float epsilon, long window) {
+    public Bar(double epsilon, long window) {
       this.eh = new ExponentialHistogram(epsilon, window);
     }
 
@@ -280,7 +280,7 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
     }
 
     public Bar split(double ratio) {
-      ExponentialHistogram split = eh.split((float) ratio);
+      ExponentialHistogram split = eh.split(ratio);
       double upperMinimum = minimum + ((maximum - minimum) * ratio);
       double upperMaximum = maximum;
       this.maximum = upperMinimum;

@@ -36,7 +36,7 @@ public class ExponentialHistogram {
   
   private static final long[] EMPTY_LONG_ARRAY = new long[0];
 
-  private final float epsilon;
+  private final double epsilon;
   private final int mergeThreshold;
   private final long window;
   
@@ -46,11 +46,11 @@ public class ExponentialHistogram {
   private long total;
   private long last;
 
-  public ExponentialHistogram(float epsilon, long window) {
+  public ExponentialHistogram(double epsilon, long window) {
     this(epsilon, (int) (Math.ceil(Math.ceil(1.0 / epsilon) / 2) + 1), window, 0);
   }
 
-  private ExponentialHistogram(float epsilon, int mergeThreshold, long window, int initialSize) {
+  private ExponentialHistogram(double epsilon, int mergeThreshold, long window, int initialSize) {
     this.epsilon = epsilon;
     this.mergeThreshold = mergeThreshold;
     this.window = window;
@@ -291,7 +291,7 @@ public class ExponentialHistogram {
     return total - (last >>> 1);
   }
   
-  public ExponentialHistogram split(float fraction) {
+  public ExponentialHistogram split(double fraction) {
     long[] originalBoxes = boxes;
     int[] originalInsert = insert;
 
@@ -425,7 +425,7 @@ public class ExponentialHistogram {
     return 0;
   }
 
-  public float epsilon() {
+  public double epsilon() {
     return epsilon;
   }
 }
