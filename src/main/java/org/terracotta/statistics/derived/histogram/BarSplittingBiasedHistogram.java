@@ -40,7 +40,7 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
   private final double[] maxSizeTable;
   
   private long size;
-  
+
   public BarSplittingBiasedHistogram(double maxCoefficient, double phi, int expansionFactor, int bucketCount, float barEpsilon, long window) {
     this.bucketCount = bucketCount;
     this.barCount = bucketCount * expansionFactor;
@@ -48,6 +48,11 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
     this.bars = new ArrayList<Bar>(barCount);
     this.bars.add(new Bar(barEpsilon, window));
     this.phi = phi;
+
+    /*
+     * Using L'Hôpital: lim_(x->1) f(x)/g(x) = lim_(x->1)(f'(x))/(g'(x))
+     * So: lim_(phi->1) (1-phi)/(1-phi^n) = lim_(phi->1) 1/n
+     */
     this.alphaPhi = (phi == 1.0f) ? 1.0 / bucketCount : (1 - phi) / (1 - Math.pow(phi, bucketCount));
 
     double rho = Math.pow(phi, 1.0 / expansionFactor);

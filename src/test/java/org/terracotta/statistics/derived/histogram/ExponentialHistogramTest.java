@@ -15,12 +15,13 @@
  */
 package org.terracotta.statistics.derived.histogram;
 
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.number.IsCloseTo.closeTo;
-import static org.junit.Assert.assertThat;
 import org.junit.Test;
 
 import java.util.Random;
+
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.number.IsCloseTo.closeTo;
+import static org.junit.Assert.assertThat;
 
 /*
  * Selected test cases extracted from <a href="http://citeseerx.ist.psu.edu/viewdoc/citations?doi=10.1.1.225.1196">
