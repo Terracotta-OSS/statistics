@@ -39,12 +39,14 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
 
   private final int barCount;
   private final int bucketCount;
+  private final double barEpsilon;
+  private final long window;
   private final double phi;
   private final double alphaPhi;
   private final double ratio;
   private final List<Bar> bars;
   private final double[] maxSizeTable;
-  
+
   private long size;
 
   /**
@@ -70,6 +72,8 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
    */
   public BarSplittingBiasedHistogram(double maxCoefficient, double phi, int expansionFactor, int bucketCount, double barEpsilon, long window) {
     this.bucketCount = bucketCount;
+    this.barEpsilon = barEpsilon;
+    this.window = window;
     this.barCount = bucketCount * expansionFactor;
     
     this.bars = new ArrayList<Bar>(barCount);
@@ -152,8 +156,18 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
    * @param time current timestamp
    */
   public void expire(long time) {
-    for (Bar b : bars) {
-      b.expire(time);
+    long calculatedSize = 0;
+    Iterator<Bar> it = bars.iterator();
+    while (it.hasNext()) {
+      long barSize = it.next().expire(time);
+      if (barSize == 0) {
+        it.remove();
+      }
+      calculatedSize += barSize;
+    }
+    this.size = calculatedSize;
+    if (bars.isEmpty()) {
+      bars.add(new Bar(barEpsilon, window));
     }
   }
 
@@ -317,8 +331,8 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
   private static final class Bar {
     
     private final ExponentialHistogram eh;
-    private double minimum = Double.POSITIVE_INFINITY;
-    private double maximum = Double.NEGATIVE_INFINITY;
+    private double minimum = Double.NaN;
+    private double maximum = Double.NaN;
 
     Bar(double epsilon, long window) {
       this.eh = new ExponentialHistogram(epsilon, window);
@@ -331,17 +345,17 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
     }
 
     void insert(double value, long time) {
-      if (value < minimum) {
+      if (!(value >= minimum)) {
         minimum = value;
       }
-      if (value >= maximum) {
+      if (!(value < maximum)) {
         maximum = nextUp(value);
       }
       eh.insert(time);
     }
 
-    void expire(long time) {
-      eh.expire(time);
+    long expire(long time) {
+      return eh.expire(time);
     }
 
     long count() {

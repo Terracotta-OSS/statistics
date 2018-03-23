@@ -240,8 +240,9 @@ public class ExponentialHistogram {
    * Expire old events.
    *
    * @param time current timestamp
+   * @return the count following expiry
    */
-  public void expire(long time) {
+  public long expire(long time) {
     for (int logSize = (Long.SIZE - 1) - numberOfLeadingZeros(last); logSize >= 0; logSize--) {
       boolean live = false;
       for (int i = min_l(logSize); i < max_l(logSize); i++) {
@@ -257,10 +258,11 @@ public class ExponentialHistogram {
       }
       if (live) {
         last = 1L << logSize;
-        return;
+        return count();
       }
     }
     last = 0;
+    return 0;
   }
 
   private int min_l(int logSize) {
