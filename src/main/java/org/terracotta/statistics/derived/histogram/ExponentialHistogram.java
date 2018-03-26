@@ -28,6 +28,10 @@ import static java.util.Arrays.fill;
 
 /**
  * An implementation of the Exponential Histogram sketch as outlined by Datar et al.
+ * <p>
+ *   This class is *not thread-safe*, safe consumption in a multi-threaded environment will require some form of
+ *   external locking.
+ * </p>
  *
  * @see <a href="http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.24.7941">
  *   Maintaining Stream Statistics over Sliding Windows</a>
@@ -134,9 +138,7 @@ public class ExponentialHistogram {
 
     for (int i = 0; i < canonical.length; i++) {
       int min = min_l(i);
-      for (int a = min; a < min + canonical[i]; a++) {
-        boxes[a] = time;
-      }
+      fill(boxes, min, min + canonical[i], time);
     }
     return boxes;
   }
@@ -201,12 +203,8 @@ public class ExponentialHistogram {
     if (time == MIN_VALUE) {
       time++;
     }
-    insert_l(0, time);
-  }
-
-  private void insert_l(int initialLogSize, long time) {
-    total += (1L << initialLogSize);
-    for (int logSize = initialLogSize; ; logSize++) {
+    total += 1L;
+    for (int logSize = 0; ; logSize++) {
       ensureCapacity(logSize);
       
       int insertIndex = insert[logSize];
@@ -274,7 +272,7 @@ public class ExponentialHistogram {
   }
   
   private int max_l(int logSize) {
-    return ((logSize + 2) * mergeThreshold) - 1;
+    return min_l(logSize + 1);
   }
 
   /**
@@ -410,9 +408,9 @@ public class ExponentialHistogram {
       throw new ArrayIndexOutOfBoundsException();
     } else {
       //insertion-sort
-      int firstEmpty = -1;
+      int firstEmpty = toIndex;
       for (int i = fromIndex, j = i; i < toIndex - 1; j = ++i) {
-        if (a[i] == Long.MIN_VALUE && firstEmpty == -1) {
+        if (a[i] == Long.MIN_VALUE && firstEmpty == toIndex) {
           firstEmpty = i;
         }
         long ai = a[i + 1];
@@ -431,11 +429,7 @@ public class ExponentialHistogram {
         firstEmpty = toIndex - 1;
       }
 
-      if (firstEmpty == -1) {
-        return toIndex;
-      } else {
-        return firstEmpty;
-      }
+      return firstEmpty;
     }
   }
 
