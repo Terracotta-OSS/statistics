@@ -17,8 +17,18 @@ package org.terracotta.statistics.derived.histogram;
 
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.Random;
+import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
 
+import static java.util.Collections.emptyList;
+import static java.util.function.UnaryOperator.identity;
+import static java.util.stream.IntStream.rangeClosed;
+import static java.util.stream.Stream.of;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.junit.Assert.assertThat;

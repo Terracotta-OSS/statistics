@@ -21,6 +21,7 @@ import org.junit.rules.ErrorCollector;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.stream.DoubleStream;
@@ -112,6 +113,23 @@ public class BarSplittingBiasedHistogramPreciseTest {
       } else {
         errors.checkThat("Quantile " + q + " lower bound:", bounds[0], lessThanOrEqualTo(values[(int) ceil]));
         errors.checkThat("Quantile " + q + " upper bound:", bounds[1], greaterThan(values[(int) ceil]));
+      }
+    }
+  }
+
+  @Test
+  public void testFlipFlop() throws IOException {
+    BarSplittingBiasedHistogram bsbh = new BarSplittingBiasedHistogram(bias, bars, 100000);
+    Random rndm = new Random(seed);
+
+    long time = 0;
+
+    for (int c = 0; c < 10; c++) {
+      long centroid = rndm.nextInt(3000) - 1500;
+      long width = rndm.nextInt(3000) + 100;
+
+      for (double datum : rndm.doubles(100000).map(d -> (d * width) + centroid).toArray()) {
+        bsbh.event(datum, time++);
       }
     }
   }

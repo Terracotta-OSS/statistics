@@ -101,7 +101,7 @@ public class ExponentialHistogram {
       System.arraycopy(merged, 0, boxes, min, boxCount);
 
       int overflowSize = limit - boxCount;
-      overflow = new long[overflowSize >>> 1];
+      overflow = new long[overflowSize >> 1];
       for (int j = 0; j < overflow.length; j++) {
         overflow[j] = merged[boxCount + (2 * j)];
       }
@@ -425,7 +425,7 @@ public class ExponentialHistogram {
         }
         a[j + 1] = ai;
       }
-      if (a[toIndex - 1] == Long.MIN_VALUE && firstEmpty == -1) {
+      if (a[toIndex - 1] == Long.MIN_VALUE && firstEmpty == toIndex) {
         firstEmpty = toIndex - 1;
       }
 

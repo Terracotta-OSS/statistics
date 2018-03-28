@@ -27,6 +27,10 @@ import static java.util.stream.Stream.of;
 /**
  * An implementation of the histogram algorithm described in:
  * 'Fast Computation of Approximate Biased Histograms on Sliding Windows over Data Streams' [H. Mousavi &amp; C. Zaniolo]
+ * <p>
+ *   This class is *not thread-safe*, safe consumption in a multi-threaded environment will require some form of
+ *   external locking.
+ * </p>
  *
  * @see <a href="http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.407.3977">
  *   Fast Computation of Approximate Biased Histograms on Sliding Windows over Data Streams</a>
