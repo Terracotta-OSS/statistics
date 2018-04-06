@@ -15,14 +15,10 @@
  */
 package org.terracotta.statistics.derived.histogram;
 
-import org.hamcrest.core.Is;
 import org.junit.Test;
-
-import java.util.stream.IntStream;
 
 import static java.lang.Math.nextUp;
 import static java.util.stream.IntStream.range;
-import static java.util.stream.IntStream.rangeClosed;
 import static org.hamcrest.collection.IsArrayContainingInOrder.arrayContaining;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
