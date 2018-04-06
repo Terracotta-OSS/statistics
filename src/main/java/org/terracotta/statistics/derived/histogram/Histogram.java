@@ -18,18 +18,16 @@ package org.terracotta.statistics.derived.histogram;
 import java.util.List;
 
 /**
- * A histogram.
- *
- * @param <T> x-axis numerical type
+ * A histogram supporting double values
  */
-public interface Histogram<T extends Number> {
+public interface Histogram {
 
   /**
    * Returns the histograms buckets
    *
    * @return the histogram buckets
    */
-  List<Bucket<T>> getBuckets();
+  List<Bucket> getBuckets();
 
   /**
    * Returns the bounds {@code [minimum, maximum]} on the given quantile.
@@ -38,28 +36,26 @@ public interface Histogram<T extends Number> {
    * @return the quantile bounds
    * @throws IllegalArgumentException if {@code quantile} if outside the range [0.0..1.0]
    */
-  T[] getQuantileBounds(double quantile) throws IllegalArgumentException;
+  double[] getQuantileBounds(double quantile) throws IllegalArgumentException;
 
   /**
    * A histogram bucket.
-   *
-   * @param <T> numerical type of the bucket bounds
    */
-  interface Bucket<T extends Number> {
+  interface Bucket {
 
     /**
      * Returns the bucket minimum (inclusive).
      *
      * @return the bucket minimum
      */
-    T minimum();
+    double minimum();
 
     /**
      * Returns the bucket maximum (exclusive).
      *
      * @return the bucket maximum
      */
-    T maximum();
+    double maximum();
 
     /**
      * Returns the count of events in this bucket.

@@ -19,8 +19,8 @@ import org.junit.Test;
 
 import static java.lang.Math.nextUp;
 import static java.util.stream.IntStream.range;
-import static org.hamcrest.collection.IsArrayContainingInOrder.arrayContaining;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertThat;
 
 public class BarSplittingBiasedHistogramTest {
@@ -29,8 +29,8 @@ public class BarSplittingBiasedHistogramTest {
   public void testQuantileBoundsOfEmptyHistogram() {
     BarSplittingBiasedHistogram bsbh = new BarSplittingBiasedHistogram(10, 100);
 
-    assertThat(bsbh.getQuantileBounds(0.0), arrayContaining(Double.NaN, Double.NaN));
-    assertThat(bsbh.getQuantileBounds(1.0), arrayContaining(Double.NaN, Double.NaN));
+    assertArrayEquals(bsbh.getQuantileBounds(0.0), new double[]{Double.NaN, Double.NaN}, 0.0);
+    assertArrayEquals(bsbh.getQuantileBounds(1.0), new double[]{Double.NaN, Double.NaN}, 0.0);
   }
 
   @Test
