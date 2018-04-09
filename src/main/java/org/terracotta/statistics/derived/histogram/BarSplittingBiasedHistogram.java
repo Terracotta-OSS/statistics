@@ -371,6 +371,74 @@ public class BarSplittingBiasedHistogram implements Histogram {
       return "[" + minimum + " --" + count() + "-> " + maximum + "]";
     }
 
+    /*
+     * This method is problematic.  What it's doing is attempting to split this bar in to two pieces, such that their
+     * counts are in the ratio ρ (the bar adjusted φ).
+     *  ______
+     * |      |
+     * |      |
+     * |      |
+     * |      |     ______     ______
+     * |      |    |      |   |      |
+     * | this | => |  s1  | + |  s2  |
+     * |______|    |______|   |______|
+     *
+     * So:
+     *   s2.count() = s1.count() * ρ
+     *   s1.count() + s2.count() = this.count()
+     *
+     *   s2.count() = (ρ / (1 + ρ)) * this.count()
+     *
+     * Define:
+     *   θ = (ρ / (1 + ρ))
+     *
+     * So we split off θ of the total count to form s2.  We then have to decide the bounds for s1 and s2...
+     * this is where things go wrong.
+     *
+     *     _______________
+     *    |         |     |
+     *    |         |   __|
+     *    |   ____  |  /  |
+     *    |  /    \_|_/   |
+     *    | /       |     |
+     *    |/      θ-qtle  |
+     *    |_________|_____|
+     *   min      split  max
+     *
+     * The 'correct' place to split the bar is at the θ-quantile of the distribution within the bar.  We don't know this
+     * however.  In fact we know nothing (Jon Snow) - instead we approximate the distribution as flat within the bar,
+     * so:
+     *     __________ __________
+     *    |          |          |
+     *    |    s1    |    s2    |
+     *    |__________|__________|
+     *   min  min+θ*(max-min)  max
+     *
+     * This inaccurate splitting corrupts our quantile measurements. What follows is a pseudo-mathematical justification
+     * for why this is okay.
+     *
+     * We define three regions of interest:
+     *
+     * θ-qtle = min + θ*(max-min); perfect split, uninteresting.
+     *
+     * θ-qtle > min + θ*(max-min); in this region:
+     *  * any quantile determined to fall within the bounds of s1 has it's upper boundary under-estimated. A major issue,
+     *    since this makes the upper bound look lower (read better) for a latency measure, while lying to our user.
+     *  * any quantile determined to fall within the bounds of s2 has it's lower boundary under-estimated. A non-issue,
+     *    this increases our uncertainty, but correctness is maintained.
+     *
+     * θ-qtle < min + θ*(max-min); in this region:
+     *  * any quantile determined to fall within the bounds of s1 has it's upper boundary over-estimated. A non-issue,
+     *    this increases our uncertainty, but correctness is maintained.
+     *  * any quantile determined to fall within the bounds of s2 has it's lower boundary over-estimated. A minor issue,
+     *    since for our purposes an excessive latency measure is to our detriment, but not that of our users.
+     *
+     * Finally, here comes the wooo... in the tail (where the high-percentiles exist) regions where
+     * θ-qtle > min + θ*(max-min) are rare since these are associated with regions of net +ve slope, and yet tails must
+     * have net -ve slope.
+     *
+     * I therefore declare everything safe, and sweep all this nonsense under the rug.
+     */
     Bar split(double ratio) {
       ExponentialHistogram split = eh.split(ratio);
       double upperMinimum = minimum + ((maximum - minimum) * ratio);
