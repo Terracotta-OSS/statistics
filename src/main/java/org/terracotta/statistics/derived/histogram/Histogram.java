@@ -64,6 +64,11 @@ public interface Histogram {
   double[] getQuantileBounds(double quantile) throws IllegalArgumentException;
 
   /**
+   * @return the number of elements in the histogram
+   */
+  long size();
+
+  /**
    * A histogram bucket.
    */
   interface Bucket {

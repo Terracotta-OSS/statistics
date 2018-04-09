@@ -344,8 +344,9 @@ public class BarSplittingBiasedHistogram implements Histogram {
     
     return mid;
   }
-  
-  private long size() {
+
+  @Override
+  public long size() {
     return size;
   }
 
@@ -513,7 +514,7 @@ public class BarSplittingBiasedHistogram implements Histogram {
 
     @Override
     public String toString() {
-      return "[" + minimum() + " --" + count() + " [height=(" + count() / (maximum() - minimum()) + ")-> " + maximum() + "]";
+      return "[min=" + minimum() + " (count=" + count() + ", height=" + (count() / (maximum() - minimum())) + ") max=" + maximum() + "]";
     }
 
   }
