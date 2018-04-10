@@ -103,7 +103,7 @@ public class BarSplittingBiasedHistogramPreciseTest {
     Arrays.sort(values);
 
     for (double q : quantiles) {
-      Double[] bounds = histogram.getQuantileBounds(q);
+      double[] bounds = histogram.getQuantileBounds(q);
 
       double ip = (values.length * q) - 1;
       double ceil = ceil(ip);
