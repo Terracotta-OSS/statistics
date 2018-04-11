@@ -48,7 +48,7 @@ public class BarSplittingBiasedHistogramPreciseTest {
   private static final double[] LOW_QUANTILES = stream(HIGH_QUANTILES).map(d -> 1 - d).toArray();
   private static final double[] ALL_QUANTILES = concat(stream(LOW_QUANTILES), stream(HIGH_QUANTILES)).distinct().toArray();
   private final long seed;
-  private final float bias;
+  private final double bias;
   private final int bars;
   private final double[] quantiles;
 
@@ -57,30 +57,30 @@ public class BarSplittingBiasedHistogramPreciseTest {
     Random rndm = new Random();
     // seed, bias, bars
     return asList(new Object[][] {
-        {rndm.nextLong(), 0.01f, 20, HIGH_QUANTILES},
-        {rndm.nextLong(), 0.01f, 100, HIGH_QUANTILES},
-        {rndm.nextLong(), 0.01f, 1000, HIGH_QUANTILES},
+        {rndm.nextLong(), 0.01, 20, HIGH_QUANTILES},
+        {rndm.nextLong(), 0.01, 100, HIGH_QUANTILES},
+        {rndm.nextLong(), 0.01, 1000, HIGH_QUANTILES},
 
-        {rndm.nextLong(), 0.1f, 20, HIGH_QUANTILES},
-        {rndm.nextLong(), 0.1f, 100, HIGH_QUANTILES},
-        {rndm.nextLong(), 0.1f, 1000, HIGH_QUANTILES},
+        {rndm.nextLong(), 0.1, 20, HIGH_QUANTILES},
+        {rndm.nextLong(), 0.1, 100, HIGH_QUANTILES},
+        {rndm.nextLong(), 0.1, 1000, HIGH_QUANTILES},
 
-        {rndm.nextLong(), 1f, 20, ALL_QUANTILES},
-        {rndm.nextLong(), 1f, 100, ALL_QUANTILES},
-        {rndm.nextLong(), 1f, 1000, ALL_QUANTILES},
+        {rndm.nextLong(), 1.0, 20, ALL_QUANTILES},
+        {rndm.nextLong(), 1.0, 100, ALL_QUANTILES},
+        {rndm.nextLong(), 1.0, 1000, ALL_QUANTILES},
 
-        {rndm.nextLong(), 10f, 20, LOW_QUANTILES},
-        {rndm.nextLong(), 10f, 100, LOW_QUANTILES},
-        {rndm.nextLong(), 10f, 1000, LOW_QUANTILES},
+        {rndm.nextLong(), 10.0, 20, LOW_QUANTILES},
+        {rndm.nextLong(), 10.0, 100, LOW_QUANTILES},
+        {rndm.nextLong(), 10.0, 1000, LOW_QUANTILES},
 
-        {rndm.nextLong(), 100f, 20, LOW_QUANTILES},
-        {rndm.nextLong(), 100f, 100, LOW_QUANTILES},
-        {rndm.nextLong(), 100f, 1000, LOW_QUANTILES},
+        {rndm.nextLong(), 100.0, 20, LOW_QUANTILES},
+        {rndm.nextLong(), 100.0, 100, LOW_QUANTILES},
+        {rndm.nextLong(), 100.0, 1000, LOW_QUANTILES},
     });
   }
 
-  public BarSplittingBiasedHistogramPreciseTest(long seed, float biasRange, int bars, double[] quantiles) {
-    this.bias = (float) Math.pow(biasRange, 1.0 / bars);
+  public BarSplittingBiasedHistogramPreciseTest(long seed, double biasRange, int bars, double[] quantiles) {
+    this.bias = Math.pow(biasRange, 1.0 / bars);
     this.bars = bars;
     this.seed = seed;
     this.quantiles = quantiles;

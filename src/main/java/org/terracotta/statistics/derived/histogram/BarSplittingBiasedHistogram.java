@@ -188,13 +188,13 @@ public class BarSplittingBiasedHistogram implements Histogram {
     Bar b = it.next();
     double minimum = b.minimum();
     double count = b.count();
-    for (int i = 0; i < bucketCount - 1; i++) {
+    for (int i = 0; i < bucketCount - 1 && it.hasNext(); i++) {
       while (count < targetSize && it.hasNext()) {
         count += (b = it.next()).count();
       }
       
       double surplus = count - targetSize;
-      double maximum = b.minimum() + (b.maximum() - b.minimum()) * (1 - surplus/b.count());
+      double maximum = nextUpIfEqual(minimum, b.maximum() - ((b.maximum() - b.minimum()) * surplus / b.count()));
       buckets.add(new ImmutableBucket(minimum, maximum, targetSize));
       minimum = maximum;
       count = surplus;
@@ -203,8 +203,12 @@ public class BarSplittingBiasedHistogram implements Histogram {
     while (it.hasNext()) {
       count += (b = it.next()).count();
     }
-    buckets.add(new ImmutableBucket(minimum, b.maximum(), count));
+    buckets.add(new ImmutableBucket(minimum, nextUpIfEqual(minimum, b.maximum()), count));
     return buckets;
+  }
+
+  static double nextUpIfEqual(double test, double value) {
+    return value == test ? nextUp(value) : value;
   }
 
   @Override
