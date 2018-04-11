@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
+import static java.lang.Math.nextDown;
 import static java.lang.Math.nextUp;
 import static java.util.Comparator.comparingDouble;
 import static java.util.stream.Stream.of;
@@ -188,13 +189,13 @@ public class BarSplittingBiasedHistogram implements Histogram {
     Bar b = it.next();
     double minimum = b.minimum();
     double count = b.count();
-    for (int i = 0; i < bucketCount - 1; i++) {
+    for (int i = 0; i < bucketCount - 1 && it.hasNext(); i++) {
       while (count < targetSize && it.hasNext()) {
         count += (b = it.next()).count();
       }
       
       double surplus = count - targetSize;
-      double maximum = b.minimum() + (b.maximum() - b.minimum()) * (1 - surplus/b.count());
+      double maximum = nextUpIfEqual(minimum, b.maximum() - ((b.maximum() - b.minimum()) * surplus / b.count()));
       buckets.add(new ImmutableBucket(minimum, maximum, targetSize));
       minimum = maximum;
       count = surplus;
@@ -203,8 +204,22 @@ public class BarSplittingBiasedHistogram implements Histogram {
     while (it.hasNext()) {
       count += (b = it.next()).count();
     }
-    buckets.add(new ImmutableBucket(minimum, b.maximum(), count));
+    buckets.add(new ImmutableBucket(minimum, nextUpIfEqual(minimum, b.maximum()), count));
     return buckets;
+  }
+
+  static double nextUpIfEqual(double test, double value) {
+    return value == test ? nextUp(value) : value;
+  }
+
+  @Override
+  public double getMinimum() {
+    return bars.get(0).minimum();
+  }
+
+  @Override
+  public double getMaximum() {
+    return nextDown(bars.get(bars.size() - 1).maximum());
   }
 
   @Override
@@ -278,6 +293,8 @@ public class BarSplittingBiasedHistogram implements Histogram {
         bars.add(xIndex + 1, split);
       } else if (xIndex > mergePoint) {
         bars.add(xIndex, split);
+      } else {
+        throw new AssertionError("split at merge point!");
       }
     }
   }
@@ -390,9 +407,9 @@ public class BarSplittingBiasedHistogram implements Histogram {
      *   s2.count() = (ρ / (1 + ρ)) * this.count()
      *
      * Define:
-     *   θ = (ρ / (1 + ρ))
+     *   θ = 1 - (ρ / (1 + ρ))
      *
-     * So we split off θ of the total count to form s2.  We then have to decide the bounds for s1 and s2...
+     * So we split off (1 - θ) of the total count to form s2.  We then have to decide the bounds for s1 and s2...
      * this is where things go wrong.
      *
      *     _______________
@@ -439,9 +456,10 @@ public class BarSplittingBiasedHistogram implements Histogram {
      *
      * I therefore declare everything safe, and sweep all this nonsense under the rug.
      */
-    Bar split(double ratio) {
-      ExponentialHistogram split = eh.split(ratio);
-      double upperMinimum = minimum + ((maximum - minimum) * ratio);
+    Bar split(double targetRatio) {
+      ExponentialHistogram split = eh.split(targetRatio);
+      double ratio = ((double) split.count()) / (eh.count() + split.count());
+      double upperMinimum = maximum - ((maximum - minimum) * ratio);
       double upperMaximum = maximum;
       this.maximum = upperMinimum;
       
