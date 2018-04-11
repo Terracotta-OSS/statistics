@@ -22,6 +22,8 @@ import static java.lang.Long.MIN_VALUE;
 import static java.lang.Long.highestOneBit;
 import static java.lang.Long.numberOfLeadingZeros;
 import static java.lang.Long.numberOfTrailingZeros;
+import static java.lang.Math.min;
+import static java.lang.Math.round;
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOf;
 import static java.util.Arrays.fill;
@@ -297,7 +299,7 @@ public class ExponentialHistogram {
 
     ExponentialHistogram that = new ExponentialHistogram(epsilon, window);
 
-    that.total = (long) (this.total * fraction);
+    that.total = round(((double) this.total) * fraction);
     this.total -= that.total;
 
     int[] thisCanonical = tailedLCanonical(mergeThreshold - 1, this.total);
