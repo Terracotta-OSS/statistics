@@ -35,6 +35,7 @@ import static java.util.Arrays.stream;
 import static java.util.stream.DoubleStream.concat;
 import static java.util.stream.DoubleStream.generate;
 import static org.hamcrest.collection.IsArrayContainingInOrder.arrayContaining;
+import static org.hamcrest.core.Is.is;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
 import static org.hamcrest.number.OrderingComparison.lessThanOrEqualTo;
 import static org.junit.Assert.assertThat;
@@ -94,7 +95,7 @@ public class BarSplittingBiasedHistogramPreciseTest {
 
     double slope = (rndm.nextDouble() * 999.99) + 0.01;
     double offset = (rndm.nextDouble() - 0.5) * 1000;
-    checkPercentiles(generate(rndm::nextDouble).map(x -> (x * slope) + offset).limit(100000), bsbh, quantiles);
+    checkHistogram(generate(rndm::nextDouble).map(x -> (x * slope) + offset).limit(100000), bsbh, quantiles);
   }
 
   @Test
@@ -106,19 +107,23 @@ public class BarSplittingBiasedHistogramPreciseTest {
     double width = (rndm.nextDouble() * 999.99) + 0.01;
     double centroid = (rndm.nextDouble() - 0.5) * 1000;
 
-    checkPercentiles(generate(rndm::nextGaussian).map(x -> (x * width) + centroid).limit(100000), bsbh, quantiles);
+    checkHistogram(generate(rndm::nextGaussian).map(x -> (x * width) + centroid).limit(100000), bsbh, quantiles);
   }
 
-  private void checkPercentiles(DoubleStream data, BarSplittingBiasedHistogram histogram, double ... quantiles) {
+  private void checkHistogram(DoubleStream data, BarSplittingBiasedHistogram histogram, double ... quantiles) {
     double[] values = data.toArray();
 
     for (int i = 0; i < values.length; ) {
       for (int j = 0; j < 1000 && i < values.length; i++) {
-        histogram.event(values[i], 0);
+        histogram.event(values[i], i);
       }
 
       sort(values, 0, i);
 
+      histogram.expire(i);
+
+      assertThat(histogram.getMinimum(), is(values[0]));
+      assertThat(histogram.getMaximum(), is(values[i - 1]));
       for (double q : quantiles) {
         double[] bounds = histogram.getQuantileBounds(q);
 
