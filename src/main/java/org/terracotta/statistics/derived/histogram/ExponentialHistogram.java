@@ -299,7 +299,7 @@ public class ExponentialHistogram {
 
     ExponentialHistogram that = new ExponentialHistogram(epsilon, window);
 
-    that.total = round(((double) this.total) * fraction);
+    that.total = round(this.total * fraction);
     this.total -= that.total;
 
     int[] thisCanonical = tailedLCanonical(mergeThreshold - 1, this.total);
