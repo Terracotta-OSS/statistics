@@ -19,6 +19,7 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.hamcrest.core.DescribedAs;
+import org.junit.AssumptionViolatedException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -29,7 +30,10 @@ import java.util.function.Function;
 import java.util.stream.DoubleStream;
 
 import static java.lang.Math.ceil;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 import static java.util.Arrays.asList;
+import static java.util.Arrays.copyOfRange;
 import static java.util.Arrays.sort;
 import static java.util.Arrays.stream;
 import static java.util.stream.DoubleStream.concat;
@@ -37,6 +41,7 @@ import static java.util.stream.DoubleStream.generate;
 import static org.hamcrest.collection.IsArrayContainingInOrder.arrayContaining;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
+import static org.hamcrest.number.OrderingComparison.greaterThanOrEqualTo;
 import static org.hamcrest.number.OrderingComparison.lessThanOrEqualTo;
 import static org.junit.Assert.assertThat;
 
@@ -171,6 +176,35 @@ public class BarSplittingBiasedHistogramPreciseTest {
 
       for (double datum : rndm.doubles(100000).map(d -> (d * width) + centroid).toArray()) {
         bsbh.event(datum, time++);
+      }
+    }
+  }
+
+  @Test
+  public void testSplitBiasEffectOnMaximum() {
+    Random rndm = new Random(seed);
+
+    BarSplittingBiasedHistogram bsbh = new BarSplittingBiasedHistogram(bias, bars, 1000);
+
+    double width = (rndm.nextDouble() * 999.99) + 0.01;
+    double centroid = (rndm.nextDouble() - 0.5) * 1000;
+
+    double[] values = generate(rndm::nextGaussian).map(x -> (x * width) + centroid).limit(10000).toArray();
+    double[] window = new double[0];
+    for (int i = 0; i < values.length; i++) {
+      bsbh.event(values[i], i);
+      bsbh.expire(i);
+
+      window = copyOfRange(window, max(0, window.length - 999), min(1000, window.length + 1));
+      window[window.length - 1] = values[i];
+      sort(window);
+
+      if (bias < 1.0) {
+        assertThat(bsbh.getMaximum(), greaterThanOrEqualTo(window[window.length - 1]));
+      } else if (bias > 1.0) {
+        assertThat(bsbh.getMinimum(), lessThanOrEqualTo(window[0]));
+      } else {
+        throw new AssumptionViolatedException("Random bias for equi-depth - skipping");
       }
     }
   }
