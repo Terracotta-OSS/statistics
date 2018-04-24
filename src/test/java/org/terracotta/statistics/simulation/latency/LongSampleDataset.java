@@ -17,7 +17,7 @@ package org.terracotta.statistics.simulation.latency;
 
 import org.jfree.data.DomainOrder;
 import org.jfree.data.xy.AbstractXYDataset;
-import org.terracotta.statistics.simulation.latency.LongSample;
+import org.terracotta.statistics.Sample;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,17 +32,17 @@ public class LongSampleDataset extends AbstractXYDataset {
 
   private static final long serialVersionUID = 1L;
 
-  private final Map<String, List<LongSample>> series;
+  private final Map<String, List<Sample<Long>>> series;
   private final List<String> keys;
   private final DomainOrder domainOrder;
   private final DoubleUnaryOperator xAxisTransform;
   private final DoubleUnaryOperator yAxisTransform;
 
-  public LongSampleDataset(List<LongSample> oneSerie, DomainOrder domainOrder, DoubleUnaryOperator xAxisTransform, DoubleUnaryOperator yAxisTransform) {
+  public LongSampleDataset(List<Sample<Long>> oneSerie, DomainOrder domainOrder, DoubleUnaryOperator xAxisTransform, DoubleUnaryOperator yAxisTransform) {
     this(Collections.singletonMap("", oneSerie), domainOrder, xAxisTransform, yAxisTransform);
   }
 
-  public LongSampleDataset(Map<String, List<LongSample>> series, DomainOrder domainOrder, DoubleUnaryOperator xAxisTransform, DoubleUnaryOperator yAxisTransform) {
+  public LongSampleDataset(Map<String, List<Sample<Long>>> series, DomainOrder domainOrder, DoubleUnaryOperator xAxisTransform, DoubleUnaryOperator yAxisTransform) {
     this.keys = new ArrayList<>(series.keySet());
     this.series = series;
     this.domainOrder = domainOrder;
@@ -79,7 +79,7 @@ public class LongSampleDataset extends AbstractXYDataset {
   @Override
   public double getXValue(int series, int item) {
     String key = keys.get(series);
-    return xAxisTransform.applyAsDouble(this.series.get(key).get(item).time());
+    return xAxisTransform.applyAsDouble(this.series.get(key).get(item).getTimestamp());
   }
 
   @Override
@@ -90,7 +90,7 @@ public class LongSampleDataset extends AbstractXYDataset {
   @Override
   public double getYValue(int series, int item) {
     String key = keys.get(series);
-    return yAxisTransform.applyAsDouble(this.series.get(key).get(item).value());
+    return yAxisTransform.applyAsDouble(this.series.get(key).get(item).getSample());
   }
 
   @Override

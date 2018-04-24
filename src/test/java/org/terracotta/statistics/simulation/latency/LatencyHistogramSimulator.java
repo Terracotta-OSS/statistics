@@ -27,8 +27,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
-import org.terracotta.statistics.derived.latency.DefaultLatencyHistogramStatistic;
+import org.terracotta.statistics.Sample;
 import org.terracotta.statistics.Time;
+import org.terracotta.statistics.derived.latency.DefaultLatencyHistogramStatistic;
 import org.terracotta.statistics.simulation.latency.ConcurrentParameterized.ConcurrencyLevel;
 
 import java.awt.*;
@@ -57,7 +58,7 @@ import static java.util.function.DoubleUnaryOperator.identity;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.LongStream.iterate;
 import static org.junit.runners.Parameterized.Parameters;
-import static org.terracotta.statistics.simulation.latency.LongSample.sample;
+import static org.terracotta.statistics.Sample.sample;
 import static org.terracotta.statistics.simulation.latency.GraphUtils.writeCSV;
 import static org.terracotta.statistics.simulation.latency.GraphUtils.writeGraph;
 import static org.terracotta.statistics.simulation.latency.LatencyUtils.generateLatencies;
@@ -88,12 +89,12 @@ public class LatencyHistogramSimulator {
   private static final Dimension HD = new Dimension(1280, 720);
 
   private static final File OUTPUT = new File("target/latencies");
-  private static final ConcurrentMap<File, Map<String, List<LongSample>>> HISTOGRAM_CHART_CREATED = new ConcurrentHashMap<>();
+  private static final ConcurrentMap<File, Map<String, List<Sample<Long>>>> HISTOGRAM_CHART_CREATED = new ConcurrentHashMap<>();
   private static final Duration COLLECTOR_INTERVAL = ofSeconds(10);
   private static final Duration MEAN_LATENCY = ofMillis(100);
 
   // Sorted list of samples, by time
-  private static List<LongSample> OPERATIONS;
+  private static List<Sample<Long>> OPERATIONS;
 
   @Parameters(name = "{index}: win={0}_buck={1}_phi={2}_frame={3}_pts={4}")
   public static Iterable<Object[]> data() {
@@ -185,13 +186,13 @@ public class LatencyHistogramSimulator {
   @Test
   public void simulation() {
     // avoid re-creation of the whole histogram and collected sampled
-    Map<String, List<LongSample>> samples = HISTOGRAM_CHART_CREATED.computeIfAbsent(getHistogramFile(), histogramFile -> {
+    Map<String, List<Sample<Long>>> samples = HISTOGRAM_CHART_CREATED.computeIfAbsent(getHistogramFile(), histogramFile -> {
 
       // histogram statistics that will be in Ehcache and will collect all operation's latencies
       DefaultLatencyHistogramStatistic histogram = new DefaultLatencyHistogramStatistic(phi, bucketCount, window, () -> nanoTime);
 
       // simulate some operations and trigger statistic collection about each 10 sec
-      Map<String, List<LongSample>> collectedSamples = replayOperations(histogram);
+      Map<String, List<Sample<Long>>> collectedSamples = replayOperations(histogram);
 
       //System.out.println("histogram: " + histogram);
       //System.out.println("buckets: " + histogram.buckets()); // prints internal stuff for debugging purposes
@@ -221,20 +222,20 @@ public class LatencyHistogramSimulator {
     return new File(OUTPUT, format("win=%s_buck=%s_phi=%s_frame=%s_pts=%s.png", window.toMinutes(), bucketCount, phi, graphTimeFrame.toMinutes(), graphPoints));
   }
 
-  private Map<String, List<LongSample>> replayOperations(DefaultLatencyHistogramStatistic histogram) {
-    final Map<String, List<LongSample>> collectedSamples = new TreeMap<>(); // hold collected samples from histogram each ~10 sec
+  private Map<String, List<Sample<Long>>> replayOperations(DefaultLatencyHistogramStatistic histogram) {
+    final Map<String, List<Sample<Long>>> collectedSamples = new TreeMap<>(); // hold collected samples from histogram each ~10 sec
     final long startNs = nanoTime = Time.time();
     final long duration = COLLECTOR_INTERVAL.toNanos();
     long nextCollect = startNs + duration;
-    for (LongSample sample : OPERATIONS) {
-      nanoTime = startNs + sample.time();
-      histogram.event(nanoTime, sample.value());
+    for (Sample<Long> sample : OPERATIONS) {
+      nanoTime = startNs + sample.getTimestamp();
+      histogram.event(nanoTime, sample.getSample());
       if (nanoTime >= nextCollect) {
         // collected statistics in voltron each 10 seconds that are sent to a management system
         // collected samples are timestamped by using the "arrival" date on the management system, in milliseconds
         nextCollect = nanoTime + duration;
         getPercentiles(histogram, identity()).forEach((name, pct) -> {
-          LongSample collectedSample = sample(sample.time(), round(pct.value()));
+          Sample<Long> collectedSample = sample(sample.getTimestamp(), round(pct.value()));
           collectedSamples.computeIfAbsent(name, s -> new ArrayList<>()).add(collectedSample);
         });
       }
@@ -242,8 +243,8 @@ public class LatencyHistogramSimulator {
     return collectedSamples;
   }
 
-  private void generateGraph(Map<String, List<LongSample>> collectedSamples) {
-    long now = collectedSamples.get("max").get(collectedSamples.get("max").size() - 1).time(); // inclusive
+  private void generateGraph(Map<String, List<Sample<Long>>> collectedSamples) {
+    long now = collectedSamples.get("max").get(collectedSamples.get("max").size() - 1).getTimestamp(); // inclusive
     final long windowPerPoint = graphTimeFrame.toNanos() / graphPoints;
     collectedSamples = collectedSamples.entrySet().stream().collect(toMap(Map.Entry::getKey, e -> reduce(e.getValue(), now, windowPerPoint)));
     collectedSamples.put("All Latencies", latestSamples(OPERATIONS, now));
@@ -256,28 +257,28 @@ public class LatencyHistogramSimulator {
     GraphUtils.writeChart(graphFile, chart, HD);
   }
 
-  private List<LongSample> reduce(List<LongSample> samples, long now, long windowPerPoint) {
-    List<LongSample> points = iterate(now, prev -> prev - windowPerPoint)
+  private List<Sample<Long>> reduce(List<Sample<Long>> samples, long now, long windowPerPoint) {
+    List<Sample<Long>> points = iterate(now, prev -> prev - windowPerPoint)
         .mapToObj(end -> new long[]{end - windowPerPoint, end}) // bounds: ]end-window;end]
         .map(bounds -> sample(bounds[1], samples.stream()
-            .filter(sample -> sample.time() > bounds[0] && sample.time() <= bounds[1])
-            .mapToLong(LongSample::value)
+            .filter(sample -> sample.getTimestamp() > bounds[0] && sample.getTimestamp() <= bounds[1])
+            .mapToLong(Sample::getSample)
             .max()
             .orElse(0)))
         .limit(graphPoints)
         .collect(Collectors.toList());
     for (int i = 1; i < points.size(); i++) {
-      LongSample sample = points.get(i);
-      if (sample.value() == 0) {
-        points.set(i, sample(sample.time(), points.get(i - 1).value()));
+      Sample<Long> sample = points.get(i);
+      if (sample.getSample() == 0) {
+        points.set(i, sample(sample.getTimestamp(), points.get(i - 1).getSample()));
       }
     }
     return points;
   }
 
-  private List<LongSample> latestSamples(List<LongSample> serie, long now) {
+  private List<Sample<Long>> latestSamples(List<Sample<Long>> serie, long now) {
     long from = now - graphTimeFrame.toNanos(); // exclusive
-    return serie.stream().filter(s -> s.time() > from && s.time() <= now).collect(Collectors.toList());
+    return serie.stream().filter(s -> s.getTimestamp() > from && s.getTimestamp() <= now).collect(Collectors.toList());
   }
 
 }

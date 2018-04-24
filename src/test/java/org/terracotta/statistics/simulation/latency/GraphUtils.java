@@ -26,6 +26,7 @@ import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.chart.ui.RectangleInsets;
 import org.jfree.chart.ui.TextAnchor;
 import org.jfree.data.DomainOrder;
+import org.terracotta.statistics.Sample;
 import org.terracotta.statistics.derived.histogram.Histogram;
 
 import java.awt.*;
@@ -54,11 +55,11 @@ public class GraphUtils {
     FORMATER.setMaximumFractionDigits(0);
   }
 
-  public static void writeCSV(File output, List<LongSample> samples) {
+  public static void writeCSV(File output, List<Sample<Long>> samples) {
     try (Writer out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output, false), StandardCharsets.UTF_8), 64 * 1024)) {
       out.write("time delta (ns),latency (ns)\n");
-      for (LongSample operation : samples) {
-        out.write(operation.time() + "," + operation.value() + "\n");
+      for (Sample<Long> operation : samples) {
+        out.write(operation.getTimestamp() + "," + operation.getSample() + "\n");
       }
     } catch (IOException e) {
       throw new UncheckedIOException(e);
@@ -76,7 +77,7 @@ public class GraphUtils {
   }
 
   public static void writeGraph(File output,
-                                List<LongSample> samples, Map<String, BoundedValue> percentiles, DomainOrder domainOrder,
+                                List<Sample<Long>> samples, Map<String, BoundedValue> percentiles, DomainOrder domainOrder,
                                 String xAxisLabel, String yAxisLabel, Dimension dimension,
                                 DoubleUnaryOperator xAxisTransform, DoubleUnaryOperator yAxisTransform) {
     String title = String.format("count: %s, min: %s, max: %s%n%s",

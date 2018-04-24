@@ -16,6 +16,7 @@
 package org.terracotta.statistics.simulation.latency;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.terracotta.statistics.Sample;
 import org.terracotta.statistics.derived.latency.LatencyHistogramStatistic;
 
 import java.time.Duration;
@@ -28,7 +29,7 @@ import java.util.function.LongSupplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.terracotta.statistics.simulation.latency.LongSample.sample;
+import static org.terracotta.statistics.Sample.sample;
 import static org.terracotta.statistics.simulation.latency.StreamUtils.nextGaussian;
 import static org.terracotta.statistics.simulation.latency.StreamUtils.takeWhile;
 import static org.terracotta.statistics.simulation.latency.StreamUtils.toLong;
@@ -49,9 +50,9 @@ public class LatencyUtils {
     return stats;
   }
 
-  public static Map<String, BoundedValue> getPercentiles(List<LongSample> samples, DoubleUnaryOperator transform) {
+  public static Map<String, BoundedValue> getPercentiles(List<Sample<Long>> samples, DoubleUnaryOperator transform) {
     Map<String, BoundedValue> stats = new LinkedHashMap<>();
-    DescriptiveStatistics statistic = new DescriptiveStatistics(samples.stream().mapToDouble(LongSample::value).toArray());
+    DescriptiveStatistics statistic = new DescriptiveStatistics(samples.stream().mapToDouble(Sample::getSample).toArray());
     stats.put("min", BoundedValue.min(statistic, transform));
     stats.put("p10", BoundedValue.pct(statistic, transform, .1));
     stats.put("p50", BoundedValue.median(statistic, transform));
@@ -61,12 +62,12 @@ public class LatencyUtils {
     return stats;
   }
 
-  public static List<LongSample> generateLatencies(Random random, double opsPerSec, Duration duration, long meanLatency) {
+  public static List<Sample<Long>> generateLatencies(Random random, double opsPerSec, Duration duration, long meanLatency) {
     final long end = duration.toNanos();
-    return takeWhile(latencyStream(random, opsPerSec, meanLatency), sample -> sample.time() < end).collect(Collectors.toList());
+    return takeWhile(latencyStream(random, opsPerSec, meanLatency), sample -> sample.getTimestamp() < end).collect(Collectors.toList());
   }
 
-  public static Stream<LongSample> latencyStream(Random random, double opsPerSec, long latencyMean) {
+  public static Stream<Sample<Long>> latencyStream(Random random, double opsPerSec, long latencyMean) {
     // REF: // https://www.javamex.com/tutorials/random_numbers/gaussian_distribution_2.shtml
     // 70% of latencies will fall between latencyMean +/- 20%
     double latencyStdDev = latencyMean / 5.0;
@@ -76,7 +77,7 @@ public class LatencyUtils {
     double delayStdDev = delayMean / 5.0;
     LongSupplier delays = toLong(nextGaussian(random, delayMean, delayStdDev), Math::round);
     // build a stream of samples
-    return Stream.iterate(sample(0, latencies.getAsLong()), prev -> sample(prev.time() + delays.getAsLong(), latencies.getAsLong()));
+    return Stream.iterate(sample(0, latencies.getAsLong()), prev -> sample(prev.getTimestamp() + delays.getAsLong(), latencies.getAsLong()));
   }
 
   public static DoubleUnaryOperator nsToMicros() {
