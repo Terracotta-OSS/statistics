@@ -62,4 +62,8 @@ public class Sample<T extends Serializable> implements Serializable {
     return getSample() + " @ " + getTimestamp();
   }
 
+  public static <T extends Serializable> Sample<T> sample(long timestamp, T value) {
+    return new Sample<>(timestamp, value);
+  }
+
 }
