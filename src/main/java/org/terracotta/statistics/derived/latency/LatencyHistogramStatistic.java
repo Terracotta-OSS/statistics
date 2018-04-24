@@ -17,30 +17,22 @@ package org.terracotta.statistics.derived.latency;
 
 import org.terracotta.statistics.ValueStatistic;
 
+import java.util.function.Function;
+
 import static org.terracotta.statistics.ValueStatistics.gauge;
 
 /**
  * @author Mathieu Carbou
  */
-public interface LatencyStatistic {
+public interface LatencyHistogramStatistic extends LatencyHistogramQuery {
 
   /**
-   * @return The minimum in ns or null if it does not exist yet
+   * Enables to query the histogram several times within a synchronized state so that every calls are consistent
    */
-  Long minimum();
+  <T> T query(Function<LatencyHistogramQuery, T> fn);
 
-  /**
-   * @return The maximum in ns or null if it does not exist yet
-   */
-  Long maximum();
-
-  /**
-   * @return The average in ns or NaN if no value
-   */
-  double average();
-
-  default ValueStatistic<Double> averageStatistic() {
-    return gauge(this::average);
+  default ValueStatistic<Long> percentileStatistic(double percent) {
+    return gauge(() -> percentile(percent));
   }
 
   default ValueStatistic<Long> minimumStatistic() {
@@ -49,6 +41,10 @@ public interface LatencyStatistic {
 
   default ValueStatistic<Long> maximumStatistic() {
     return gauge(this::maximum);
+  }
+
+  default ValueStatistic<Long> medianStatistic() {
+    return gauge(this::median);
   }
 
 }
