@@ -37,6 +37,7 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -246,7 +247,11 @@ public class LatencyHistogramSimulator {
   private void generateGraph(Map<String, List<Sample<Long>>> collectedSamples) {
     long now = collectedSamples.get("max").get(collectedSamples.get("max").size() - 1).getTimestamp(); // inclusive
     final long windowPerPoint = graphTimeFrame.toNanos() / graphPoints;
-    collectedSamples = collectedSamples.entrySet().stream().collect(toMap(Map.Entry::getKey, e -> reduce(e.getValue(), now, windowPerPoint)));
+    collectedSamples = collectedSamples.entrySet().stream().collect(toMap(
+        Map.Entry::getKey,
+        e -> reduce(e.getValue(), now, windowPerPoint),
+        (u, v) -> {throw new IllegalStateException(String.format("Duplicate key %s", u));},
+        LinkedHashMap::new));
     collectedSamples.put("All Latencies", latestSamples(OPERATIONS, now));
     LongSampleDataset dataset = new LongSampleDataset(collectedSamples, DomainOrder.ASCENDING, nsToSecs(), nsToMicros());
     JFreeChart chart = ChartFactory.createXYLineChart("", "time (s)", "latency (μs)", dataset, PlotOrientation.VERTICAL, true, false, false);
