@@ -89,8 +89,8 @@ public class ExponentialHistogram {
     int[] canonical = tailedLCanonical(mergeThreshold - 1, aTotal + bTotal);
 
     initializeArrays(canonical.length - 1);
-    this.last = 1L << (canonical.length - 1);
     this.total = aTotal + bTotal;
+    this.last = this.total == 0 ? 0 : 1L << (canonical.length - 1);
 
     long[] overflow = EMPTY_LONG_ARRAY;
     for (int logSize = 0; logSize < canonical.length; logSize++) {
@@ -227,7 +227,13 @@ public class ExponentialHistogram {
       } else if ((time - previous) < window) {
         //no space available - time to merge
         time = boxes[insertIndex];
-        boxes[insertIndex] = MIN_VALUE;
+        if (time == MIN_VALUE) {
+          //previous expired - assume expiry of it's partner
+          total -= 1L << logSize;
+          return;
+        } else {
+          boxes[insertIndex] = MIN_VALUE;
+        }
       } else {
         //previous aged out - decrement size
         total -= 1L << logSize;
@@ -304,8 +310,8 @@ public class ExponentialHistogram {
 
     int[] thisCanonical = tailedLCanonical(mergeThreshold - 1, this.total);
     int[] thatCanonical = tailedLCanonical(mergeThreshold - 1, that.total);
-    this.last = 1L << (thisCanonical.length - 1);
-    that.last = 1L << (thatCanonical.length - 1);
+    this.last = this.total == 0 ? 0 : 1L << (thisCanonical.length - 1);
+    that.last = that.total == 0 ? 0 : 1L << (thatCanonical.length - 1);
 
     this.initializeArrays(thisCanonical.length - 1);
     that.initializeArrays(thatCanonical.length - 1);

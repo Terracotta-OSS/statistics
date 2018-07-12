@@ -17,14 +17,21 @@ package org.terracotta.statistics.derived.histogram;
 
 import org.junit.Test;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.List;
+import java.util.Queue;
 import java.util.Random;
+import java.util.Stack;
 import java.util.function.UnaryOperator;
+import java.util.stream.DoubleStream;
 import java.util.stream.Stream;
 
+import static java.lang.Math.nextDown;
+import static java.lang.Math.nextUp;
 import static java.util.Collections.emptyList;
 import static java.util.function.UnaryOperator.identity;
 import static java.util.stream.IntStream.rangeClosed;
@@ -175,6 +182,41 @@ public class ExponentialHistogramTest {
   private static void inject(ExponentialHistogram eh, int count, int before) {
     for (int i = 0; i < count; i++) {
       eh.insert(before);
+    }
+  }
+
+  @Test
+  public void testRandomTimeSource() {
+    long seed = System.nanoTime();
+    Random rndm = new Random(seed);
+    for (long i = 0; i < 1000; i++) {
+      try {
+        ExponentialHistogram initial = new ExponentialHistogram(0.1, i / 4);
+        for (long j = 0; j < i; j++) {
+          int time = rndm.nextInt((int) i);
+          initial.insert(time);
+          initial.expire(time);
+        }
+        long initialCount = initial.count();
+
+        Deque<ExponentialHistogram> histograms = new ArrayDeque<>();
+        histograms.push(initial);
+
+        ExponentialHistogram merge = new ExponentialHistogram(0.1, Long.MAX_VALUE);
+        while (!histograms.isEmpty()) {
+          ExponentialHistogram histogram = histograms.pop();
+          ExponentialHistogram split = histogram.split(0.4);
+          if (split.count() > 0 && histogram.count() > 0) {
+            histograms.push(split);
+            histograms.push(histogram);
+          } else {
+            merge.merge(split);
+            merge.merge(histogram);
+          }
+        }
+      } catch (Throwable t) {
+        throw new AssertionError("Failure @ " + i + " seed=" + seed, t);
+      }
     }
   }
 }
