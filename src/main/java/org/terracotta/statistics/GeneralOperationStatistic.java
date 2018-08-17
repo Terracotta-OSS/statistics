@@ -15,10 +15,12 @@
  */
 package org.terracotta.statistics;
 
-import java.util.EnumMap;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.LongAdder;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * An operation observer that tracks operation result counts and can drive further derived statistics.
@@ -29,7 +31,7 @@ import java.util.concurrent.atomic.LongAdder;
  */
 class GeneralOperationStatistic<T extends Enum<T>> extends AbstractOperationStatistic<T> implements OperationStatistic<T> {
 
-  private final EnumMap<T, LongAdder> counts;
+  private final LongAdder[] counts;
 
   /**
    * Create an operation statistics for a given operation result type.
@@ -39,9 +41,9 @@ class GeneralOperationStatistic<T extends Enum<T>> extends AbstractOperationStat
    */
   GeneralOperationStatistic(String name, Set<String> tags, Map<String, ? extends Object> properties, Class<T> type) {
     super(name, tags, properties, type);
-    this.counts = new EnumMap<>(type);
-    for (T t : type.getEnumConstants()) {
-      counts.put(t, new LongAdder());
+    this.counts = new LongAdder[type.getEnumConstants().length];
+    for (int i = 0; i < counts.length; i++) {
+      counts[i] = new LongAdder();
     }
   }
 
@@ -53,26 +55,30 @@ class GeneralOperationStatistic<T extends Enum<T>> extends AbstractOperationStat
    */
   @Override
   public long count(T type) {
-    return counts.get(type).sum();
+    return counts[type.ordinal()].sum();
   }
 
   @Override
   public long sum(Set<T> types) {
     long sum = 0;
     for (T t : types) {
-      sum += counts.get(t).sum();
+      sum += counts[t.ordinal()].sum();
     }
     return sum;
   }
 
   @Override
   public void end(T result) {
-    counts.get(result).increment();
+    counts[result.ordinal()].increment();
     super.end(result);
   }
 
   @Override
   public String toString() {
-    return counts.toString();
+    T[] constants = type.getEnumConstants();
+
+    return IntStream.range(0, constants.length)
+        .mapToObj(i -> constants[i] + "=" + counts[i])
+        .collect(Collectors.joining(", ", "[", "]"));
   }
 }
