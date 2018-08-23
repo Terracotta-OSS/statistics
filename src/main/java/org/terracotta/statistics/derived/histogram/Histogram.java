@@ -68,6 +68,10 @@ public interface Histogram {
    */
   long size();
 
+  void event(double value, long time);
+
+  void expire(long time);
+
   /**
    * A histogram bucket.
    */

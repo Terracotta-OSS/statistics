@@ -23,11 +23,14 @@ import org.junit.AssumptionViolatedException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.terracotta.statistics.derived.histogram.StripedHistogram;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
 
 import static java.lang.Math.ceil;
 import static java.lang.Math.max;
@@ -47,19 +50,21 @@ import static org.hamcrest.number.OrderingComparison.greaterThanOrEqualTo;
 import static org.hamcrest.number.OrderingComparison.lessThanOrEqualTo;
 import static org.junit.Assert.assertThat;
 
-public class BarSplittingBiasedHistogramPreciseTest extends HistogramPreciseTest {
+public class StripedHistogramPreciseTest extends HistogramPreciseTest {
 
-  public BarSplittingBiasedHistogramPreciseTest(long seed, double biasRange, int bars, double[] quantiles) {
+  private static final int CPUS = Runtime.getRuntime().availableProcessors();
+
+  public StripedHistogramPreciseTest(long seed, double biasRange, int bars, double[] quantiles) {
     super(seed, biasRange, bars, quantiles);
   }
 
   @Override
   protected Histogram histogram(double bias, int bars, long window) {
-    return new BarSplittingBiasedHistogram(bias, bars, window);
+    return new StripedHistogram(bias, bars / CPUS, window);
   }
 
   @Override
   protected void feedHistogram(Histogram histogram, double[] values) {
-    range(0, values.length).forEach(i -> histogram.event(values[i], i));
+    range(0, values.length).parallel().forEach(i -> histogram.event(values[i], i));
   }
 }

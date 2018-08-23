@@ -34,7 +34,7 @@ public class OperationResultSamplerTest {
 
   @Test
   public void testRateOfZeroNeverSamples() {
-    OperationResultSampler<FooBar> sampler = new OperationResultSampler<>(of(FooBar.FOO), 0.0f);
+    OperationResultSampler<FooBar> sampler = new OperationResultSampler<>(of(FooBar.FOO), 0.0);
     sampler.addDerivedStatistic((time, slatency) -> fail());
 
     for (int i = 0; i < 100; i++) {
@@ -45,7 +45,7 @@ public class OperationResultSamplerTest {
 
   @Test
   public void testRateOfOneAlwaysSamples() {
-    OperationResultSampler<FooBar> sampler = new OperationResultSampler<>(of(FooBar.FOO), 1.0f);
+    OperationResultSampler<FooBar> sampler = new OperationResultSampler<>(of(FooBar.FOO), 1.0);
     final AtomicInteger eventCount = new AtomicInteger();
     sampler.addDerivedStatistic((time, latency) -> eventCount.incrementAndGet());
 
@@ -59,7 +59,7 @@ public class OperationResultSamplerTest {
 
   @Test
   public void testMismatchedResultNeverSamples() {
-    OperationResultSampler<FooBar> sampler = new OperationResultSampler<>(of(FooBar.FOO), 1.0f);
+    OperationResultSampler<FooBar> sampler = new OperationResultSampler<>(of(FooBar.FOO), 1.0);
     sampler.addDerivedStatistic((time, latency) -> fail());
 
     for (int i = 0; i < 100; i++) {
@@ -71,7 +71,7 @@ public class OperationResultSamplerTest {
   @Test
   public void testLatencyMeasuredAccurately() throws InterruptedException {
     Random random = new Random();
-    OperationResultSampler<FooBar> sampler = new OperationResultSampler<>(of(FooBar.FOO), 1.0f);
+    OperationResultSampler<FooBar> sampler = new OperationResultSampler<>(of(FooBar.FOO), 1.0);
     final AtomicLong expected = new AtomicLong();
     sampler.addDerivedStatistic((time, latency) -> assertThat(latency, greaterThanOrEqualTo(expected.get())));
 
