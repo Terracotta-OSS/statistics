@@ -18,6 +18,7 @@ package org.terracotta.statistics;
 import org.terracotta.statistics.observer.ChainedObserver;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -40,5 +41,9 @@ public class AbstractSourceStatistic<T extends ChainedObserver> implements Sourc
   @Override
   public void removeDerivedStatistic(T derived) {
     derivedStatistics.remove(derived);
+  }
+
+  public Collection<T> getDerivedStatistics() {
+    return Collections.unmodifiableCollection(derivedStatistics);
   }
 }

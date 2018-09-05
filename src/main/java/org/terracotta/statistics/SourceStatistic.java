@@ -17,6 +17,8 @@ package org.terracotta.statistics;
 
 import org.terracotta.statistics.observer.ChainedObserver;
 
+import java.util.Collection;
+
 /**
  * Source statistic implementations support derived statistics.
  * <p>
@@ -40,4 +42,11 @@ public interface SourceStatistic<T extends ChainedObserver> {
    * @param derived statistic to be removed
    */
   void removeDerivedStatistic(T derived);
+
+  /**
+   * Retrieve all registered statistics.
+   *
+   * @return an unmodifiable collection of all derived statistics
+   */
+  Collection<T> getDerivedStatistics();
 }

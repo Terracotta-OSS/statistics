@@ -17,6 +17,7 @@ package org.terracotta.statistics;
 
 import org.terracotta.statistics.observer.ChainedOperationObserver;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
@@ -137,6 +138,11 @@ public class StatisticMapper<SOURCE extends Enum<SOURCE>, TARGET extends Enum<TA
     if (translator != null) {
       statistic.removeDerivedStatistic(translator);
     }
+  }
+
+  @Override
+  public Collection<ChainedOperationObserver<? super TARGET>> getDerivedStatistics() {
+    return Collections.unmodifiableCollection(derivedStats.keySet());
   }
 
   @Override

@@ -19,6 +19,7 @@ import org.terracotta.statistics.AbstractSourceStatistic;
 import org.terracotta.statistics.observer.ChainedEventObserver;
 import org.terracotta.statistics.observer.ChainedOperationObserver;
 
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
 
@@ -50,4 +51,7 @@ public class OperationResultFilter<T extends Enum<T>> extends AbstractSourceStat
     }
   }
 
+  public Set<T> getTargets() {
+    return Collections.unmodifiableSet(targets);
+  }
 }

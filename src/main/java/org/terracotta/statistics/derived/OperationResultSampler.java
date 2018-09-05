@@ -47,4 +47,8 @@ public class OperationResultSampler<T extends Enum<T>> extends OperationResultFi
   private boolean sample() {
     return ceiling == Integer.MAX_VALUE || ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE) < ceiling;
   }
+
+  public int getCeiling() {
+    return ceiling;
+  }
 }
