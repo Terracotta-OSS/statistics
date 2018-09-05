@@ -1,4 +1,20 @@
 /*
+ * All content copyright Terracotta, Inc., unless otherwise indicated.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
  * Derived from code written by Doug Lea with assistance from members
  * of JCP JSR-166 Expert Group and released to the public domain,
  * as explained at http://creativecommons.org/publicdomain/zero/1.0/
@@ -27,6 +43,7 @@ public class Striped<T> {
 
   static final class Cell<T> {
 
+    @SuppressWarnings("rawtypes")
     static final AtomicIntegerFieldUpdater<Cell> GUARD_UPDATER = AtomicIntegerFieldUpdater.newUpdater(Cell.class, "guard");
 
     final T entity;
@@ -147,7 +164,7 @@ public class Striped<T> {
           try {
             if (cells == cs) {      // Expand table unless stale
               @SuppressWarnings("unchecked")
-              Cell<T>[] rs = new Cell[cs.length << 1];
+              Cell<T>[] rs = (Cell<T>[]) new Cell<?>[cs.length << 1];
               for (int i = 0; i < cs.length; ++i)
                 rs[i] = cs[i];
               cells = rs;
@@ -163,7 +180,7 @@ public class Striped<T> {
         try {                           // Initialize table
           if (cells == null) {
             @SuppressWarnings("unchecked")
-            Cell<T>[] newCells = new Cell[2];
+            Cell<T>[] newCells = (Cell<T>[]) new Cell<?>[2];
             cell = new Cell<>(constructor.get());
             cell.process(process);
             newCells[hash & 1] = cell;
@@ -225,7 +242,7 @@ public class Striped<T> {
       requireNonNull(action);
 
       for (int i = index; i < limit; i++) {
-        Cell<T> cell = (Cell<T>) array[i];
+        Cell<T> cell = array[i];
         if (cell != null) {
           visitCell(cell, action);
         }

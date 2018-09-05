@@ -53,7 +53,7 @@ public class LatencySimpleMovingAverageTest {
   }
 
   @Test
-  public void testExpiredEventAverage() throws InterruptedException {
+  public void testExpiredEventAverage() {
     LatencySimpleMovingAverage average = new LatencySimpleMovingAverage(100, TimeUnit.MILLISECONDS);
     average.event(Time.time(), 1L);
     SOURCE.advanceTime(300, TimeUnit.MILLISECONDS);
@@ -73,7 +73,7 @@ public class LatencySimpleMovingAverageTest {
   }
 
   @Test
-  public void testAverageMoves() throws InterruptedException {
+  public void testAverageMoves() {
     LatencySimpleMovingAverage average = new LatencySimpleMovingAverage(100, TimeUnit.MILLISECONDS);
     average.event(Time.time(), 1L);
     SOURCE.advanceTime(50, TimeUnit.MILLISECONDS);

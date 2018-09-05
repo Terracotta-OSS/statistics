@@ -31,6 +31,9 @@ class Cache {
 
   OperationObserver<StoreOperationOutcomes.GetOutcome> getObserver;
   Map<String, String> data = new ConcurrentHashMap<String, String>() {
+
+    private static final long serialVersionUID = 1L;
+
     @Override
     public String get(Object key) {
       // costly operation

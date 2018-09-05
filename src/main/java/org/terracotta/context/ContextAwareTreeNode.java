@@ -31,8 +31,8 @@ import java.util.Set;
  */
 class ContextAwareTreeNode implements TreeNode {
 
-  private Object context;
-  private TreeNode wrappedNode;
+  private final Object context;
+  private final TreeNode wrappedNode;
 
   public ContextAwareTreeNode(TreeNode node, Object context) {
     this.context = context;

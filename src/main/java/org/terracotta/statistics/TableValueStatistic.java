@@ -27,6 +27,8 @@ import java.util.function.Consumer;
  */
 public class TableValueStatistic extends TableSkeleton implements ValueStatistic<Table> {
 
+  private static final long serialVersionUID = 1L;
+
   public static TableValueStatistic.Builder newBuilder(String... innerStatisticNames) {
     return new TableValueStatistic.Builder(innerStatisticNames);
   }

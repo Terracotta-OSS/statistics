@@ -117,9 +117,9 @@ public class MappedOperationStatistic<S extends Enum<S>, D extends Enum<D>> impl
         .filter(context(identifier(subclassOf(OperationStatistic.class))))
         .filter(context(attributes(Matchers.allOf(
             hasAttribute("name", statName),
-            hasAttribute("this", new Matcher<OperationStatistic>() {
+            hasAttribute("this", new Matcher<OperationStatistic<?>>() {
               @Override
-              protected boolean matchesSafely(OperationStatistic object) {
+              protected boolean matchesSafely(OperationStatistic<?> object) {
                 return object.type().equals(statisticType);
               }
             })

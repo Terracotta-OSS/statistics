@@ -22,7 +22,6 @@ import static java.lang.Long.MIN_VALUE;
 import static java.lang.Long.highestOneBit;
 import static java.lang.Long.numberOfLeadingZeros;
 import static java.lang.Long.numberOfTrailingZeros;
-import static java.lang.Math.min;
 import static java.lang.Math.round;
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOf;
@@ -120,9 +119,7 @@ public class ExponentialHistogram {
   public void insert(long time, long count) throws IllegalArgumentException {
     if (count < 0) {
       throw new IllegalArgumentException("negative count");
-    } else if (count == 0) {
-      return;
-    } else {
+    } else if (count > 0) {
       if (time == MIN_VALUE) {
         //MIN_VALUE means a box is unused so we avoid it
         time++;
@@ -320,7 +317,7 @@ public class ExponentialHistogram {
       int thisBoxCount = logSize < thisCanonical.length ? thisCanonical[logSize] : 0;
       int thatBoxCount = logSize < thatCanonical.length ? thatCanonical[logSize] : 0;
 
-      /**
+      /*
        * transfer(...) reverse-sorts putting the highest (i.e. most recent) stuff first.  This means we bias recent stuff
        * in to the boxes we transfer to first, and older stuff in to the one we transfer second.  In order to minimize
        * the effect this has on the stats we care about we do the transfers based on the split fraction.  We target

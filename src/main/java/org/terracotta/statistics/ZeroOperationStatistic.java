@@ -24,7 +24,7 @@ import java.util.Set;
  */
 public class ZeroOperationStatistic<T extends Enum<T>> implements OperationStatistic<T> {
 
-  private static final OperationStatistic<?> INSTANCE = new ZeroOperationStatistic();
+  private static final OperationStatistic<?> INSTANCE = new ZeroOperationStatistic<>();
 
   @SuppressWarnings("unchecked")
   public static <T extends Enum<T>> OperationStatistic<T> get() {

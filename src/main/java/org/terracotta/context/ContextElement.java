@@ -27,7 +27,7 @@ public interface ContextElement {
    *
    * @return the associated object's class
    */
-  Class identifier();
+  Class<?> identifier();
 
   /**
    * The set of attributes for the associated Java object.

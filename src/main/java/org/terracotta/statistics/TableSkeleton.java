@@ -103,7 +103,7 @@ public abstract class TableSkeleton implements Serializable {
     }
     ValueStatistic<? extends Serializable>[] accessors = statistics.get(rowName);
     if (accessors == null) {
-      accessors = new ValueStatistic[innerStatisticNames.length];
+      accessors = new ValueStatistic<?>[innerStatisticNames.length];
       statistics.put(rowName, accessors);
     }
     accessors[idx] = accessor;

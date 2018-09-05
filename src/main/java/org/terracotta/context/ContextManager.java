@@ -142,7 +142,7 @@ public class ContextManager {
   }
 
   private static void discoverAssociations(Object origin) {
-    for (Class c = origin.getClass(); c != null; c = c.getSuperclass()) {
+    for (Class<?> c = origin.getClass(); c != null; c = c.getSuperclass()) {
       for (Field f : c.getDeclaredFields()) {
         if (f.isAnnotationPresent(ContextChild.class)) {
           f.setAccessible(true);

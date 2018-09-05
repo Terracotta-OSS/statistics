@@ -69,7 +69,7 @@ public class OperationResultSamplerTest {
   }
 
   @Test
-  public void testLatencyMeasuredAccurately() throws InterruptedException {
+  public void testLatencyMeasuredAccurately() {
     Random random = new Random();
     OperationResultSampler<FooBar> sampler = new OperationResultSampler<>(of(FooBar.FOO), 1.0);
     final AtomicLong expected = new AtomicLong();

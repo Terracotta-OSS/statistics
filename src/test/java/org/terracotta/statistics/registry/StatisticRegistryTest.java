@@ -49,7 +49,7 @@ public class StatisticRegistryTest {
   StatisticRegistry registry = new StatisticRegistry(this, Time::absoluteTime);
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
 
     StatisticsManager.createPassThroughStatistic(
         this,
@@ -69,7 +69,7 @@ public class StatisticRegistryTest {
   }
 
   @Test
-  public void queryStatistic() throws Exception {
+  public void queryStatistic() {
     assertThat(registry.queryStatistic("Inexisting").isPresent(), is(false));
     Statistic<Serializable> statistic = registry.queryStatistic("Axis:TimeUnit").get();
     assertThat(statistic.getSamples().size(), equalTo(1));
@@ -79,7 +79,7 @@ public class StatisticRegistryTest {
   }
 
   @Test
-  public void queryStatistics() throws Exception {
+  public void queryStatistics() {
     Map<String, Statistic<? extends Serializable>> statistics = registry.queryStatistics();
     assertThat(statistics.keySet(), hasItems(
         "Cache:Hits",
@@ -98,7 +98,7 @@ public class StatisticRegistryTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void registerStatistic_duplication() throws Exception {
+  public void registerStatistic_duplication() {
     registry.registerGauge("Cache:OffHeapMemoryUsed", () -> 2048L);
   }
 

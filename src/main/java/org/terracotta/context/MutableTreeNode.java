@@ -44,7 +44,7 @@ class MutableTreeNode extends AbstractTreeNode {
 
   @Override
   Set<AbstractTreeNode> getAncestors() {
-    Set<AbstractTreeNode> ancestors = Collections.newSetFromMap(new IdentityHashMap<AbstractTreeNode, Boolean>());
+    Set<AbstractTreeNode> ancestors = Collections.newSetFromMap(new IdentityHashMap<>());
     ancestors.addAll(parents);
     for (AbstractTreeNode parent : parents) {
       ancestors.addAll(parent.getAncestors());
