@@ -92,7 +92,7 @@ public class BarSplittingBiasedHistogram implements Histogram {
     this.alphaPhi = (phi == 1.0) ? 1.0 / bucketCount : (1 - phi) / (1 - Math.pow(phi, bucketCount));
 
     double rho = Math.pow(phi, 1.0 / expansionFactor);
-    double alphaRho = (rho == 1.0f) ? 1.0 / barCount : (1 - rho) / (1 - Math.pow(rho, barCount));
+    double alphaRho = (rho == 1.0) ? 1.0 / barCount : (1 - rho) / (1 - Math.pow(rho, barCount));
     this.ratio = (rho / (1.0 + rho));
     this.maxSizeTable = new double[barCount];
     for (int i = 0; i < barCount; i++) {
@@ -208,7 +208,7 @@ public class BarSplittingBiasedHistogram implements Histogram {
     return buckets;
   }
 
-  static double nextUpIfEqual(double test, double value) {
+  protected static double nextUpIfEqual(double test, double value) {
     return value == test ? nextUp(value) : value;
   }
 
@@ -350,7 +350,23 @@ public class BarSplittingBiasedHistogram implements Histogram {
     return size;
   }
 
-  private static final class Bar {
+  List<Bar> bars() {
+    return bars;
+  }
+
+  double alphaPhi() {
+    return alphaPhi;
+  }
+
+  double phi() {
+    return phi;
+  }
+
+  int bucketCount() {
+    return bucketCount;
+  }
+
+  static final class Bar {
     
     private final ExponentialHistogram eh;
     private double minimum = Double.NaN;
@@ -483,39 +499,5 @@ public class BarSplittingBiasedHistogram implements Histogram {
     double epsilon() {
       return eh.epsilon();
     }
-  }
-
-  private static class ImmutableBucket implements Bucket {
-
-    private final double minimum;
-    private final double maximum;
-    private final double count;
-
-    ImmutableBucket(double minimum, double maximum, double count) {
-      this.minimum = minimum;
-      this.maximum = maximum;
-      this.count = count;
-    }
-
-    @Override
-    public double minimum() {
-      return minimum;
-    }
-
-    @Override
-    public double maximum() {
-      return maximum;
-    }
-
-    @Override
-    public double count() {
-      return count;
-    }
-
-    @Override
-    public String toString() {
-      return "[min=" + minimum() + " (count=" + count() + ", height=" + (count() / (maximum() - minimum())) + ") max=" + maximum() + "]";
-    }
-
   }
 }

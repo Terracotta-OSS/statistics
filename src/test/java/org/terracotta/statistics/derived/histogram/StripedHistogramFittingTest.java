@@ -24,26 +24,29 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.terracotta.statistics.derived.histogram.StripedHistogram;
 
 import java.util.Arrays;
 import java.util.Random;
 import java.util.stream.DoubleStream;
 
+import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.DoubleStream.generate;
 import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.junit.Assert.assertThat;
 
-public class BarSplittingBiasedHistogramFittingTest extends HistogramFittingTest {
+public class StripedHistogramFittingTest extends HistogramFittingTest {
 
-  public BarSplittingBiasedHistogramFittingTest(long seed, double biasRange, int bars, double slopeError, double centroidError, double widthError) {
+  public StripedHistogramFittingTest(long seed, double biasRange, int bars, double slopeError, double centroidError, double widthError) {
     super(seed, biasRange, bars, slopeError, centroidError, widthError);
   }
 
   @Override
   protected Histogram histogram(double bias, int bars, DoubleStream data) {
-    BarSplittingBiasedHistogram bsbh = new BarSplittingBiasedHistogram(bias, bars, Long.MAX_VALUE);
-    data.forEach(d -> bsbh.event(d, 0));
-    return bsbh;
+    StripedHistogram hist = new StripedHistogram(bias, bars, Long.MAX_VALUE);
+    data.parallel().forEach(d -> hist.event(d, 0));
+    return hist;
   }
 }

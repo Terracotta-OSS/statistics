@@ -48,7 +48,7 @@ public class ExponentialHistogramTest {
 
   @Test
   public void testPerformance() {
-    ExponentialHistogram eh = new ExponentialHistogram(0.7f, 7100);
+    ExponentialHistogram eh = new ExponentialHistogram(0.7, 7100);
     long start = System.nanoTime();
     for (int i = 0; i < 1000000; i++) {
       eh.insert(i);
@@ -59,7 +59,7 @@ public class ExponentialHistogramTest {
 
   @Test
   public void testMousaviZanioloCounting() {
-    ExponentialHistogram eh = new ExponentialHistogram(0.5f, 35);
+    ExponentialHistogram eh = new ExponentialHistogram(0.5, 35);
     inject(eh, 16, 25);
     inject(eh, 8, 34);
     inject(eh, 4, 39);
@@ -84,7 +84,7 @@ public class ExponentialHistogramTest {
 
   @Test
   public void testMousaviZanioloMerging() {
-    ExponentialHistogram ehl = new ExponentialHistogram(0.5f, Long.MAX_VALUE);
+    ExponentialHistogram ehl = new ExponentialHistogram(0.5, Long.MAX_VALUE);
     inject(ehl, 4, 39);
     inject(ehl, 4, 48);
     inject(ehl, 2, 52);
@@ -93,7 +93,7 @@ public class ExponentialHistogramTest {
     assertThat(ehl.count(), is(10L));
     assertThat(ehl.toString(), is("count = 10 : [1@55], [1@53], [2@52], [4@48], [4@39]"));
 
-    ExponentialHistogram ehr = new ExponentialHistogram(0.5f, Long.MAX_VALUE);
+    ExponentialHistogram ehr = new ExponentialHistogram(0.5, Long.MAX_VALUE);
     inject(ehr, 4, 13);
     inject(ehr, 4, 25);
     inject(ehr, 2, 29);
@@ -111,8 +111,8 @@ public class ExponentialHistogramTest {
 
   @Test
   public void testBulkInsertion() {
-    ExponentialHistogram ehA = new ExponentialHistogram(0.1f, Long.MAX_VALUE);
-    ExponentialHistogram ehB = new ExponentialHistogram(0.1f, Long.MAX_VALUE);
+    ExponentialHistogram ehA = new ExponentialHistogram(0.1, Long.MAX_VALUE);
+    ExponentialHistogram ehB = new ExponentialHistogram(0.1, Long.MAX_VALUE);
 
     long seed = System.nanoTime();
     Random rndm = new Random(seed);
@@ -138,7 +138,7 @@ public class ExponentialHistogramTest {
     long seed = System.nanoTime();
     Random rndm = new Random(seed);
 
-    float accuracy = (rndm.nextFloat() / 2) + 0.1f;
+    double accuracy = (rndm.nextDouble() / 2) + 0.1;
     int window = rndm.nextInt(500) + 10;
 
     ExponentialHistogram eh = new ExponentialHistogram(accuracy, window);
@@ -165,7 +165,7 @@ public class ExponentialHistogramTest {
     long seed = System.nanoTime();
     Random rndm = new Random(seed);
 
-    float accuracy = (rndm.nextFloat() / 2) + 0.001f;
+    double accuracy = (rndm.nextDouble() / 2) + 0.001;
 
     ExponentialHistogram eh = new ExponentialHistogram(accuracy, Long.MAX_VALUE);
 
