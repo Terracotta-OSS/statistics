@@ -23,6 +23,7 @@ import org.terracotta.context.query.Matchers;
 import org.terracotta.context.query.Query;
 import org.terracotta.statistics.observer.ChainedOperationObserver;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -99,6 +100,11 @@ public class MappedOperationStatistic<S extends Enum<S>, D extends Enum<D>> impl
   @Override
   public void removeDerivedStatistic(ChainedOperationObserver<? super D> derived) {
     mapper.removeDerivedStatistic(derived);
+  }
+
+  @Override
+  public Collection<ChainedOperationObserver<? super D>> getDerivedStatistics() {
+    return mapper.getDerivedStatistics();
   }
 
   @Override

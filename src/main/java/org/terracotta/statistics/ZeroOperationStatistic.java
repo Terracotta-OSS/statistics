@@ -17,6 +17,8 @@ package org.terracotta.statistics;
 
 import org.terracotta.statistics.observer.ChainedOperationObserver;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 
 /**
@@ -59,6 +61,11 @@ public class ZeroOperationStatistic<T extends Enum<T>> implements OperationStati
   @Override
   public void removeDerivedStatistic(ChainedOperationObserver<? super T> derived) {
 
+  }
+
+  @Override
+  public Collection<ChainedOperationObserver<? super T>> getDerivedStatistics() {
+    return Collections.emptyList();
   }
 
   @Override
