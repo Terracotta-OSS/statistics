@@ -79,7 +79,7 @@ public final class ObjectContextExtractor {
   private static Map<String, AttributeGetter<Object>> extractFieldAttributes(Object from) {
     Map<String, AttributeGetter<Object>> attributes = new HashMap<>();
 
-    for (Class c = from.getClass(); c != null; c = c.getSuperclass()) {
+    for (Class<?> c = from.getClass(); c != null; c = c.getSuperclass()) {
       for (Field f : c.getDeclaredFields()) {
         ContextAttribute annotation = f.getAnnotation(ContextAttribute.class);
         if (annotation != null) {

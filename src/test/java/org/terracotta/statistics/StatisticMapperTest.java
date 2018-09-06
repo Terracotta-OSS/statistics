@@ -157,7 +157,7 @@ public class StatisticMapperTest {
 
   @Test
   public void testDerivedStatisticBeginDelegation() {
-    ArgumentCaptor<ChainedOperationObserver> wrapperCapture = ArgumentCaptor.forClass(ChainedOperationObserver.class);
+    ArgumentCaptor<ChainedOperationObserver<Source>> wrapperCapture = ArgumentCaptor.forClass(ChainedOperationObserver.class);
 
     OperationStatistic<Source> statistic = mock(OperationStatistic.class);
     doNothing().when(statistic).addDerivedStatistic(wrapperCapture.capture());
@@ -179,7 +179,7 @@ public class StatisticMapperTest {
 
   @Test
   public void testDerivedStatisticEndDelegation() {
-    ArgumentCaptor<ChainedOperationObserver> wrapperCapture = ArgumentCaptor.forClass(ChainedOperationObserver.class);
+    ArgumentCaptor<ChainedOperationObserver<Source>> wrapperCapture = ArgumentCaptor.forClass(ChainedOperationObserver.class);
 
     OperationStatistic<Source> statistic = mock(OperationStatistic.class);
     doNothing().when(statistic).addDerivedStatistic(wrapperCapture.capture());

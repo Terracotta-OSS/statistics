@@ -21,7 +21,7 @@ import java.util.Set;
 
 class EnsureUnique implements Query {
 
-  static Query INSTANCE = new EnsureUnique();
+  static final Query INSTANCE = new EnsureUnique();
 
   private EnsureUnique() {
     //singleton

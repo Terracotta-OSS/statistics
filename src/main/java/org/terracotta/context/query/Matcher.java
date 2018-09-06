@@ -26,7 +26,7 @@ import java.lang.reflect.Method;
 public abstract class Matcher<T> {
 
   @SuppressWarnings("unchecked")
-  private Class<T> boundType = (Class<T>) getSafeType(getClass());
+  private final Class<T> boundType = (Class<T>) getSafeType(getClass());
 
   private static <T extends Matcher<?>> Class<?> getSafeType(Class<T> fromClass) {
     for (Class<? super T> c = fromClass; c != Object.class; c = c.getSuperclass()) {

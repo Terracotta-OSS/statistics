@@ -84,7 +84,7 @@ public final class StatisticBuilder {
    *
    * @param <T> the generic type
    */
-  static class AbstractStatisticBuilder<T extends AbstractStatisticBuilder> {
+  static class AbstractStatisticBuilder<T extends AbstractStatisticBuilder<T>> {
 
     /**
      * The tags.

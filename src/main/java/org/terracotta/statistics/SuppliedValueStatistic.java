@@ -17,16 +17,7 @@ package org.terracotta.statistics;
 
 import java.io.Serializable;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
-
-import static org.terracotta.statistics.StatisticType.COUNTER;
-import static org.terracotta.statistics.StatisticType.GAUGE;
-import static org.terracotta.statistics.StatisticType.RATE;
-import static org.terracotta.statistics.StatisticType.RATIO;
-import static org.terracotta.statistics.StatisticType.TABLE;
 
 /**
  * This class can be used to create a {@link ValueStatistic} with a specific {@link StatisticType}

@@ -29,19 +29,19 @@ import java.util.Set;
  */
 public class QueryTestUtils {
 
-  public static TreeNode createTreeNode(Class identifier) {
+  public static TreeNode createTreeNode(Class<?> identifier) {
     return createTreeNode(identifier, Collections.emptyMap());
   }
 
-  public static TreeNode createTreeNode(Class identifier, Map<String, Object> attributes) {
+  public static TreeNode createTreeNode(Class<?> identifier, Map<String, Object> attributes) {
     return createTreeNode(identifier, attributes, Collections.emptySet());
   }
 
-  public static TreeNode createTreeNode(Class identifier, Set<TreeNode> children) {
+  public static TreeNode createTreeNode(Class<?> identifier, Set<TreeNode> children) {
     return createTreeNode(identifier, Collections.emptyMap(), children);
   }
 
-  public static TreeNode createTreeNode(Class identifier, Map<String, Object> attributes, Set<TreeNode> children) {
+  public static TreeNode createTreeNode(Class<?> identifier, Map<String, Object> attributes, Set<TreeNode> children) {
     return new ImmutableTreeNode(children, new ImmutableContextElement(identifier, attributes));
   }
 
@@ -93,16 +93,16 @@ public class QueryTestUtils {
 
   static class ImmutableContextElement implements ContextElement {
 
-    private final Class identifier;
+    private final Class<?> identifier;
     private final Map<String, Object> attributes;
 
-    public ImmutableContextElement(Class identifier, Map<String, Object> attributes) {
+    public ImmutableContextElement(Class<?> identifier, Map<String, Object> attributes) {
       this.identifier = identifier;
       this.attributes = Collections.unmodifiableMap(attributes);
     }
 
     @Override
-    public Class identifier() {
+    public Class<?> identifier() {
       return identifier;
     }
 

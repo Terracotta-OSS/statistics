@@ -38,7 +38,7 @@ import static org.terracotta.statistics.ValueStatistics.counter;
 public class TableStatisticTest {
 
   @Test
-  public void test_returning_live_independent_stats() throws Exception {
+  public void test_returning_live_independent_stats() {
     StatisticRegistry registry = new StatisticRegistry(this, Time::absoluteTime);
 
     // fetching the live stats
@@ -59,7 +59,7 @@ public class TableStatisticTest {
   }
 
   @Test
-  public void test_no_sample_when_table_empty() throws Exception {
+  public void test_no_sample_when_table_empty() {
     StatisticRegistry registry = new StatisticRegistry(this, Time::absoluteTime);
 
     // fetching the live stats
@@ -79,7 +79,7 @@ public class TableStatisticTest {
   }
 
   @Test
-  public void test_returning_dependent_stats_snapshot() throws Exception {
+  public void test_returning_dependent_stats_snapshot() {
     StatisticRegistry registry = new StatisticRegistry(this, Time::absoluteTime);
 
     // create a statistic that is fetched when queried
@@ -137,17 +137,18 @@ public class TableStatisticTest {
   }
 
   @Before
-  public void setUp() throws Exception {
-    dbStats.put("prepared-query-1", new HashMap<String, Supplier<Number>>() {{
-      put("total-exec-count", () -> 10L);
-      put("total-exec-time", () -> 1000L);
-      put("total-failed-count", () -> 1L);
-    }});
-    dbStats.put("prepared-query-2", new HashMap<String, Supplier<Number>>() {{
-      put("total-exec-count", () -> 20L);
-      put("total-exec-time", () -> 2000L);
-      put("total-failed-count", () -> 2L);
-    }});
+  public void setUp() {
+    Map<String, Supplier<Number>> value1 = new HashMap<>();
+    value1.put("total-exec-count", () -> 10L);
+    value1.put("total-exec-time", () -> 1000L);
+    value1.put("total-failed-count", () -> 1L);
+    dbStats.put("prepared-query-1", value1);
+
+    Map<String, Supplier<Number>> value2 = new HashMap<>();
+    dbStats.put("prepared-query-2", value2);
+    value2.put("total-exec-count", () -> 20L);
+    value2.put("total-exec-time", () -> 2000L);
+    value2.put("total-failed-count", () -> 2L);
   }
 
 }

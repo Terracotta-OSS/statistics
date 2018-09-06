@@ -18,7 +18,6 @@ package org.terracotta.statistics.derived.histogram;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -38,7 +37,7 @@ public class BarSplittingBiasedHistogramPerformanceTest extends HistogramPerform
   }
 
   @Test
-  public void testData() throws IOException {
+  public void testData() {
     BarSplittingBiasedHistogram bsbh = new BarSplittingBiasedHistogram(0.75, 20, 1000000);
     Random rndm = new Random();
     long[] data = new long[2000000];

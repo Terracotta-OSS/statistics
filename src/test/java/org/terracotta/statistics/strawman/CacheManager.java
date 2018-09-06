@@ -27,18 +27,18 @@ public class CacheManager {
 
   @ContextAttribute("name") private final String name;
 
-  private final Collection<Cache> caches = new ArrayList<>();
+  private final Collection<Cache<?, ?>> caches = new ArrayList<>();
 
   public CacheManager(String name) {
     this.name = name;
   }
 
-  public void addCache(Cache cache) {
+  public void addCache(Cache<?, ?> cache) {
     caches.add(cache);
     associate(this).withChild(cache);
   }
 
-  public void removeCache(Cache cache) {
+  public void removeCache(Cache<?, ?> cache) {
     caches.remove(cache);
     dissociate(this).fromChild(cache);
   }

@@ -59,7 +59,7 @@ public class EventRateSimpleMovingAverageTest {
   }
 
   @Test
-  public void testConsistentRate() throws InterruptedException {
+  public void testConsistentRate() {
     for (int rate = 1; rate < 10; rate++) {
       EventRateSimpleMovingAverage stat = new EventRateSimpleMovingAverage(100, TimeUnit.MILLISECONDS);
       double actualRate = new EventDriver(stat, 10, rate, 20, TimeUnit.MILLISECONDS).call();
@@ -68,7 +68,7 @@ public class EventRateSimpleMovingAverageTest {
   }
 
   @Test
-  public void testChangingRateWithShortPeriodReaches() throws InterruptedException {
+  public void testChangingRateWithShortPeriodReaches() {
     EventRateSimpleMovingAverage stat = new EventRateSimpleMovingAverage(200, TimeUnit.MILLISECONDS);
 
     double firstRate = new EventDriver(stat, 10, 10, 20, TimeUnit.MILLISECONDS).call();
@@ -79,7 +79,7 @@ public class EventRateSimpleMovingAverageTest {
   }
 
   @Test
-  public void testChangingRateWithLongPeriodDoesntReach() throws InterruptedException {
+  public void testChangingRateWithLongPeriodDoesntReach() {
     EventRateSimpleMovingAverage stat = new EventRateSimpleMovingAverage(60, TimeUnit.SECONDS);
 
     double firstRate = new EventDriver(stat, 5000, 10, 20, TimeUnit.MILLISECONDS).call();
@@ -110,7 +110,7 @@ public class EventRateSimpleMovingAverageTest {
   }
 
   @Test
-  public void testWindowThresholdEffects() throws InterruptedException {
+  public void testWindowThresholdEffects() {
     EventRateSimpleMovingAverage stat = new EventRateSimpleMovingAverage(1, TimeUnit.SECONDS);
     for (long cycles = 0; cycles < 3; cycles++) {
       SOURCE.advanceTime(100, TimeUnit.MILLISECONDS);

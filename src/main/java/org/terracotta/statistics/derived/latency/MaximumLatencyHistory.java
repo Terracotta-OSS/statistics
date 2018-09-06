@@ -106,9 +106,7 @@ public class MaximumLatencyHistory implements ChainedEventObserver, SampledStati
   public List<Sample<Long>> history() {
     long drift = this.drift;
     return archive.stream()
-        .map(acumulator -> {
-          return new Sample<>((acumulator.start() - drift) / 1_000_000, acumulator.maximum());
-        })
+        .map(acumulator -> new Sample<>((acumulator.start() - drift) / 1_000_000, acumulator.maximum()))
         .collect(Collectors.toList());
   }
 

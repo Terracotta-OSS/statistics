@@ -23,7 +23,7 @@ import static org.junit.Assert.assertThat;
 public class ContextManagerTest {
 
   @Test
-  public void nodeForUnknownContext() throws Exception {
+  public void nodeForUnknownContext() {
     assertThat(ContextManager.nodeFor(this), nullValue());
   }
 }

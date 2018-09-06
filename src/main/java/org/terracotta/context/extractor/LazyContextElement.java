@@ -24,16 +24,16 @@ import java.util.Map.Entry;
 
 class LazyContextElement implements ContextElement {
 
-  private final Class identifier;
+  private final Class<?> identifier;
   private final Map<? extends String, AttributeGetter<Object>> attributes;
 
-  public LazyContextElement(Class identifier, Map<? extends String, AttributeGetter<Object>> attributes) {
+  public LazyContextElement(Class<?> identifier, Map<? extends String, AttributeGetter<Object>> attributes) {
     this.identifier = identifier;
     this.attributes = new HashMap<>(attributes);
   }
 
   @Override
-  public Class identifier() {
+  public Class<?> identifier() {
     return identifier;
   }
 

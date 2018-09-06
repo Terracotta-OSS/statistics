@@ -129,6 +129,8 @@ public class EventRateSimpleMovingAverage implements ChainedEventObserver, Value
 
   static class CounterPartition extends LongAdder {
 
+    private static final long serialVersionUID = 1L;
+
     private final long start;
     private final long end;
 
