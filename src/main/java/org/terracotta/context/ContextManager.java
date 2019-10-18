@@ -211,11 +211,11 @@ public class ContextManager {
    * The initial node in the queries traversal will be the node whose children
    * form the root set of this {@code ContextManager}.  That is, the following
    * code will select the root set of this instance.<br>
-   * <pre>
+   * <pre>{@code
    * public static Set<TreeNode> roots(ContextManager manager) {
    *   return manager.query(QueryBuilder.queryBuilder().children().build());
    * }
-   * </pre>
+   * }</pre>
    * 
    * @param query the query to execute
    * @return the set of nodes selected by the query

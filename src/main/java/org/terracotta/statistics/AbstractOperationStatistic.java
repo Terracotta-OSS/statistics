@@ -56,7 +56,7 @@ public abstract class AbstractOperationStatistic<T extends Enum<T>> extends Abst
   }
   
   /**
-   * Return a {@ValueStatistic<Long>} returning the count for the given result.
+   * Return a {@code ValueStatistic<Long>} returning the count for the given result.
    * 
    * @param result the result of interest 
    * @return a {@code ValueStatistic} instance
