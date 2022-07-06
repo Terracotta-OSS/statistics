@@ -15,65 +15,79 @@
  */
 package org.terracotta.statistics.derived.histogram;
 
-import org.junit.Rule;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
+import org.hamcrest.core.DescribedAs;
+import org.junit.AssumptionViolatedException;
 import org.junit.Test;
-import org.junit.rules.ErrorCollector;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Random;
+import java.util.function.Function;
 import java.util.stream.DoubleStream;
 
 import static java.lang.Math.ceil;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.util.Arrays.asList;
+import static java.util.Arrays.copyOfRange;
+import static java.util.Arrays.sort;
+import static java.util.Arrays.stream;
+import static java.util.stream.DoubleStream.concat;
 import static java.util.stream.DoubleStream.generate;
+import static org.hamcrest.collection.IsArrayContainingInOrder.arrayContaining;
+import static org.hamcrest.core.Is.is;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
+import static org.hamcrest.number.OrderingComparison.greaterThanOrEqualTo;
 import static org.hamcrest.number.OrderingComparison.lessThanOrEqualTo;
+import static org.junit.Assert.assertThat;
 
 @RunWith(Parameterized.class)
 public class BarSplittingBiasedHistogramPreciseTest {
 
-  @Rule
-  public final ErrorCollector errors = new ErrorCollector();
-
-  private static final double ERROR_THRESHOLD = 10;
-
+  private static final double[] HIGH_QUANTILES = new double[] {0.5, 0.75, 0.9, 0.99};
+  private static final double[] LOW_QUANTILES = stream(HIGH_QUANTILES).map(d -> 1 - d).toArray();
+  private static final double[] ALL_QUANTILES = concat(stream(LOW_QUANTILES), stream(HIGH_QUANTILES)).distinct().toArray();
   private final long seed;
-  private final float bias;
+  private final double bias;
   private final int bars;
+  private final double[] quantiles;
 
   @Parameterized.Parameters(name = "{index}: seed={0} bias={1}, bars={2}")
   public static Iterable<Object[]> data() {
     Random rndm = new Random();
     // seed, bias, bars
-    return Arrays.asList(new Object[][] {
-        {rndm.nextLong(), 0.01f, 20},
-        {rndm.nextLong(), 0.01f, 100},
-        {rndm.nextLong(), 0.01f, 1000},
+    return asList(new Object[][] {
+        {rndm.nextLong(), 0.01, 20, HIGH_QUANTILES},
+        {rndm.nextLong(), 0.01, 100, HIGH_QUANTILES},
+        {rndm.nextLong(), 0.01, 1000, HIGH_QUANTILES},
 
-        {rndm.nextLong(), 0.1f, 20},
-        {rndm.nextLong(), 0.1f, 100},
-        {rndm.nextLong(), 0.1f, 1000},
+        {rndm.nextLong(), 0.1, 20, HIGH_QUANTILES},
+        {rndm.nextLong(), 0.1, 100, HIGH_QUANTILES},
+        {rndm.nextLong(), 0.1, 1000, HIGH_QUANTILES},
 
-        {rndm.nextLong(), 1f, 20},
-        {rndm.nextLong(), 1f, 100},
-        {rndm.nextLong(), 1f, 1000},
+        {rndm.nextLong(), 1.0, 20, ALL_QUANTILES},
+        {rndm.nextLong(), 1.0, 100, ALL_QUANTILES},
+        {rndm.nextLong(), 1.0, 1000, ALL_QUANTILES},
 
-        {rndm.nextLong(), 10f, 20},
-        {rndm.nextLong(), 10f, 100},
-        {rndm.nextLong(), 10f, 1000},
+        {rndm.nextLong(), 10.0, 20, LOW_QUANTILES},
+        {rndm.nextLong(), 10.0, 100, LOW_QUANTILES},
+        {rndm.nextLong(), 10.0, 1000, LOW_QUANTILES},
 
-        {rndm.nextLong(), 100f, 20},
-        {rndm.nextLong(), 100f, 100},
-        {rndm.nextLong(), 100f, 1000},
+        {rndm.nextLong(), 100.0, 20, LOW_QUANTILES},
+        {rndm.nextLong(), 100.0, 100, LOW_QUANTILES},
+        {rndm.nextLong(), 100.0, 1000, LOW_QUANTILES},
     });
   }
 
-  public BarSplittingBiasedHistogramPreciseTest(long seed, float biasRange, int bars) {
-    this.bias = (float) Math.pow(biasRange, 1.0 / bars);
+  public BarSplittingBiasedHistogramPreciseTest(long seed, double biasRange, int bars, double[] quantiles) {
+    this.bias = Math.pow(biasRange, 1.0 / bars);
     this.bars = bars;
     this.seed = seed;
+    this.quantiles = quantiles;
   }
 
   @Test
@@ -82,7 +96,9 @@ public class BarSplittingBiasedHistogramPreciseTest {
 
     BarSplittingBiasedHistogram bsbh = new BarSplittingBiasedHistogram(bias, bars, Long.MAX_VALUE);
 
-    checkPercentiles(generate(() -> rndm.nextDouble() * 1000).limit(100000), bsbh, 0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99);
+    double slope = (rndm.nextDouble() * 999.99) + 0.01;
+    double offset = (rndm.nextDouble() - 0.5) * 1000;
+    checkHistogram(generate(rndm::nextDouble).map(x -> (x * slope) + offset).limit(100000), bsbh, quantiles);
   }
 
   @Test
@@ -91,30 +107,76 @@ public class BarSplittingBiasedHistogramPreciseTest {
 
     BarSplittingBiasedHistogram bsbh = new BarSplittingBiasedHistogram(bias, bars, Long.MAX_VALUE);
 
-    checkPercentiles(generate(rndm::nextGaussian).limit(100000), bsbh, 0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99);
+    double width = (rndm.nextDouble() * 999.99) + 0.01;
+    double centroid = (rndm.nextDouble() - 0.5) * 1000;
+
+    checkHistogram(generate(rndm::nextGaussian).map(x -> (x * width) + centroid).limit(100000), bsbh, quantiles);
   }
 
-  private void checkPercentiles(DoubleStream data, BarSplittingBiasedHistogram histogram, double ... quantiles) {
+  private void checkHistogram(DoubleStream data, BarSplittingBiasedHistogram histogram, double ... quantiles) {
     double[] values = data.toArray();
-    for (double d : values) {
-      histogram.event(d, 0);
-    }
 
-    Arrays.sort(values);
+    for (int i = 0; i < values.length; ) {
+      for (int j = 0; j < 1000 && i < values.length; i++) {
+        histogram.event(values[i], i);
+      }
 
-    for (double q : quantiles) {
-      double[] bounds = histogram.getQuantileBounds(q);
+      sort(values, 0, i);
 
-      double ip = (values.length * q) - 1;
-      double ceil = ceil(ip);
-      if (ip == ceil) {
-        errors.checkThat("Quantile " + q + " lower bound:", bounds[0], lessThanOrEqualTo(values[(int) ip]));
-        errors.checkThat("Quantile " + q + " upper bound:", bounds[1], greaterThan(values[(int) (ip + 1)]));
-      } else {
-        errors.checkThat("Quantile " + q + " lower bound:", bounds[0], lessThanOrEqualTo(values[(int) ceil]));
-        errors.checkThat("Quantile " + q + " upper bound:", bounds[1], greaterThan(values[(int) ceil]));
+      histogram.expire(i);
+
+      assertThat(histogram.getMinimum(), is(values[0]));
+      assertThat(histogram.getMaximum(), is(values[i - 1]));
+      assertThat(histogram.getSizeBounds(), encompasses(values.length));
+      for (double q : quantiles) {
+        double[] bounds = histogram.getQuantileBounds(q);
+
+        double ip = (i * q) - 1;
+        double ceil = ceil(ip);
+        if (ip == ceil) {
+          double lower = values[(int) ip];
+          double upper = values[(int) (ip + 1)];
+          assertThat("Quantile " + q + " after " + i, bounds, encompasses(lower, upper));
+        } else {
+          double value = values[(int) ceil];
+          assertThat("Quantile " + q + " after " + i, bounds, encompasses(value, value));
+        }
       }
     }
+  }
+
+  @SuppressWarnings("unchecked")
+  private static Matcher<double[]> encompasses(double lower, double upper) {
+    return new DescribedAs<double[]>("a range fully encompassing [%0, %1]",
+        convertedFrom(double[].class, a -> stream(a).boxed().toArray(Double[]::new),
+            arrayContaining(lessThanOrEqualTo(lower), greaterThan(upper))),
+        new Object[] {lower, upper}) {
+      @Override
+      public void describeMismatch(Object item, Description description) {
+        if (item instanceof double[] && ((double[]) item).length == 2) {
+          double[] array = (double[]) item;
+          description.appendText("in range [").appendValue(array[0]).appendText(", ").appendValue(array[1]).appendText(") ");
+        }
+        super.describeMismatch(item, description);
+      }
+    };
+  }
+
+  @SuppressWarnings("unchecked")
+  private static Matcher<double[]> encompasses(double value) {
+    return new DescribedAs<double[]>("a range fully encompassing %0",
+        convertedFrom(double[].class, a -> stream(a).boxed().toArray(Double[]::new),
+            arrayContaining(lessThanOrEqualTo(value), greaterThan(value))),
+        new Object[] {value}) {
+      @Override
+      public void describeMismatch(Object item, Description description) {
+        if (item instanceof double[] && ((double[]) item).length == 2) {
+          double[] array = (double[]) item;
+          description.appendText("in range [").appendValue(array[0]).appendText(", ").appendValue(array[1]).appendText(") ");
+        }
+        super.describeMismatch(item, description);
+      }
+    };
   }
 
   @Test
@@ -132,5 +194,54 @@ public class BarSplittingBiasedHistogramPreciseTest {
         bsbh.event(datum, time++);
       }
     }
+  }
+
+  @Test
+  public void testSplitBiasEffectOnMaximum() {
+    Random rndm = new Random(seed);
+
+    BarSplittingBiasedHistogram bsbh = new BarSplittingBiasedHistogram(bias, bars, 1000);
+
+    double width = (rndm.nextDouble() * 999.99) + 0.01;
+    double centroid = (rndm.nextDouble() - 0.5) * 1000;
+
+    double[] values = generate(rndm::nextGaussian).map(x -> (x * width) + centroid).limit(10000).toArray();
+    double[] window = new double[0];
+    for (int i = 0; i < values.length; i++) {
+      bsbh.event(values[i], i);
+      bsbh.expire(i);
+
+      window = copyOfRange(window, max(0, window.length - 999), min(1000, window.length + 1));
+      window[window.length - 1] = values[i];
+      sort(window);
+
+      assertThat(bsbh.getSizeBounds(), encompasses(window.length));
+      if (bias < 1.0) {
+        assertThat(bsbh.getMaximum(), greaterThanOrEqualTo(window[window.length - 1]));
+      } else if (bias > 1.0) {
+        assertThat(bsbh.getMinimum(), lessThanOrEqualTo(window[0]));
+      } else {
+        throw new AssumptionViolatedException("Random bias for equi-depth - skipping");
+      }
+    }
+  }
+
+  private static <T, U> Matcher<T> convertedFrom(Class<T> type, Function<T, U> mapper, Matcher<U> matcher) {
+    return new TypeSafeMatcher<T>(type) {
+      @Override
+      public void describeTo(Description description) {
+        matcher.describeTo(description);
+      }
+
+      @Override
+      protected void describeMismatchSafely(T item, Description mismatchDescription) {
+        matcher.describeMismatch(mapper.apply(item), mismatchDescription);
+      }
+
+      @Override
+      protected boolean matchesSafely(T item) {
+        return matcher.matches(mapper.apply(item));
+      }
+    };
   }
 }

@@ -22,6 +22,8 @@ import static java.lang.Long.MIN_VALUE;
 import static java.lang.Long.highestOneBit;
 import static java.lang.Long.numberOfLeadingZeros;
 import static java.lang.Long.numberOfTrailingZeros;
+import static java.lang.Math.min;
+import static java.lang.Math.round;
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOf;
 import static java.util.Arrays.fill;
@@ -297,7 +299,7 @@ public class ExponentialHistogram {
 
     ExponentialHistogram that = new ExponentialHistogram(epsilon, window);
 
-    that.total = (long) (this.total * fraction);
+    that.total = round(this.total * fraction);
     this.total -= that.total;
 
     int[] thisCanonical = tailedLCanonical(mergeThreshold - 1, this.total);
@@ -312,8 +314,21 @@ public class ExponentialHistogram {
       int thisBoxCount = logSize < thisCanonical.length ? thisCanonical[logSize] : 0;
       int thatBoxCount = logSize < thatCanonical.length ? thatCanonical[logSize] : 0;
 
-      transfer(originalBoxes, this.boxes, logSize, thisBoxCount);
-      transfer(originalBoxes, that.boxes, logSize, thatBoxCount);
+      /**
+       * transfer(...) reverse-sorts putting the highest (i.e. most recent) stuff first.  This means we bias recent stuff
+       * in to the boxes we transfer to first, and older stuff in to the one we transfer second.  In order to minimize
+       * the effect this has on the stats we care about we do the transfers based on the split fraction.  We target
+       * newer stuff in to the smaller split so that the better stats are on the newer stuff.  The upshot of this is
+       * that we are biasing high percentiles up, and low percentiles down.  The former is 'better' the latter is
+       * just life.  Sorry!
+       */
+      if (fraction < 0.5) {
+        transfer(originalBoxes, that.boxes, logSize, thatBoxCount);
+        transfer(originalBoxes, this.boxes, logSize, thisBoxCount);
+      } else {
+        transfer(originalBoxes, this.boxes, logSize, thisBoxCount);
+        transfer(originalBoxes, that.boxes, logSize, thatBoxCount);
+      }
     }
 
     return that;

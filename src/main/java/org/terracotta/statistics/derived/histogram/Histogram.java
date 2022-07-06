@@ -17,6 +17,8 @@ package org.terracotta.statistics.derived.histogram;
 
 import java.util.List;
 
+import static java.lang.Math.nextDown;
+
 /**
  * A histogram supporting double values
  */
@@ -30,13 +32,46 @@ public interface Histogram {
   List<Bucket> getBuckets();
 
   /**
-   * Returns the bounds {@code [minimum, maximum]} on the given quantile.
+   * The minimum value.
+   * <p>
+   *   This is equal to the inclusive lower bound of the zeroth (0.0) quantile.
+   * </p>
+   * @return the minimum value
+   */
+  default double getMinimum() {
+    return getQuantileBounds(0.0)[0];
+  }
+
+  /**
+   * The maximum value.
+   * <p>
+   *   This is equal to highest double value strictly less than the exclusive upper bound of the last (1.0) quantile.
+   * </p>
+   *
+   * @return the maximum value
+   */
+  default double getMaximum() {
+    return nextDown(getQuantileBounds(1.0)[1]);
+  }
+
+  /**
+   * Returns the bounds {@code [minimum, maximum)} on the given quantile.
    *
    * @param quantile desired quantile
    * @return the quantile bounds
    * @throws IllegalArgumentException if {@code quantile} if outside the range [0.0..1.0]
    */
   double[] getQuantileBounds(double quantile) throws IllegalArgumentException;
+
+  /**
+   * @return the number of elements in the histogram
+   */
+  long size();
+
+  /**
+   * @return the bounds on the number of elements in the histogram
+   */
+  double[] getSizeBounds();
 
   /**
    * A histogram bucket.
