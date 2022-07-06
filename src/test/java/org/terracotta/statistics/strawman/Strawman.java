@@ -51,7 +51,7 @@ public final class Strawman {
 
     @SuppressWarnings("unchecked")
     OperationStatistic<GetResult> getStatistic = (OperationStatistic<GetResult>) getStatisticNode.getContext().attributes().get("this");
-    OperationResultSampler<GetResult> hitLatency = new OperationResultSampler<>(of(GetResult.HIT), 1.0f);
+    OperationResultSampler<GetResult> hitLatency = new OperationResultSampler<>(of(GetResult.HIT), 1.0);
     LatencyAccumulator hitLatencyStats = LatencyAccumulator.empty();
     hitLatency.addDerivedStatistic(hitLatencyStats);
     getStatistic.addDerivedStatistic(hitLatency);

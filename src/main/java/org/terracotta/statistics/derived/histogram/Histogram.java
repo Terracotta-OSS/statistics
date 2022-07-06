@@ -73,6 +73,10 @@ public interface Histogram {
    */
   double[] getSizeBounds();
 
+  void event(double value, long time);
+
+  void expire(long time);
+
   /**
    * A histogram bucket.
    */

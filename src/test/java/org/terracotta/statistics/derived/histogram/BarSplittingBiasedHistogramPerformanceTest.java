@@ -23,41 +23,23 @@ import java.util.Arrays;
 import java.util.Random;
 
 @Ignore
-public class BarSplittingBiasedHistogramPerformanceTest {
+public class BarSplittingBiasedHistogramPerformanceTest extends HistogramPerformanceTest {
 
-  @Test
-  public void testNanoTime() throws IOException {
-    long total = 0L;
-    for (int i = 0; i < 2000000; i++) {
-      long start = System.nanoTime();
-      total += System.nanoTime() - start;
-    }
-    System.out.println("System.nanoTime() mean time (ns): " + (((double) total) / 2000000));
-  }
-
-  @Test
-  public void testSelf() throws IOException {
-    BarSplittingBiasedHistogram bsbh = new BarSplittingBiasedHistogram(0.75f, 20, 1000000);
+  @Override
+  protected Histogram selfTime(double bias, int bars) {
+    BarSplittingBiasedHistogram bsbh = new BarSplittingBiasedHistogram(0.75, 20, 1000000);
     long last = 3000L;
     for (int i = 0; i < 2000000; i++) {
       long start = System.nanoTime();
       bsbh.event(last, i);
       last = System.nanoTime() - start;
     }
-    System.out.println("Minimum " + Arrays.toString(bsbh.getQuantileBounds(0)));
-    System.out.println("Median " + Arrays.toString(bsbh.getQuantileBounds(0.5)));
-    System.out.println("90%ile " + Arrays.toString(bsbh.getQuantileBounds(0.9)));
-    System.out.println("95%ile " + Arrays.toString(bsbh.getQuantileBounds(0.95)));
-    System.out.println("99%ile " + Arrays.toString(bsbh.getQuantileBounds(0.99)));
-    System.out.println("99.9%ile " + Arrays.toString(bsbh.getQuantileBounds(0.999)));
-    System.out.println("99.99%ile " + Arrays.toString(bsbh.getQuantileBounds(0.9999)));
-    System.out.println("99.999%ile " + Arrays.toString(bsbh.getQuantileBounds(0.99999)));
-    System.out.println("Maximum " + Arrays.toString(bsbh.getQuantileBounds(1.0)));
+    return bsbh;
   }
 
   @Test
   public void testData() throws IOException {
-    BarSplittingBiasedHistogram bsbh = new BarSplittingBiasedHistogram(0.75f, 20, 1000000);
+    BarSplittingBiasedHistogram bsbh = new BarSplittingBiasedHistogram(0.75, 20, 1000000);
     Random rndm = new Random();
     long[] data = new long[2000000];
     for (int i = 0; i < data.length; i++) {
@@ -76,5 +58,4 @@ public class BarSplittingBiasedHistogramPerformanceTest {
     long fullEnd = System.nanoTime() - fullStart;
     System.out.println("Mean Time (ns): " + ((double) fullEnd) / (cycles * data.length));
   }
-
 }
