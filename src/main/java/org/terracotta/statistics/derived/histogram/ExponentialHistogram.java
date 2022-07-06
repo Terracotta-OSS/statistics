@@ -17,11 +17,11 @@ package org.terracotta.statistics.derived.histogram;
 
 import java.util.Arrays;
 
+import static java.lang.Integer.max;
 import static java.lang.Long.MIN_VALUE;
 import static java.lang.Long.highestOneBit;
 import static java.lang.Long.numberOfLeadingZeros;
 import static java.lang.Long.numberOfTrailingZeros;
-import static java.lang.Math.max;
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOf;
 import static java.util.Arrays.fill;
@@ -73,31 +73,35 @@ public class ExponentialHistogram {
     if (b.mergeThreshold != mergeThreshold) {
       throw new IllegalArgumentException();
     }
-    merge(b.boxes, b.last, b.total);
+    merge(b.boxes, b.total);
   }
 
-  /*
-   * This could be improved to directly generate the lCanonical representation of (bTotal + this.total) and then
-   * fill in the timestamps according.  I *think* that would be a little faster, but for now this works okay.
-   */
-  private void merge(long[] bBoxes, long bLast, long bTotal) {
+  private void merge(long[] bBoxes, long bTotal) {
     long[] aBoxes = this.boxes;
+    long aTotal = this.total;
 
-    int logLast = (Long.SIZE - 1) - numberOfLeadingZeros(last | bLast);
-    initializeArrays(logLast);
-    this.total += bTotal;
-    
+    int[] canonical = tailedLCanonical(mergeThreshold - 1, aTotal + bTotal);
+
+    initializeArrays(canonical.length - 1);
+    this.last = 1L << (canonical.length - 1);
+    this.total = aTotal + bTotal;
+
     long[] overflow = EMPTY_LONG_ARRAY;
-    for (int logSize = 0; logSize <= logLast; logSize++) {
-      overflow = insert(logSize, aBoxes, bBoxes, overflow);
+    for (int logSize = 0; logSize < canonical.length; logSize++) {
+      int boxCount = canonical[logSize];
+
+      int min = min_l(logSize);
+      int max = max_l(logSize);
+      long[] merged = merge(aBoxes, bBoxes, min, max, overflow);
+      int limit = reverseSort(merged);
+      System.arraycopy(merged, 0, boxes, min, boxCount);
+
+      int overflowSize = limit - boxCount;
+      overflow = new long[overflowSize >>> 1];
+      for (int j = 0; j < overflow.length; j++) {
+        overflow[j] = merged[boxCount + (2 * j)];
+      }
     }
-    int logSize = logLast + 1;
-    while (overflow.length > 0) {
-      ensureCapacity(logSize);
-      overflow = insert(logSize, overflow);
-      logSize++;
-    }
-    last = 1L << (logSize - 1);
   }
 
   /**
@@ -117,9 +121,7 @@ public class ExponentialHistogram {
         //MIN_VALUE means a box is unused so we avoid it
         time++;
       }
-      long[] bBoxes = makeBoxes(time, count);
-      long bLast = 1L << (((bBoxes.length - mergeThreshold + 1) / mergeThreshold) - 1);
-      merge(bBoxes, bLast, count);
+      merge(makeBoxes(time, count), count);
     }
   }
 
@@ -168,72 +170,26 @@ public class ExponentialHistogram {
     return canonical;
   }
 
-  private long[] insert(int logSize, long[] values) {
-    int min = min_l(logSize);
-    int max = max_l(logSize);
-    int width = max - min;
-    int overflowSize = max(0, ((values.length - width) + 1) & -2);
-    int savedSize = values.length - overflowSize;
-
-    arraycopy(values, 0, boxes, max - savedSize, savedSize);
-    insert[logSize] = max - ((savedSize % width) + 1);
-
-    if (overflowSize == 0) {
-      return EMPTY_LONG_ARRAY;
-    } else {
-      long[] overflow = new long[overflowSize >>> 1];
-      for (int j = 0; j < overflow.length; j++) {
-        overflow[j] = values[savedSize + (2 * j)];
-      }
-      return overflow;
-    }
-  }
-
-  private long[] insert(int logSize, long[] a, long[] b, long[] carry) {
-    int min = min_l(logSize);
-    int max = max_l(logSize);
-    long[] merged = reverseSort(merge(a, b, min, max, carry));
-    int mergedEnd = usedLength(merged);
-    int width = max - min;
-    int overflowSize = max(0, ((mergedEnd - width) + 1) & -2);
-    int savedSize = mergedEnd - overflowSize;
-    
-    arraycopy(merged, 0, boxes, max - savedSize, savedSize);
-    insert[logSize] = max - ((savedSize % width) + 1);
-
-    if (overflowSize == 0) {
-      return EMPTY_LONG_ARRAY;
-    } else {
-      long[] overflow = new long[overflowSize >>> 1];
-      for (int j = 0; j < overflow.length; j++) {
-        overflow[j] = merged[savedSize + (2 * j)];
-      }
-
-      return overflow;
-    }
-  }
-
   private static long[] merge(long[] a, long[] b, int min, int max, long[] c) {
+    int width = max - min;
     if (max <= a.length) {
       if (max <= b.length) {
-    	int width = max - min;
         long[] merged = copyOf(c, c.length + 2 * width);
         arraycopy(a, min, merged, c.length, width);
         arraycopy(b, min, merged, c.length + width, width);
         return merged;
       } else {
-        return merge(a, min, max, c);
+        long[] merged = copyOf(c, c.length + width);
+        arraycopy(a, min, merged, c.length, width);
+        return merged;
       }
+    } else if (max <= b.length) {
+      long[] merged = copyOf(c, c.length + width);
+      arraycopy(b, min, merged, c.length, width);
+      return merged;
     } else {
-      return merge(b, min, max, c);
+      return c;
     }
-  }
-
-  private static long[] merge(long[] a, int min, int max, long[] c) {
-    int width = max - min;
-    long[] merged = copyOf(c, c.length + width);
-    arraycopy(a, min, merged, c.length, width);
-    return merged;
   }
 
   /**
@@ -284,8 +240,9 @@ public class ExponentialHistogram {
    * Expire old events.
    *
    * @param time current timestamp
+   * @return the count following expiry
    */
-  public void expire(long time) {
+  public long expire(long time) {
     for (int logSize = (Long.SIZE - 1) - numberOfLeadingZeros(last); logSize >= 0; logSize--) {
       boolean live = false;
       for (int i = min_l(logSize); i < max_l(logSize); i++) {
@@ -301,10 +258,11 @@ public class ExponentialHistogram {
       }
       if (live) {
         last = 1L << logSize;
-        return;
+        return count();
       }
     }
     last = 0;
+    return 0;
   }
 
   private int min_l(int logSize) {
@@ -331,79 +289,96 @@ public class ExponentialHistogram {
   /**
    * Split an exponential histogram off this one.
    * <p>
-   *   The returned histogram will contains {code fraction} of the events in this one.
+   *   The returned histogram will contain {code fraction} of the events in this one.
    * </p>
    * @param fraction splitting fraction
    * @return the new histogram
    */
   public ExponentialHistogram split(double fraction) {
     long[] originalBoxes = boxes;
-    int[] originalInsert = insert;
 
-    int logLast = (Long.SIZE - 1) - numberOfLeadingZeros(last);
-    ExponentialHistogram other = new ExponentialHistogram(epsilon, mergeThreshold, window, logLast - 1);
-    initializeArrays(logLast - 1);
-    this.total = 0;
-    this.last = 0;
-    
-    { //extracted zero iteration
-      int start = originalInsert[0] + 1;
-      for (int i = start; i < max_l(0); i++) {
-        long time = originalBoxes[i];
-        if (time == MIN_VALUE) {
-          break;
-        } else if (other.total <= fraction * (other.total + this.total)) {
-          other.insert_l(0, time);
-        } else {
-          insert_l(0, time);
-        }
-      }
-      for (int i = 0; i < start; i++) {
-        long time = originalBoxes[i];
-        if (time == MIN_VALUE) {
-          break;
-        } else if (other.total <= fraction * (other.total + this.total)) {
-          other.insert_l(0, time);
-        } else {
-          insert_l(0, time);
-        }
-      }
+    ExponentialHistogram that = new ExponentialHistogram(epsilon, window);
+
+    that.total = (long) (this.total * fraction);
+    this.total -= that.total;
+
+    int[] thisCanonical = tailedLCanonical(mergeThreshold - 1, this.total);
+    int[] thatCanonical = tailedLCanonical(mergeThreshold - 1, that.total);
+    this.last = 1L << (thisCanonical.length - 1);
+    that.last = 1L << (thatCanonical.length - 1);
+
+    this.initializeArrays(thisCanonical.length - 1);
+    that.initializeArrays(thatCanonical.length - 1);
+
+    for (int logSize = 0; logSize < max(thisCanonical.length, thatCanonical.length); logSize++) {
+      int thisBoxCount = logSize < thisCanonical.length ? thisCanonical[logSize] : 0;
+      int thatBoxCount = logSize < thatCanonical.length ? thatCanonical[logSize] : 0;
+
+      transfer(originalBoxes, this.boxes, logSize, thisBoxCount);
+      transfer(originalBoxes, that.boxes, logSize, thatBoxCount);
     }
-    
-    for (int logSize = 1; logSize < originalInsert.length; logSize++) {
-      int start = originalInsert[logSize] + 1;
-      for (int i = start; i < max_l(logSize); i++) {
-        long time = originalBoxes[i];
-        if (time == MIN_VALUE) {
-          break;
-        } else {
-          for (int split = 0; split < 2; split++) {
-            if (other.total <= fraction * (other.total + this.total)) {
-              other.insert_l(logSize - 1, time);
-            } else {
-              this.insert_l(logSize - 1, time);
-            }
-          }
-        }
-      }
-      for (int i = min_l(logSize); i < start; i++) {
-        long time = originalBoxes[i];
-        if (time == MIN_VALUE) {
-          break;
-        } else {
-          for (int split = 0; split < 2; split++) {
-            if (other.total <= fraction * (other.total + this.total)) {
-              other.insert_l(logSize - 1, time);
-            } else {
-              this.insert_l(logSize - 1, time);
-            }
-          }
-        }
-      }
-    }
-    return other;
+
+    return that;
   }
-  
+
+  private void transfer(long[] originalBoxes, long[] targetBoxes, int logSize, int count) {
+    if (count > 0) {
+      int min = min_l(logSize);
+      int max = max_l(logSize);
+      int limit = min + count;
+
+      int available = reverseSort(originalBoxes, min, max) - min;
+
+      int pulldown = count - available;
+      if (pulldown > 0) {
+
+        long[] pulled = doubleUp(pull(originalBoxes, logSize + 1, (pulldown + 1) >> 1));
+
+        System.arraycopy(originalBoxes, min, targetBoxes, min, available);
+        Arrays.fill(originalBoxes, min, min + available, Long.MIN_VALUE);
+
+        System.arraycopy(pulled, 0, targetBoxes, min + available, pulldown);
+        System.arraycopy(pulled, pulldown, originalBoxes, min, pulled.length - pulldown);
+      } else {
+        System.arraycopy(originalBoxes, min, targetBoxes, min, count);
+        Arrays.fill(originalBoxes, min, limit, Long.MIN_VALUE);
+      }
+    }
+  }
+
+  private long[] pull(long[] originalBoxes, int logSize, int count) {
+    int min = min_l(logSize);
+    int max = max_l(logSize);
+    int limit = min + count;
+
+    int available = reverseSort(originalBoxes, min, max) - min;
+
+    int pulldown = count - available;
+    if (pulldown > 0) {
+
+      long[] pulled = doubleUp(pull(originalBoxes, logSize + 1, (pulldown + 1) >> 1));
+
+      long[] boxes = Arrays.copyOfRange(originalBoxes, min, limit);
+      Arrays.fill(originalBoxes, min, min + available, Long.MIN_VALUE);
+
+      System.arraycopy(pulled, 0, boxes, available, pulldown);
+      System.arraycopy(pulled, pulldown, originalBoxes, min, pulled.length - pulldown);
+      return boxes;
+    } else {
+      long[] boxes = Arrays.copyOfRange(originalBoxes, min, limit);
+      Arrays.fill(originalBoxes, min, limit, Long.MIN_VALUE);
+      return boxes;
+    }
+  }
+
+  private long[] doubleUp(long[] a) {
+    long[] da = new long[a.length << 1];
+    for (int i = 0; i < a.length; i++) {
+      da[(i << 1) + 1] = da[i << 1] = a[i];
+    }
+    return da;
+  }
+
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
@@ -426,18 +401,42 @@ public class ExponentialHistogram {
     return sb.toString();
   }
   
-  private static long[] reverseSort(long[] a) {
-    for (int i = 0, j = i; i < a.length - 1; j = ++i) {
+  private static int reverseSort(long[] a) {
+    return reverseSort(a, 0, a.length);
+  }
+
+  private static int reverseSort(long[] a, int fromIndex, int toIndex) {
+    if (fromIndex < 0 || toIndex > a.length) {
+      throw new ArrayIndexOutOfBoundsException();
+    } else {
+      //insertion-sort
+      int firstEmpty = -1;
+      for (int i = fromIndex, j = i; i < toIndex - 1; j = ++i) {
+        if (a[i] == Long.MIN_VALUE && firstEmpty == -1) {
+          firstEmpty = i;
+        }
         long ai = a[i + 1];
         while (ai > a[j]) {
-            a[j + 1] = a[j];
-            if (j-- == 0) {
-                break;
-            }
+          if (j == firstEmpty) {
+            firstEmpty++;
+          }
+          a[j + 1] = a[j];
+          if (j-- == fromIndex) {
+            break;
+          }
         }
         a[j + 1] = ai;
+      }
+      if (a[toIndex - 1] == Long.MIN_VALUE && firstEmpty == -1) {
+        firstEmpty = toIndex - 1;
+      }
+
+      if (firstEmpty == -1) {
+        return toIndex;
+      } else {
+        return firstEmpty;
+      }
     }
-    return a;
   }
 
   private void ensureCapacity(int logSize) {
@@ -459,15 +458,6 @@ public class ExponentialHistogram {
     for (int i = 0; i < logMax + 1; i++) {
       this.insert[i] = max_l(i) - 1;
     }
-  }
-
-  private static int usedLength(long[] merged) {
-    for (int i = merged.length - 1; i >= 0; i--) {
-      if (merged[i] != MIN_VALUE) {
-        return i + 1;
-      }
-    }
-    return 0;
   }
 
   /**

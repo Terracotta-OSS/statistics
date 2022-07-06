@@ -17,9 +17,6 @@ package org.terracotta.statistics.derived.histogram;
 
 import java.util.List;
 
-import static java.util.Comparator.comparingDouble;
-import static java.util.stream.Stream.of;
-
 /**
  * A histogram.
  *
