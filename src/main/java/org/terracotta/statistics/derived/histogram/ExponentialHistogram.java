@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Terracotta, Inc..
+ * All content copyright Terracotta, Inc., unless otherwise indicated.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import static java.util.Arrays.copyOf;
 import static java.util.Arrays.fill;
 
 /**
- * An implementation of the Exponential Histogram sketch as outline by Datar et al.
+ * An implementation of the Exponential Histogram sketch as outlined by Datar et al.
  *
  * @see <a href="http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.24.7941">
  *   Maintaining Stream Statistics over Sliding Windows</a>
@@ -36,7 +36,7 @@ public class ExponentialHistogram {
   
   private static final long[] EMPTY_LONG_ARRAY = new long[0];
 
-  private final float epsilon;
+  private final double epsilon;
   private final int mergeThreshold;
   private final long window;
   
@@ -46,21 +46,40 @@ public class ExponentialHistogram {
   private long total;
   private long last;
 
-  public ExponentialHistogram(float epsilon, long window) {
+  /**
+   * Creates an exponential histogram maintaining a count over {@code window} to within @{epsilon} fractional accuracy.
+   *
+   * @param epsilon fractional accuracy
+   * @param window sliding window size
+   */
+  public ExponentialHistogram(double epsilon, long window) {
     this(epsilon, (int) (Math.ceil(Math.ceil(1.0 / epsilon) / 2) + 1), window, 0);
   }
 
-  private ExponentialHistogram(float epsilon, int mergeThreshold, long window, int initialSize) {
+  private ExponentialHistogram(double epsilon, int mergeThreshold, long window, int initialSize) {
     this.epsilon = epsilon;
     this.mergeThreshold = mergeThreshold;
     this.window = window;
     initializeArrays(initialSize);
   }
-  
+
+  /**
+   * Merge the supplied ExponentialHistogram in to this one.
+   *
+   * @param b histogram to merge
+   * @throws IllegalArgumentException if the two merge-thresholds are not equals
+   */
   public void merge(ExponentialHistogram b) {
+    if (b.mergeThreshold != mergeThreshold) {
+      throw new IllegalArgumentException();
+    }
     merge(b.boxes, b.last, b.total);
   }
 
+  /*
+   * This could be improved to directly generate the lCanonical representation of (bTotal + this.total) and then
+   * fill in the timestamps according.  I *think* that would be a little faster, but for now this works okay.
+   */
   private void merge(long[] bBoxes, long bLast, long bTotal) {
     long[] aBoxes = this.boxes;
 
@@ -81,7 +100,14 @@ public class ExponentialHistogram {
     last = 1L << (logSize - 1);
   }
 
-  public void insert(long time, long count) {
+  /**
+   * Bulk insert {@code count} events at {@code time}.
+   *
+   * @param time event time
+   * @param count event count
+   * @throws IllegalArgumentException if count is negative
+  */
+  public void insert(long time, long count) throws IllegalArgumentException {
     if (count < 0) {
       throw new IllegalArgumentException("negative count");
     } else if (count == 0) {
@@ -209,7 +235,12 @@ public class ExponentialHistogram {
     arraycopy(a, min, merged, c.length, width);
     return merged;
   }
-  
+
+  /**
+   * Insert a single event at {@code time}
+   *
+   * @param time event timestamp
+   */
   public void insert(long time) {
     if (time == MIN_VALUE) {
       time++;
@@ -248,7 +279,12 @@ public class ExponentialHistogram {
       }
     }
   }
-  
+
+  /**
+   * Expire old events.
+   *
+   * @param time current timestamp
+   */
   public void expire(long time) {
     for (int logSize = (Long.SIZE - 1) - numberOfLeadingZeros(last); logSize >= 0; logSize--) {
       boolean live = false;
@@ -282,16 +318,25 @@ public class ExponentialHistogram {
   private int max_l(int logSize) {
     return ((logSize + 2) * mergeThreshold) - 1;
   }
-  
-  public boolean isEmpty() {
-    return total == 0;
-  }
 
+  /**
+   * Returns the approximate current count.
+   *
+   * @return the approximate count
+   */
   public long count() {
     return total - (last >>> 1);
   }
-  
-  public ExponentialHistogram split(float fraction) {
+
+  /**
+   * Split an exponential histogram off this one.
+   * <p>
+   *   The returned histogram will contains {code fraction} of the events in this one.
+   * </p>
+   * @param fraction splitting fraction
+   * @return the new histogram
+   */
+  public ExponentialHistogram split(double fraction) {
     long[] originalBoxes = boxes;
     int[] originalInsert = insert;
 
@@ -425,7 +470,12 @@ public class ExponentialHistogram {
     return 0;
   }
 
-  public float epsilon() {
+  /**
+   * Return the fractional accuracy of this exponential histogram
+   *
+   * @return fractional accuracy
+   */
+  public double epsilon() {
     return epsilon;
   }
 }

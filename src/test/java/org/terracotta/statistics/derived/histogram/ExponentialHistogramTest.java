@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Terracotta, Inc..
+ * All content copyright Terracotta, Inc., unless otherwise indicated.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,13 @@
  */
 package org.terracotta.statistics.derived.histogram;
 
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.number.IsCloseTo.closeTo;
-import static org.junit.Assert.assertThat;
 import org.junit.Test;
 
 import java.util.Random;
+
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.number.IsCloseTo.closeTo;
+import static org.junit.Assert.assertThat;
 
 /*
  * Selected test cases extracted from <a href="http://citeseerx.ist.psu.edu/viewdoc/citations?doi=10.1.1.225.1196">

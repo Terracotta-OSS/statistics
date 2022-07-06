@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Terracotta, Inc..
+ * All content copyright Terracotta, Inc., unless otherwise indicated.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,7 +102,7 @@ public class BarSplittingBiasedHistogramPreciseTest {
     Arrays.sort(values);
 
     for (double q : quantiles) {
-      double[] bounds = histogram.getQuantileBounds(q);
+      Double[] bounds = histogram.getQuantileBounds(q);
 
       double ip = (values.length * q) - 1;
       double ceil = ceil(ip);

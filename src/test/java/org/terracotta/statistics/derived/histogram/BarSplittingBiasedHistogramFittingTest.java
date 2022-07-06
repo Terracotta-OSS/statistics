@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Terracotta, Inc..
+ * All content copyright Terracotta, Inc., unless otherwise indicated.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,6 +83,10 @@ public class BarSplittingBiasedHistogramFittingTest {
     this.widthError = widthError;
   }
 
+  /*
+   * This 'test' is used to calculate the standard-deviations contained in the parameter arrays above.
+   * It should never need to be run again, but is left here for posterity.
+   */
   @Test
   @Ignore
   public void evaluateFlatHistogramErrors() {
@@ -112,6 +116,10 @@ public class BarSplittingBiasedHistogramFittingTest {
     return fit(bsbh, PolynomialCurveFitter.create(1));
   }
 
+  /*
+   * This 'test' is used to calculate the standard-deviations contained in the parameter arrays above.
+   * It should never need to be run again, but is left here for posterity.
+   */
   @Test
   @Ignore
   public void evaluateGaussianHistogramErrors() {

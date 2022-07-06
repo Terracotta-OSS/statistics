@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Terracotta, Inc..
+ * All content copyright Terracotta, Inc., unless otherwise indicated.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,12 @@
 package org.terracotta.statistics.derived.histogram;
 
 class ImmutableDoubleBucket implements Histogram.Bucket<Double> {
+
   private final double minimum;
   private final double maximum;
   private final double count;
 
-  public ImmutableDoubleBucket(double minimum, double maximum, double count) {
+  ImmutableDoubleBucket(double minimum, double maximum, double count) {
     this.minimum = minimum;
     this.maximum = maximum;
     this.count = count;
