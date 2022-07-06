@@ -24,6 +24,7 @@ import static java.lang.Math.nextUp;
 public class BarSplittingBiasedHistogram implements Histogram<Double> {
   
   private final int barCount;
+  private final float barEpsilon;
   private final int bucketCount;
   private final double phi;
   private final double alphaPhi;
@@ -36,6 +37,7 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
   public BarSplittingBiasedHistogram(double maxCoefficient, double phi, int expansionFactor, int bucketCount, float barEpsilon, long window) {
     this.bucketCount = bucketCount;
     this.barCount = bucketCount * expansionFactor;
+    this.barEpsilon = barEpsilon;
     
     this.bars = new ArrayList<Bar>(barCount);
     this.bars.add(new Bar(barEpsilon, window));
@@ -104,7 +106,9 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
   }
 
   public double[] getQuantileBounds(double quantile) {
-    double threshold = quantile * size();
+    double[] sizeBounds = getSizeBounds();
+    double lowThreshold = quantile * sizeBounds[0];
+    double highThreshold = quantile * sizeBounds[1];
 
     double lowCount = 0;
     double highCount = 0;
@@ -114,10 +118,10 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
       lowCount += b.count() * (1.0 - b.epsilon());
       highCount += b.count() * (1.0 + b.epsilon());
 
-      if (highCount >= threshold) {
+      if (highCount >= lowThreshold) {
         double lowerBound = b.minimum();
         while (true) {
-          if (lowCount >= threshold) {
+          if (lowCount >= highThreshold) {
             return new double[] {lowerBound, b.maximum()};
           } else if (it.hasNext()) {
             b = it.next();
@@ -199,6 +203,10 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
   
   private long size() {
     return size;
+  }
+
+  private double[] getSizeBounds() {
+    return new double[] { size * (1 - barEpsilon), size * (1 + barEpsilon) };
   }
 
   static class Bar {
