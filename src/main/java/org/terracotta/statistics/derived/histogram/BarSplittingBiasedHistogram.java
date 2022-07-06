@@ -27,11 +27,15 @@ import static java.util.stream.Stream.of;
 /**
  * An implementation of the histogram algorithm described in:
  * 'Fast Computation of Approximate Biased Histograms on Sliding Windows over Data Streams' [H. Mousavi &amp; C. Zaniolo]
+ * <p>
+ *   This class is *not thread-safe*, safe consumption in a multi-threaded environment will require some form of
+ *   external locking.
+ * </p>
  *
  * @see <a href="http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.407.3977">
  *   Fast Computation of Approximate Biased Histograms on Sliding Windows over Data Streams</a>
  */
-public class BarSplittingBiasedHistogram implements Histogram<Double> {
+public class BarSplittingBiasedHistogram implements Histogram {
   private static final double DEFAULT_MAX_COEFFICIENT = 1.7;
   private static final double DEFAULT_PHI = 0.7;
   private static final int DEFAULT_EXPANSION_FACTOR = 7;
@@ -72,11 +76,11 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
    */
   public BarSplittingBiasedHistogram(double maxCoefficient, double phi, int expansionFactor, int bucketCount, double barEpsilon, long window) {
     this.bucketCount = bucketCount;
+    this.barEpsilon = barEpsilon;
     this.window = window;
     this.barCount = bucketCount * expansionFactor;
-    this.barEpsilon = barEpsilon;
 
-    this.bars = new ArrayList<Bar>(barCount);
+    this.bars = new ArrayList<>(barCount);
     this.bars.add(new Bar(barEpsilon, window));
     this.phi = phi;
 
@@ -177,8 +181,8 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
   }
 
   @Override
-  public List<Histogram.Bucket<Double>> getBuckets() {
-    List<Histogram.Bucket<Double>> buckets = new ArrayList<Histogram.Bucket<Double>>(bucketCount);
+  public List<Histogram.Bucket> getBuckets() {
+    List<Histogram.Bucket> buckets = new ArrayList<>(bucketCount);
     double targetSize = size() * alphaPhi; // * phi^0
     Iterator<Bar> it = bars.iterator();
     Bar b = it.next();
@@ -191,7 +195,7 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
       
       double surplus = count - targetSize;
       double maximum = b.minimum() + (b.maximum() - b.minimum()) * (1 - surplus/b.count());
-      buckets.add(new ImmutableDoubleBucket(minimum, maximum, targetSize));
+      buckets.add(new ImmutableBucket(minimum, maximum, targetSize));
       minimum = maximum;
       count = surplus;
       targetSize *= phi;
@@ -199,12 +203,12 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
     while (it.hasNext()) {
       count += (b = it.next()).count();
     }
-    buckets.add(new ImmutableDoubleBucket(minimum, b.maximum(), count));
+    buckets.add(new ImmutableBucket(minimum, b.maximum(), count));
     return buckets;
   }
 
   @Override
-  public Double[] getQuantileBounds(double quantile) {
+  public double[] getQuantileBounds(double quantile) {
     if (quantile > 1.0 || quantile < 0.0) {
       throw new IllegalArgumentException("Invalid quantile requested: " + quantile);
     } else {
@@ -213,7 +217,7 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
     }
   }
 
-  private Double[] evaluateQuantileFromMax(double quantile) {
+  private double[] evaluateQuantileFromMax(double quantile) {
     double[] sizeBounds = getSizeBounds();
     double lowThreshold = (1.0 - quantile) * sizeBounds[0];
     double highThreshold = (1.0 - quantile) * sizeBounds[1];
@@ -232,13 +236,13 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
           b = it.previous();
           lowCount += b.count() * (1.0 - b.epsilon());
         }
-        return new Double[] {b.minimum(), upperBound};
+        return new double[] {b.minimum(), upperBound};
       }
     }
     throw new AssertionError();
   }
 
-  private Double[] evaluateQuantileFromMin(double quantile) {
+  private double[] evaluateQuantileFromMin(double quantile) {
     double[] sizeBounds = getSizeBounds();
     double lowThreshold = quantile * sizeBounds[0];
     double highThreshold = quantile * sizeBounds[1];
@@ -257,7 +261,7 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
           b = it.next();
           lowCount += b.count() * (1.0 - b.epsilon());
         }
-        return new Double[] {lowerBound, b.maximum()};
+        return new double[] {lowerBound, b.maximum()};
       }
     }
     throw new AssertionError();
@@ -401,5 +405,38 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
       return eh.epsilon();
     }
   }
-  
+
+  private static class ImmutableBucket implements Bucket {
+
+    private final double minimum;
+    private final double maximum;
+    private final double count;
+
+    ImmutableBucket(double minimum, double maximum, double count) {
+      this.minimum = minimum;
+      this.maximum = maximum;
+      this.count = count;
+    }
+
+    @Override
+    public double minimum() {
+      return minimum;
+    }
+
+    @Override
+    public double maximum() {
+      return maximum;
+    }
+
+    @Override
+    public double count() {
+      return count;
+    }
+
+    @Override
+    public String toString() {
+      return "[" + minimum() + " --" + count() + " [height=(" + count() / (maximum() - minimum()) + ")-> " + maximum() + "]";
+    }
+
+  }
 }
