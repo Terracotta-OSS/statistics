@@ -16,15 +16,23 @@
 package org.terracotta.statistics.derived.histogram;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 import static java.lang.Math.nextUp;
+import static java.util.Comparator.comparingDouble;
+import static java.util.stream.Stream.of;
 
 public class BarSplittingBiasedHistogram implements Histogram<Double> {
-  
+  private static final float DEFAULT_MAX_COEFFICIENT = 1.7f;
+  private static final float DEFAULT_PHI = 0.7f;
+  private static final int DEFAULT_EXPANSION_FACTOR = 7;
+  private static final float DEFAULT_EXP_HISTOGRAM_EPSILON = 0.01f;
+
   private final int barCount;
-  private final float barEpsilon;
+  private final double barEpsilon;
   private final int bucketCount;
   private final double phi;
   private final double alphaPhi;
@@ -54,11 +62,11 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
   }
 
   public BarSplittingBiasedHistogram(int bucketCount, long window) {
-    this(1.7f, 0.7f, 7, bucketCount, 0.1f, window);
+    this(DEFAULT_MAX_COEFFICIENT, DEFAULT_PHI, DEFAULT_EXPANSION_FACTOR, bucketCount, DEFAULT_EXP_HISTOGRAM_EPSILON, window);
   }
 
   public BarSplittingBiasedHistogram(double phi, int bucketCount, long window) {
-    this(1.7f, phi, 7, bucketCount, 0.1f, window);
+    this(DEFAULT_MAX_COEFFICIENT, phi, DEFAULT_EXPANSION_FACTOR, bucketCount, DEFAULT_EXP_HISTOGRAM_EPSILON, window);
   }
   
   public void event(double value, long time) {
@@ -106,6 +114,36 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
   }
 
   public double[] getQuantileBounds(double quantile) {
+    return of(evaluateQuantileFromMin(quantile), evaluateQuantileFromMax(quantile))
+        .min(comparingDouble(bounds -> bounds[1] - bounds[0])).get();
+  }
+
+  private double[] evaluateQuantileFromMax(double quantile) {
+    double[] sizeBounds = getSizeBounds();
+    double lowThreshold = (1.0 - quantile) * sizeBounds[0];
+    double highThreshold = (1.0 - quantile) * sizeBounds[1];
+
+    double lowCount = 0;
+    double highCount = 0;
+
+    for (ListIterator<Bar> it = bars.listIterator(bars.size()); it.hasPrevious(); ) {
+      Bar b = it.previous();
+      lowCount += b.count() * (1.0 - b.epsilon());
+      highCount += b.count() * (1.0 + b.epsilon());
+
+      if (highCount >= lowThreshold) {
+        double upperBound = b.maximum();
+        while (lowCount < highThreshold && it.hasPrevious()) {
+          b = it.previous();
+          lowCount += b.count() * (1.0 - b.epsilon());
+        }
+        return new double[] {b.minimum(), upperBound};
+      }
+    }
+    throw new AssertionError();
+  }
+
+  private double[] evaluateQuantileFromMin(double quantile) {
     double[] sizeBounds = getSizeBounds();
     double lowThreshold = quantile * sizeBounds[0];
     double highThreshold = quantile * sizeBounds[1];
@@ -113,22 +151,16 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
     double lowCount = 0;
     double highCount = 0;
 
-    for (Iterator<Bar> it = bars.iterator(); it.hasNext(); ) {
+    for (ListIterator<Bar> it = bars.listIterator(); it.hasNext(); ) {
       Bar b = it.next();
       lowCount += b.count() * (1.0 - b.epsilon());
       highCount += b.count() * (1.0 + b.epsilon());
 
       if (highCount >= lowThreshold) {
         double lowerBound = b.minimum();
-        while (true) {
-          if (lowCount >= highThreshold) {
-            return new double[] {lowerBound, b.maximum()};
-          } else if (it.hasNext()) {
-            b = it.next();
-            lowCount += b.count() * (1.0 - b.epsilon());
-          } else {
-            break;
-          }
+        while (lowCount < highThreshold && it.hasNext()) {
+          b = it.next();
+          lowCount += b.count() * (1.0 - b.epsilon());
         }
         return new double[] {lowerBound, b.maximum()};
       }
@@ -269,7 +301,7 @@ public class BarSplittingBiasedHistogram implements Histogram<Double> {
     public double minimum() {
       return minimum;
     }
-    
+
     public double maximum() {
       return maximum;
     }

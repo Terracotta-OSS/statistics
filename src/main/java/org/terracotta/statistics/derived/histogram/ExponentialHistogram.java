@@ -114,7 +114,7 @@ public class ExponentialHistogram {
   }
 
   private static int[] tailedLCanonical(int l, long count) {
-    if (count < l) {
+    if (count <= l) {
       return new int[]{(int) count};
     } else {
       int[] form = lCanonical(l, count - l);
