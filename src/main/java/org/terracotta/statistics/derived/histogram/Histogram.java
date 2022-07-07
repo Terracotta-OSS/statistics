@@ -68,6 +68,11 @@ public interface Histogram {
    */
   long size();
 
+  /**
+   * @return the bounds on the number of elements in the histogram
+   */
+  double[] getSizeBounds();
+
   void event(double value, long time);
 
   void expire(long time);

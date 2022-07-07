@@ -128,7 +128,7 @@ public abstract class HistogramPreciseTest {
 
     assertThat(histogram.getMinimum(), is(values[0]));
     assertThat(histogram.getMaximum(), is(values[values.length - 1]));
-    assertThat((double) histogram.size(), closeTo(values.length, values.length * 0.01));
+    assertThat(histogram.getSizeBounds(), compatibleWith(values.length));
     for (double q : quantiles) {
       double[] bounds = histogram.getQuantileBounds(q);
 
@@ -217,7 +217,7 @@ public abstract class HistogramPreciseTest {
       window[window.length - 1] = values[i];
       sort(window);
 
-      assertThat((double) hist.size(), closeTo(window.length, window.length * 0.01));
+      assertThat(hist.getSizeBounds(), compatibleWith(window.length));
       if (bias < 1.0) {
         assertThat(hist.getMaximum(), greaterThanOrEqualTo(window[window.length - 1]));
       } else if (bias > 1.0) {

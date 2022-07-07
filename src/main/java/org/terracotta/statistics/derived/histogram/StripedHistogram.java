@@ -179,7 +179,9 @@ public class StripedHistogram extends Striped<BarSplittingBiasedHistogram> imple
   }
 
   private double[] evaluateQuantileFromMax(double quantile) {
-    double threshold = (1.0 - quantile) * size();
+    double[] sizeBounds = getSizeBounds();
+    double lowThreshold = (1.0 - quantile) * sizeBounds[0];
+    double highThreshold = (1.0 - quantile) * sizeBounds[1];
 
     List<double[]> barsByMinimum = stream()
         .flatMap(h -> h.bars().stream().map(bar -> new double[] {bar.minimum(), bar.count() * (1.0 - bar.epsilon())}))
@@ -194,14 +196,14 @@ public class StripedHistogram extends Striped<BarSplittingBiasedHistogram> imple
       double[] upperB = upperIt.previous();
       highCount += upperB[1];
 
-      if (highCount >= threshold) {
+      if (highCount >= lowThreshold) {
         double lowCount = 0;
         double[] lowerB = null;
         for (ListIterator<double[]> lowerIT = barsByMinimum.listIterator(barsByMinimum.size()); lowerIT.hasPrevious(); ) {
           lowerB = lowerIT.previous();
           lowCount += lowerB[1];
 
-          if (lowCount >= threshold) {
+          if (lowCount >= highThreshold) {
             break;
           }
         }
@@ -212,7 +214,9 @@ public class StripedHistogram extends Striped<BarSplittingBiasedHistogram> imple
   }
 
   private double[] evaluateQuantileFromMin(double quantile) {
-    double threshold = quantile * size();
+    double[] sizeBounds = getSizeBounds();
+    double lowThreshold = quantile * sizeBounds[0];
+    double highThreshold = quantile * sizeBounds[1];
 
     List<double[]> barsByMinimum = stream()
         .flatMap(h -> h.bars().stream().map(bar -> new double[] {bar.minimum(), bar.count() * (1.0 + bar.epsilon())}))
@@ -226,14 +230,14 @@ public class StripedHistogram extends Striped<BarSplittingBiasedHistogram> imple
       double[] lowerB = lowerIt.next();
       highCount += lowerB[1];
 
-      if (highCount >= threshold) {
+      if (highCount >= lowThreshold) {
         double lowCount = 0;
         double[] upperB = null;
         for (ListIterator<double[]> upperIt = barsByMaximum.listIterator(); upperIt.hasNext(); ) {
           upperB = upperIt.next();
           lowCount += upperB[1];
 
-          if (lowCount >= threshold) {
+          if (lowCount >= highThreshold) {
             break;
           }
         }
@@ -246,6 +250,15 @@ public class StripedHistogram extends Striped<BarSplittingBiasedHistogram> imple
   @Override
   public long size() {
     return stream().mapToLong(Histogram::size).sum();
+  }
+
+  @Override
+  public double[] getSizeBounds() {
+    return stream().map(BarSplittingBiasedHistogram::getSizeBounds).reduce((a, b) -> {
+      a[0] += b[0];
+      a[1] += b[1];
+      return a;
+    }).orElseThrow(AssertionError::new);
   }
 
   @Override
