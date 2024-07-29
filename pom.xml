@@ -133,4 +133,13 @@
     <connection>scm:git:https://github.com/Terracotta-OSS/statistics.git</connection>
     <developerConnection>scm:git:git@github.com:Terracotta-OSS/statistics.git</developerConnection>
   </scm>
+
+  <developers>
+    <developer>
+      <name>Terracotta Engineers</name>
+      <email>tc-oss-dg@ibm.com</email>
+      <organization>Super iPaaS Integration LLC, an IBM Company</organization>
+      <organizationUrl>https://terracotta.org</organizationUrl>
+    </developer>
+  </developers>
 </project>
