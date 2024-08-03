@@ -1,4 +1,8 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><!-- All content copyright Terracotta, Inc., unless otherwise indicated.
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+ Copyright Terracotta, Inc.
+ Copyright Super iPaaS Integration LLC, an IBM Company 2024
+
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
@@ -9,13 +13,15 @@
  distributed under the License is distributed on an "AS IS" BASIS,
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  See the License for the specific language governing permissions and
- limitations under the License. --><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+ limitations under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <artifactId>forge-parent</artifactId>
     <groupId>org.terracotta.forge</groupId>
-    <version>4.13</version>
+    <version>8.0</version>
     <relativePath/>
   </parent>
 
@@ -26,16 +32,31 @@
   <packaging>jar</packaging>
 
   <properties>
+    <java.build.version>8</java.build.version>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
+      <version>1.7.25</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-jdk14</artifactId>
+      <version>1.7.25</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest</artifactId>
+      <version>2.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -45,7 +66,7 @@
       <plugin>
         <groupId>org.apache.rat</groupId>
         <artifactId>apache-rat-plugin</artifactId>
-        <version>0.8</version>
+        <version>0.13</version>
         <configuration>
           <licenses>
             <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense">
@@ -55,7 +76,7 @@
               <patterns>
                 <pattern>http://creativecommons.org/publicdomain/zero/1.0/</pattern>
               </patterns>
-            </license>            
+            </license>
           </licenses>
           <licenseFamilies>
             <licenseFamily implementation="org.apache.rat.license.Apache20LicenseFamily"/>
@@ -65,7 +86,6 @@
           </licenseFamilies>
           <excludes>
             <exclude>nb-configuration.xml</exclude>
-            <exclude>.idea/**/*</exclude>
           </excludes>
         </configuration>
         <executions>
@@ -78,59 +98,48 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.terracotta</groupId>
-        <artifactId>maven-forge-plugin</artifactId>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
         <executions>
           <execution>
             <id>default-test</id>
             <phase>test</phase>
-            <goals>
-              <goal>test</goal>
-            </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <dependencies>
+          <dependency>
+            <groupId>com.puppycrawl.tools</groupId>
+            <artifactId>checkstyle</artifactId>
+            <version>9.3</version>
+          </dependency>
+        </dependencies>
       </plugin>
     </plugins>
   </build>
 
   <repositories>
     <repository>
-      <id>terracotta-snapshots</id>
-      <url>http://www.terracotta.org/download/reflector/snapshots</url>
-    </repository>
-    <repository>
-      <id>terracotta-releases</id>
-      <url>http://www.terracotta.org/download/reflector/releases</url>
+      <id>terracotta-oss</id>
+      <url>https://repo.terracotta.org/maven2</url>
     </repository>
   </repositories>
-  
-  <pluginRepositories>
-    <pluginRepository>
-      <id>terracotta-snapshots</id>
-      <url>http://www.terracotta.org/download/reflector/snapshots</url>
-    </pluginRepository>
-    <pluginRepository>
-      <id>terracotta-releases</id>
-      <url>http://www.terracotta.org/download/reflector/releases</url>
-    </pluginRepository> 
-  </pluginRepositories>
-
-  <distributionManagement>
-    <repository>
-      <id>terracotta-os-releases</id>
-      <name>Terracotta OS Releases Repository</name>
-      <url>${terracotta-os-releases-url}</url>
-    </repository>
-    <snapshotRepository>
-      <id>terracotta-os-snapshots</id>
-      <uniqueVersion>false</uniqueVersion>
-      <name>Terracotta OS Snapshots Repository</name>
-      <url>${terracotta-os-snapshots-url}</url>
-    </snapshotRepository>
-  </distributionManagement>
 
   <scm>
-    <connection>scm:svn:http://svn.terracotta.org/svn/forge/projects/statistics/trunk</connection>
-    <developerConnection>scm:svn:https://svn.terracotta.org/repo/forge/projects/statistics/trunk</developerConnection>
+    <url>https://github.com/Terracotta-OSS/statistics</url>
+    <connection>scm:git:https://github.com/Terracotta-OSS/statistics.git</connection>
+    <developerConnection>scm:git:git@github.com:Terracotta-OSS/statistics.git</developerConnection>
   </scm>
+
+  <developers>
+    <developer>
+      <name>Terracotta Engineers</name>
+      <email>tc-oss-dg@ibm.com</email>
+      <organization>Super iPaaS Integration LLC, an IBM Company</organization>
+      <organizationUrl>https://terracotta.org</organizationUrl>
+    </developer>
+  </developers>
 </project>
